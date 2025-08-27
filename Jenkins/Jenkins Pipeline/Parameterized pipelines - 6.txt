@@ -1,0 +1,88 @@
+Parameterized Pipelines:
+---------------------
+	This allows user-defines inputs (parameters) at the start of its execution. This lets users run the same pipeline in different ways, depending on the values of those imputs, making it versatile and adaptable to different tasks. Common parameter types include: (String: A text input, Boolean: A true/false checkbox, Choice: A dropdown list of options, File: upload a file as input)
+
+Example Scenario: 
+	Suppose a team has a pipeline that deploys a software application to either a testing or production environment. Instead of creating separate pipelines for each environment, they can make the deployment pipeline parameterized, with a choice parameter for the environment:
+Environment parameter: "test" or "prod"
+
+Use Cases in Companies:
+1. Deployment to Multiple Environments:
+Companies often have separate environments for testing, staging, and production. A parameterized pipeline lets them deploy to any of these with a single pipeline, choosing the environment at run time.
+
+2. Running Automated Tests:
+Quality Assurance teams might run tests with different parameters, like browser types (Chrome, Firefox, Safari). They can set up parameters for the browser choice, test type (e.g., unit, integration), or even load testing thresholds.
+
+Parameters:
+-----------
+Boolean Parameter:
+-----------------
+1. Open/create a folder in visual studio code (params) - create another folder within that (boolean) - and create a (Jenkinsfile)
+
+pipeline {
+    agent any
+
+    parameters {
+        booleanParam(defaultValue: false, description: "Enable service?", name: "myBoolean")
+    }
+
+    stages {
+        stage("Demo") {
+            steps {
+                echo "booleanParam is set to: ${params.myBoolean}"
+            }
+        }
+    }
+}
+
+2. come to the jenkins dashboard and create a new item, name (boolPipeline) - choose type (Pipeline) - under Pipeline script, now paste the Jenkinsfile - save, now click "build now, and we can see the pipeline got started, click on the logs and we can see the boolean value as "false", come back to jenkins dashboard and go inside to (boolPipline) once again
+
+3. we can see, (Build with Parameters) now, which means this one got added, to confirm come to configure; and we can see that Boolean parameter got added and service got enabled, now comeback and click on Build with parameter and we can see the checkbox to enable, enable the checkbox and click on build we can see one more pipeline got triggered and check the logs where we can see this got changed to true.
+
+String Parameter:
+----------------
+1. Let us create it for string parameter, create a new folder within the params folder, name it as (string) and create a new (Jenkinsfile)
+
+pipeline {
+    agent any
+
+    parameters {
+        string(defaultValue: "TEST", description: "Which environment to deploy in?", name: "deployEnv")
+    }
+
+    stages {
+        stage("Demo") {
+            steps {
+                echo "string is set to: ${params.deployEnv}"
+            }
+        }
+    }
+}
+
+2. come back to jenkins dashboard - create a new item, name (stringPipeline) - choose (Pipeline) - under Pipeline script, now paste the Jenkinsfile - save, now click "build now, and we can see the pipeline got started, click on the logs and we can see the string is set to Test - come back to jenkins dashboard and go inside to (stringPipline) once again we can see, (Build with Parameters) now, which means this one got added
+
+3. give the deployEnv as (PROD) this time - build - now in the new pipeline check for the logs and we can see this got deployed in PROD; this is great for setting a custom variable.
+
+Choice Parameter:
+----------------
+1. reate a new folder within the params folder, name it as (choice) and create a new (Jenkinsfile)
+
+pipeline {
+    agent any
+
+    parameters {
+        choice(choices: ["TEST", "DEV", "QA", "PRE-PROD", "PROD"], description: "Which environment to deploy in?", name: "deployEnv")
+    }
+
+    stages {
+        stage("Demo") {
+            steps {
+                echo "choice is set to: ${params.deployEnv}"
+            }
+        }
+    }
+}
+
+2. come back to jenkins dashboard - create a new item, name (choicePipeline) - choose (Pipeline) - under Pipeline script, now paste the Jenkinsfile - save, now click "build now, and we can see the pipeline got started, click on the logs and we can see the default is set to Test - come back to jenkins dashboard and go inside to (choicePipline) once again we can see, (Build with Parameters)
+
+3. now we got the drop down, and we can choose the env accordingly (ex: QA) to deploy, click on Build and we can see the pipeline got executed - check the logs to confirm where this one got deployed. [there are at times, it may not work in the 1st time so try to execute once again to get the output]

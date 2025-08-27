@@ -1,0 +1,118 @@
+Jenkins Pipeline:
+=================
+	A Jenkins Pipeline is a way to automate your build, test, and deployment process using code. Instead of manually clicking buttons in Jenkins to run jobs, we can write a pipeline script (usually in Groovy) that describes all the stages of the process. This script is stored in a file called Jenkinsfile inside the project repository.
+	So, whenever Jenkins runs the pipeline, it just reads the instructions from this Jenkinsfile and executes step by step.
+
+Types of Pipelines in Jenkins
+=============================
+There are mainly two types:
+
+1. Declarative Pipeline
+ > This is the newer and more structured way of writing pipelines.
+ > It uses predefined blocks like pipeline {}, stages {}, and steps {}.
+ > It’s easy to understand, has fewer chances of syntax errors, and is recommended for most teams.
+ > Think of it like a fixed format where you fill in your build/test/deploy steps.
+
+2. Scripted Pipeline
+ > This is the older and more flexible style.
+ > It’s written in full Groovy script, so you have more control, but it’s harder to read for beginners.
+ > It doesn’t force a structure; you define everything in node {} blocks.
+ > Good for advanced use cases where you need a lot of logic in your pipeline.
+
+Key Differences
+---------------
+ . Declarative = simple, structured, beginner-friendly.
+ . Scripted = flexible, powerful, but more complex.
+
+Example: Declarative Pipeline
+-----------------------------
+Here’s a very simple declarative pipeline:
+
+pipeline {
+    agent any   // run on any available Jenkins agent
+    stages {
+        stage('Build') {
+            steps {
+                echo "Building the project..."
+            }
+        }
+        stage('Test') {
+            steps {
+                echo "Running tests..."
+            }
+        }
+        stage('Deploy') {
+            steps {
+                echo "Deploying the project..."
+            }
+        }
+    }
+}
+
+Step by step explanation:
+-------------------------
+1. pipeline {} → starts the pipeline.
+2. agent any → tells Jenkins to run on any available machine.
+3. stages {} → group of different phases.
+4. stage('Build') → a specific phase (here, build).
+5. steps {} → actual commands to run (here we just print messages).
+
+Example: Scripted Pipeline
+--------------------------
+Here’s the same thing but in scripted style:
+
+node {
+    stage('Build') {
+        echo "Building the project..."
+    }
+    stage('Test') {
+        echo "Running tests..."
+    }
+    stage('Deploy') {
+        echo "Deploying the project..."
+    }
+}
+
+Step by step explanation:
+-------------------------
+1. node {} → tells Jenkins to run everything inside this block on a Jenkins agent.
+2. stage('Build') → same as before, just different style.
+3. Inside each stage, we give instructions using echo.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

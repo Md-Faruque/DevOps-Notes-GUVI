@@ -1,0 +1,147 @@
+Jenkins: Part -2
+
+How to setup Email Configuration:
+Come inside the console - manage jenkins - system (configure global settings and paths) - scroll down to the bottom we can see (E-Mail Notification)
+
+Fill these details:
+SMTP server - smtp.gmail.com
+Default user e-mail suffix - (@gmail.com) [you need to provide the suffix accordingly ex: @yahoo.com, @outlook.in etc.,]
+
+click on Advanced --
+enable the checkbox (Use SMTP Authentication)
+username - provide your complete username (ex: abcakshiv@gmail.com)
+password [If you are using gmail, they have blocked the access to provide the password directly; hence come to your email, manage accounts, make sure you have enabled 2-step verification, and search bar look for (app passwords) - now give the name to remember (jenkins) - create == this gives us with 16 characters, copy paste the same in the jenkins console] {for other emails, check accoridngly}
+enable the checkbox (Use SSL)
+Make sure you are having (UTF-8) under charset, if you don't have one then mention this accordingly
+now click on the (Test configuration by sendng test e-mail) & provide your complete email-address, same you gave on the username - click test configuration once again
+
+If the entire setup is done we will receive a message like (email was successfully sent) confirm the same by checking your email accordings, now apply & save.
+
+==========================================================================================================================================
+1. User management - AWS IAM
+2. Delivery Pipeline - higher officials better view
+3. Build Pipeline - employees view
+4. Build Monitor view - in order to monitor particular job
+
+Steps:
+1. Create another ubuntu 20.04 - 30gb - open all ports - launch
+2. open putty - change as root user (sudo su -) - install java and jenkins accordingly
+	sudo apt-get update
+	sudo apt-get upgrade -y
+	sudo apt-get install default-jdk -y
+	java -version
+	
+	wget -q -O - https://pkg.jenkins.io/debian-stable/jenkins.io.key | sudo apt-key add -
+
+	sudo sh -c 'echo deb [trusted=yes] https://pkg.jenkins.io/debian-stable binary/ > \
+    	    /etc/apt/sources.list.d/jenkins.list'
+
+	sudo apt-get update
+
+	sudo apt-get install jenkins -y
+	
+	sudo systemctl status jenkins
+
+3. open the jenkins on the browser with the default port number (8080) - and get the password from the link (cat /var/lib/jenkins/secrets/initialAdminPassword), copy paste the password and install the suggested plugins - provide the user credentials - start the jenkins
+
+4. by default, when we are opening the dashboard it will be having admin access == but in real-time this is not how it should work, due to security reasons == hence we are trying to provide with the necessary permissions
+[***FYI: in order to know the permission - go inside the dashboard - click on the manage jenkins - security - under authorization == we can see that (logged-in users can do anything) has been enabled]
+
+5. now to restrict the permission - go to manage jenkins - plugins - go to available plugins - search for (role-based authorization stratergy) - select that and click (install without restart) - scroll down to confirm everything got success and on the bottom you can see (go to the top page) click on that, it will come to the dashboard page - to confirm whether the plugin got installed or not, we need to click on the manage jenkins - security - under authorization - select the scroll-down button, we can see the (Role-based strategy) now - select that and save it.
+
+6. now, we are going to create 2 different users (1 is going to be the developer and another one is going to be the tester) - come to manage jenkins - select users - currently we can see "admin" - click on the (create user) [do this twice] - give the username, password, fullname, email address (developer, 12345, shiva, developer@gmail.com) == (tester, 12345, eeshwar, tester@gmail.com)
+click back to dashboard
+
+7. go to manage jenkins - select manage and assign roles - click manage roles - create (Employees) under the role to add - click add - [overall read permission, job read permission and view read permission] - under item roles, we need to add the department name (development) - in pattern we need to give (dev.*) [means all the content realted to dev can be accessed by the user] - add == same way do it for tester department name (test) - in pattern we need to give (test.*) - add; now give all the permissions for the dev and test as they are like admin under their team - save
+
+8. now go to assign roles - add the users under global roles provide the User ID: (developer) add (tester) add - and both them are employees so select that check box - under item roles also add both the users by giving the User ID: (developer) add (tester) add - enable the check box accordingly - (developer under developer check box) and (tester under tester check box) - save
+click back to dashboard
+
+9. now we are going to create 2 new job - new item - (devproject) - freestyle project - ok - build steps - add build step - execute shell (date) - save; new item - (testproject) - freestyle project - ok - build steps - add build step - execute shell (uptime) - save.
+
+10. copy the jenkins url with the port number (1.1.1.1:8080) - open this in a new browser - now on the login page - provide the username as (developer) and password (12345) - it will take us to the specific dashboard - and we can see very clearly that only the (dev job) got the run action, test job doesn't have the permission == try this vice versa by logout from developer and login to tester
+
+
+1. come back to the admin dashboard - create 3 different projects (buildjob, testjob, deployjob) - freestyle project - ok - build - add build step - execute shell (pwd, whoami, uname -a) - save.
+click back to dashboard
+
+2. now we need to do the ordering - select the buildjob - configure - post build actions - add post build action - build other projects - testjob - save == do the same for testjob - configure - post build actions - add post build action - build other projects - deployjob - save
+click back to dashboard
+trigger the buildjob and confirm whether it is triggering all the other jobs in order wise
+
+1. now we are going to bring the delivery pipeline [this helps to provide us with the better view for our higher officials, this can be done by bringing the plugin] - click on manage jenkins - plugins - click available and search for (delivery pipeline [select] build pipeline [select] build monitor view [select]) - at the same time - click install without restart - once everything got success, click on the go back to top page option
+
+2. now we are going to bring the multiple views - come to the dashboard -  next to "all" (+) click on the symbol - provide a name (deliveryview) - select delivery pipeline view - create - now scroll down to the bottom we can see pipeline components - add (make sure the 1st job has been selected according to the order) buildjob - ok [this is for managers view]
+[suppose, manager is looking for access to trigger, build and rerun means admin can give the access by clicking on edit view - there are multiple checkbox, according to the situation they can enable it [ex: Enable start of new pipeline build; Enable manual triggers; Enable rebuild etc.,] ok] - now automatically manager is going to get the access and they can rerun - just triggering it is going to run as usual
+
+3. we are going to create the build pipeline view - click on the (+) symbol - provide a name (buildview) - select the build pipeline view - create - make sure under the pipeline flow == Based on upstream/downstream relationship (the 1st job needs to be selected) which is buildjob in our case - ok [this is going to have a better view and more colourful with more options, because employees are the one who are really going to work on the project]
+
+4. now, we are going to create build monitor view - [the purpose of this is to concentrate on specific job depends upon criticality] - click the (+) symbol - name it as (monitorview) - select the build monitor view - create - select the job under the job filter [multiple jobs can also be monitored if required] - (deployjob & testjob) - ok [this is going to give us the exact job which we need to monitor, and we can change the size if required by clicking on the settings.
+
+Tasks:
+Try to learn another 5 plugins for better performance during the interview.
+
+Mini-Project:
+1. create a linux machine (mumbai) - open all ports - create
+
+2. create an ubuntu 20.04 (ohio) - 30gb - open all ports - create
+
+3. open both the machines - convert into root user (sudo su -)
+
+4. now we need to install git on the git machine (yum install git -y) - check the version in order to confirm (git --version)
+
+5. go to the jenkins machine - install java and jenkins - install suggested plugins - provide the credentails
+
+6. create a new repository on the github (jenkinsproject) - copy paste the github repo url (https://github.com/Akshiv20/jenkinsproject.git) on notepad for further reference
+
+7. create a directory on the git instance (mkdir git) - go inside the directory (cd git) - now we need to initialize the git (git init)
+
+8. now we are going to integrate the git and jenkins - for this go to admin console and create a new job (webhookjob) - freestyle project - ok - build - add build steps - execute shell (pwd) - under source code management, we can see git, enable that and provide the github repo url - under build triggers, we got (github hook trigger for gitscm polling) enable that - save
+
+9. go to github repo - settings - left hand side we can see webhooks, select that - add webhook (provide the password) - under payload url, we need to provide the jenkins url (http://1.1.1.1:8080/github-webhook/) - content type (application json) - disable SSL certificate - add webhook.
+
+10. now we need to configure our git - go to git instance and provide the configuration commands
+git config --global user.name  “Akshiv20”
+git config --global user.email “queenprince20@gmail.com”
+git config --global core.editor vim
+git config --global core.compression 2
+git config --global diff.tool vim.diff
+
+11. give (git config -l) to confirm the configuration was successful or not
+
+12. now we are going to create a sample file, consider that as the source code [in real-time, developer is going to write the code and push it to git] - (vi sample) fill some content, save and quit.
+
+13. by giving (git status) command we can see still it's untracked - hence we need to add and commit it move forward - (git add .) - now check the status (git status), it got tracked.
+
+14. let's commit this file now (git commit -m "first commit") [as we know, by deault there will be a master branch gets created after the first commit]
+
+15. now, we need to push our code from local to remote repo, but before this we need to create a variable (git remote add origin https://github.com/Akshiv20/jenkinsproject.git) - let us push now (git push origin master) [it is going to prompt us with the username and password == give your github credentails -- make sure we are generating a authentication token for using this password place] {go to profile - settings - developer settings - personal access token - generate token == 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}
+
+16. once the code got pushed to the remote repo - immediately the build will be started by jenkins [we can see the result under the build queue] and just by refreshing the page, we can see there was one execution happened]
+
+Task:
+1. How to avoid asking this git credentails always? what are the alternative ways
+2. Try to use real source code and intergrate the connection between GIT and Jenkins
+
+If you are facing error while connecting the github url inside the Jenkins, then proceed with these steps
+1. Open Jenkins dashboard - Manage Jenkins - Tools - under Git installations - Path to Git executables (/usr/bin/git), check the box (install automatically) - save.
+
+Jenkins shared library:
+=======================
+ > A Jenkins Shared Library is a collection of reusable pipeline code (Groovy scripts) stored in a separate Git repository (or inside Jenkins).
+
+ > Instead of duplicating the same pipeline steps in every Jenkinsfile, you write them once in the library and call them whenever needed.
+
+ > Think of it like a “common utilities toolkit” for Jenkins pipelines.
+
+Why Do We Need Shared Libraries?
+ > Reusability: One place to write a build function, then use it in 50+ pipelines.
+ > Consistency: Every team follows the same process (security checks, build standards, notifications).
+ > Maintainability: Update once in the library → applies to all jobs.
+ > Scalability: Large companies with hundreds of Jenkinsfiles don’t want every project team to reinvent the wheel.
+
+
+
+
+
+

@@ -1,0 +1,95 @@
+Security:
+=========
+1. User Management:
+	Jenkins lets you create and manage different users instead of giving everyone a single admin login. Each user has their own account.
+
+Why we use it in projects: In real-time, teams are large—developers, testers, DevOps engineers, managers. We don’t want everyone to have the same power. For example:
+ > A developer should only be able to trigger builds.
+ > A release manager can approve deployments.
+ > An admin can configure Jenkins itself.
+
+This makes the system secure, organized, and auditable.
+
+2. RBAC (Role-Based Access Control):
+	Instead of giving permissions directly to users one by one, Jenkins lets you group permissions into roles.
+
+How it works:
+ > Create a role (e.g., Developer role → “Build jobs only”).
+ > Assign users to that role.
+ > When the user logs in, they automatically inherit those permissions.
+
+Purpose in projects: Keeps control neat and prevents mistakes. Example: You don’t want a junior dev accidentally deleting a production pipeline. RBAC ensures they can only touch what they’re supposed to.
+
+3. Authentication vs Authorization
+ > Authentication: “Who are you?” → Jenkins checks your identity (username/password, LDAP, GitHub login, etc.).
+ > Authorization: “What can you do?” → After you’re logged in, Jenkins checks your permissions (RBAC, Matrix Auth, etc.).
+
+Together: You log in → Jenkins confirms you → Jenkins decides what buttons you’re allowed to click.
+
+Steps:
+------
+1. Enable Security
+ > Go to Manage Jenkins → Configure Security.
+ > Select “Jenkins’ own user database” for authentication.
+ > Choose “Matrix-based security” or “Role-Based Strategy” for authorization, and make sure to add user the admin one and provide overall permission - Apply & save.
+
+2. Create a User
+ > Go to Manage Jenkins → Users → Create User.
+ > Fill in username = dev, password (dev123), full name (developer) email (dev@gmail.com).
+ > Now user "dev" exists.
+
+3. Install Role-Based Strategy Plugin
+ > Go to Manage Jenkins - Plugins - Available plugins
+ > Search for Role-based Authoriztion Strategy - Install
+
+4. Define Roles
+ > Go to Manage Jenkins → Security - now under Authorization we earlier selected "Matrix-based" choose the drop down and we can see Role-based strategy - Apply and save.
+ > Go to Manage Jenkins - now we can see Manage and Assign Roles → Manage Roles.
+ > Now select Global roles, we can see already the admin user with overall permission, now give "dev-role" on the Role to add and provide only Overall → Read, Job → Build, Job → Read
+ > Choose Assign Roles on the left hand side - and we can see the Jenkins user here, now Add user "dev" and choose the developer roles there, apply & save
+
+5. Test it
+ > Create a new item - and provide with (sample-job), freestyle - build steps - execute shell (pwd) Apply and save.
+ > Sign out as Admin and login as dev user where we can see the job and we can read and build, but the build action won't be visible as we don't have permission for that one, and except Build they won't be able to see any other options there.
+
+Jenkins Credentials:
+====================
+	Credentials are securely stored login details, tokens, or keys inside Jenkins. Instead of hardcoding passwords in pipelines, Jenkins pulls them from its credential store.
+
+Types of Credentials:
+ > Username + Password → e.g., logging into a Git repo.
+ > SSH Keys → connecting to servers.
+ > Secret Text (API tokens) → calling APIs like GitHub or DockerHub.
+ > AWS / GCP Keys → authenticating cloud services.
+
+Project Example:
+ > A pipeline pulls code from GitHub → needs GitHub token stored in Jenkins credentials.
+ > A pipeline deploys to AWS → needs AWS access keys stored in credentials.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

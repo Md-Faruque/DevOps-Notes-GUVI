@@ -1,0 +1,42 @@
+Jenkins setup using Docker:
+===========================
+	1. This gives us a standard platform regardless of what operating system you are on.
+	2. It speeds up the installation process enormously, through this we can complete the installation within 5mins. 
+
+Docker Installation:
+--------------------
+	If we are having windows 10 or more then we can proceed with Docker Desktop, older versions we can try with Toolbox, make sure we have enabled virtualization or hypervisor accordingly
+1. go to google search for Docker Desktop - download and install the same & people who are using lower version than windows 10, make sure to use this github URL and proceed with the installation using toolbox 
+github: https://github.com/docker-archive/toolbox/releases/download/v19.03.1/DockerToolbox-19.03.1.exe
+docker toolbox for older version of windows: https://docs.docker.com/toolbox/toolbox_install_windows/
+docker toolbox releases: https://github.com/docker/toolbox/releases
+
+2. now let us bring Jenkins using Docker, open the terminal in Docker desktop which you can see at the bottom, pull the image from Docker hub (docker pull jenkins/jenkins)
+
+3. next, we need to run the container (docker run -p 8050:8080 -p 50000:50000 -v jenkins_home:/var/jenkins_home jenkins/jenkins); here we are doing port forwarding where jenkins runs on 8080 default and we are forwarding that to 8050
+--50000 is used interanally; where Jenkins uses port 50000 for master to agents communication (like Jenkins slave nodes) when they connect to the master server. This allows external Jenkins agents (slaves/nodes) to connect to the Jenkins master running in the container.
+-- jenkins_home is the name of a Docker volume on your host/local machine.
+	/var/jenkins_home is the folder where it is going to store all the information like data, including job configurations, plugins, build history, and more.
+	By mounting this volume, any data Jenkins saves to /var/jenkins_home in the container will persist even if the container is stopped or removed. If you restart the container, Jenkins can pick up exactly where it left off because the data is stored in this persistent volume.
+
+4. to confirm, we can open any browser and give (localhost:8050) and we can see the jenkins loginpage
+
+5. we can find the password from docker desktop - volumes - jenkins_home - secrets - initialAdminPassword (right click) and save the password in the local machine - paste the password - continue
+
+6. install suggested plugins - create the user admin details - save and finish - open the dashboard
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

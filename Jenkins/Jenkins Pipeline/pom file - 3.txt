@@ -1,0 +1,136 @@
+Pom.xml:
+========
+Think of pom.xml as the blueprint for a Maven project.
+
+The word POM stands for Project Object Model. It’s just an XML file that Maven reads to know everything about your project:
+ . Who you are (groupId, artifactId, version).
+ . What kind of output you want (a .jar, .war, etc.)
+ . Which dependencies you need (Spring, JUnit, logging libraries, etc.).
+ . Which plugins or build settings to use (compiler version, test reports, packaging).
+
+[***XML is short for Extensible Markup Language.
+At its core, it’s just a way to structure and store data using tags—kind of like HTML, but not limited to web pages
+XML is just a text-based way to organize information in a structured format that both humans and programs can process.]
+
+Why do you need pom.xml in Jenkins?
+-----------------------------------
+ > pom.xml belongs to Maven, not Jenkins directly.
+ > It tells Maven how to build your project: dependencies, plugins, packaging, version, etc.
+ > When Jenkins runs a Maven job (or a pipeline step like mvn clean install), Jenkins just calls Maven, and Maven reads the pom.xml to know what to do.
+ > Without pom.xml, Maven has no idea what libraries to fetch or how to compile/test your code.
+
+👉 In short: pom.xml = project build recipe. Jenkins just triggers it.
+
+How is pom.xml different from Jenkinsfile?
+------------------------------------------
+ . pom.xml = Defines what the project is and how to build/test/package it.
+ . Jenkinsfile = Defines how Jenkins should run the pipeline stages.
+
+Think of it this way:
+ . pom.xml → "I’m a Java project, I need JUnit, compile sources, run tests, package a .jar."
+ . Jenkinsfile → "First checkout code, then run Maven with pom.xml, then archive the jar, then deploy."
+
+They complement each other, not replace.
+You often need both:
+
+pom.xml handles the build logic (brain of project build)
+Jenkinsfile handles the automation workflow (conductor telling Jenkins when and how to run Maven)
+
+[*** Do Remember: If your code isn’t Java/Maven, you won’t use pom.xml at all, because that file is Maven-specific.
+Instead, every language/ecosystem usually has its own “build descriptor” file]
+
+Common languages & their build files
+------------------------------------
+ > Node.js / JavaScript → package.json
+Defines dependencies (express, lodash), scripts (npm run build, npm test), metadata.
+
+ > Python → requirements.txt or pyproject.toml (for modern builds with Poetry)
+Lists packages like flask, requests, etc.
+
+ > Go → go.mod
+Defines module name and versioned dependencies.
+
+ > .NET / C# → .csproj or packages.config
+Describes project structure, frameworks, dependencies.
+
+ > Ruby → Gemfile
+Declares gems needed for the project.
+
+ > Gradle (Java alternative to Maven) → build.gradle
+Similar to pom.xml but uses Groovy/Kotlin DSL instead of XML.
+
+How Jenkins fits in
+-------------------
+ . Project build file (like package.json, requirements.txt, go.mod) → tells the language’s tool (npm, pip, go, etc.) how to install dependencies, build, and test.
+
+ . Jenkinsfile → tells Jenkins when and how to run those tools.
+
+Cheat-sheet:
+------------
+Language → Build File → Jenkins Command
+---------------------------------------
+ > Java (Maven)
+Build file: pom.xml
+Command: mvn clean package (or mvn test, mvn install)
+
+ > Java (Gradle)
+Build file: build.gradle (or build.gradle.kts)
+Command: ./gradlew build (uses wrapper) or gradle build
+
+ > Node.js / JavaScript
+Build file: package.json
+Command: npm install && npm run build (plus npm test)
+
+ > Python
+Build file: requirements.txt or pyproject.toml
+Command: pip install -r requirements.txt && pytest
+
+ > Go
+Build file: go.mod
+Command: go build ./... && go test ./...
+
+ > .NET / C#
+Build file: .csproj or .sln
+Command: dotnet restore && dotnet build && dotnet test
+
+ > Ruby
+Build file: Gemfile
+Command: bundle install && rake test
+
+ > C/C++ (Make)
+Build file: Makefile
+Command: make (targets defined in the Makefile, e.g. make build)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,77 @@
+Variables:
+--------
+	These are like placeholders that store information, which can be used and reused in different stages of a pipeline. Using variables helps make a Jenkins pipeline more flexible, readable, and easier to maintain. Varaibles are declared using the "def" keyword, environment varaibles using "env".
+
+Types of Variables in Jenkinsfile:
+---------------------------
+ > Global Variables: Predefined by Jenkins, accessible throughout the pipeline. For example, env (environment variables), currentBuild (information about the current build).
+ > Environment Variables: Set by Jenkins or manually in the Jenkinsfile, used to store values like paths or configuration settings.
+ > User-defined Variables: Custom variables you define within the Jenkinsfile to make your code more readable and maintainable.
+
+Advantages of Using Variables in Jenkinsfile:
+------------------------------------
+ > Flexibility: Easily change configurations without modifying every step, just update the variable values.
+ > Readability: Makes the code more understandable, as you can use meaningful names instead of hardcoded values.
+ > Maintainability: Reduces the risk of errors and makes it easy to update settings in one place.
+ > Reusability: Use the same Jenkinsfile across different projects or environments by setting variables according to each context.
+
+Steps:
+-----
+1. Create a folder, name (variables), add a (Jenkinsfile)
+
+pipeline {
+    agent any
+
+    environment {
+        def myString = "Hello World"
+        def myNumber = 10
+        def myBool = true
+    }
+
+    stages{
+        stage("Demo") {
+            steps {
+                echo "myString: ${myString}"
+                echo "myNumber: ${myNumber}"
+                echo "myBool: ${myBool}"
+            }
+        }
+    }
+}
+
+2. come to jenkins dashboard - click on new item - name (variablePipeline) - choose "Pipeline" - add the Jenkinsfile under the script - save
+
+3. now click on "Build now" - and the pipeline got successfully build - check the logs as we can see for all 3 here
+
+[*** To learn about Jenkins specific Environment variables, go through this link: https://www.jenkins.io/doc/book/pipeline/jenkinsfile/#using-environment-variables]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

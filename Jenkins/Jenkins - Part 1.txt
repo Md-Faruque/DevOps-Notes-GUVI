@@ -1,0 +1,241 @@
+Jenkins - Part 1:
+---------------
+
+One of the most popular DevOps tools
+Key DevOps CI/CD tool
+Automate builds and deployments 
+Open source with over 2000+ plugins
+
+What is CI?
+	Continuous Integration, where developers frequently merge (or integrate) their code changes into a shared code repository, often several times a day. Each time new code is added, it automatically triggers a series of tests and builds. The goal is to ensure that every small change works well with the existing codebase and doesn’t break anything. If there's an issue, developers are notified, so they can quickly fix it.
+Example:
+--------
+	Imagine a team is building an online store website. Developer A works on the shopping cart, and Developer B works on the checkout process. In a CI setup, as soon as either developer updates their code in the shared repository, it triggers automated tests. If Developer A accidentally adds a bug, the CI system will flag it. This way, problems are detected early, before they reach customers.
+
+What is CD?
+	After CI, we have Continuous Deployment or Continuous Delivery. Both involve taking the changes tested in CI and automatically deploying them to production (CD) or preparing them for release (Delivery).
+
+ > Continuous Delivery means that the software is always in a "ready-to-release" state, but the release is manually triggered.
+ > Continuous Deployment takes it a step further by automatically releasing every change that passes tests to production.
+
+Example:
+--------
+	Let’s say a mobile app development team uses CD. Once the app passes all the tests, it’s either set for manual approval (Continuous Delivery) or directly released on the app store (Continuous Deployment). This let users receive app updates frequently without waiting for major releases.
+
+In general, we have in CI part (Build & Test) & if the test passes this moves to the CD section [Build Docker image, push it to a repository, add it to Kubernetes file, adn then deploy it]; with Jenkins we can automate the entire process, this can be achieved through configuring Pipelines.
+
+We do have other ways of using Jenkins here, this can be used as an automated platform to schedule cleanups, we can have it for deploying releases, we can have it for building applications standalone, etc.,
+
+Jenkins: is a server-based system running in a servlet container such as Apache Tomcat.
+
+Jenkins: has job types such as Freestyle, External, Multi-config, etc.,
+
+Jenkins: is the only award-winning open source application that monitors executions of repeated jobs, such as building a software project or jobs run by cron. 
+
+What is Jenkins?
+Jenkins is an open-source tool, which was developed using Java. In the year of 2005, Hudson developed this tool and released by sun microsystems and by 2010, Oracle took the ownership of this tool once they bought sun microsystems.
+
+Why Jenkins?
+Jenkins is a highly configuration tool on its own; the additional community developed plugins provide even more "Flexibility"; By combining Jenkins with Ant, Gradle, or any other Build Automation tools this works limitless.
+
+What can Jenkins do?
+====================
+
+- Generate test reports
+- Integrate with many different Version Control Systems
+- Push to various artifact repositories
+- Deploys directly to production or test environments
+- Notify stakeholders of build status
+- and many much..
+
+Who uses Jenkins? 
+=================
+
+- Linkedin
+- NASA
+- NETFLIX
+- ebay
+- Michelin
+- Mozilla foundation
+
+Link for Jenkins installation on Linux: https://www.jenkins.io/doc/tutorials/tutorial-for-installing-jenkins-on-AWS/
+https://varunmanik1.medium.com/devops-jenkins-aws-series-part-1-how-to-install-jenkins-on-aws-ubuntu-22-04-cb0c3cdb055
+
+Installation:
+1. Select Ubuntu 20.04 - storage 30gb - jenkins master - open all ports - create == open putty with the default username (ubuntu) and change as root user (sudo su -), update and upgrade all the packages
+sudo apt-get update
+sudo apt-get upgrade -y
+
+2. Install Java on Ubuntu server.
+sudo apt-get install default-jdk -y
+java -version
+
+3. Install Jenkins on Ubuntu server.
+wget -q -O - https://pkg.jenkins.io/debian-stable/jenkins.io.key | sudo apt-key add -
+
+sudo sh -c 'echo deb [trusted=yes] https://pkg.jenkins.io/debian-stable binary/ > \
+    /etc/apt/sources.list.d/jenkins.list'
+
+sudo apt-get update
+
+sudo apt-get install jenkins -y
+
+-- Check for the Jenkins status.
+sudo systemctl status jenkins
+
+4. Verify in 3 different ways:
+(i) ps -ef | grep jenkins
+(ii) Jenkins will be launched as a daemon up on start - Check under /etc/init.d/jenkins
+(iii) /etc/default/jenkins will capture configuration parameters for the launch like e.g JENKINS_HOME.
+
+5. now get the machine public ip and open it on the browser and launch the Jenkins URLS in the browser:-
+<ubuntu_ip_address>:8080
+
+6. this takes us to the jenkins login page, and it request us with the password - as we can see the password path was mentioned on the same place, now try to get the file by using cat command (cat /var/lib/jenkins/secrets/initialAdminPassword) - now copy paste the password on the jenkins webpage
+
+7. Install the suggested plugins [in real-time according to the requirement we can choose the specific plugins] - provide the credentials
+username: admin
+password/ confirm password: admin123
+name: jenkins
+email: abc@gmail.com
+click next - copy paste the jenkins url: [ex: http://3.19.62.168:8080/] - save and finish - start using jenkins
+
+one we are inside the dashboard - click on manage jenkins - click the button setup cloud - install plugin - aws credentials - install [wait until all packages are successfully installed] or [on top right corner also we can see this option click on the (!) symbol to setup.
+
+CREATING JOBS:
+1. we are going to run our programs by creating jobs - inside the jenkins dashboard, click on the "new item" - provide the name "BuildProject" - select freestyle project [we can setup our own configuration] - ok - select build - under build click on "add build" - execute shell script - type "pwd" - save
+click back to dashboard
+2. create another job - select "new item" - name "TestProject" - freestyle project - ok - select build - under build click on "add build" - execute shell script - type "uptime" - save
+click back to dashboard
+3. create another job - select "new item" - name "DeployProject" - freestyle project - ok - select build - under build click on "add build" - execute shell script - type "date" - save
+click back to dashboard
+4. now all these 3 projects are separate, by running the project only the specific project will get executed.
+
+JOBS ORDERING:
+1. we need to order all the projects, so that once the projects got triggered all the projects related to this should get executed automatically. 
+2. go inside the BuildProject - configure - Post-Build Actions - add post-build actions - select (build other projects) - type (TestProject,) - save. 
+click back to dashboard
+3. same way, go inside TestProject - configure - Post-Build Actions - add post-build actions - select (build other projects) - type (DeployProject,) - save.
+click back to dashboard
+4. now run the BuildProject - on the left-hand side you can see the Build Queue (Testproject & DeployProject will get executed) once done we will get the msg like No builds in the queue, now try to refresh the page, we will be able to see all the projects got executed in order wise and the number of attempts changes to (2)
+5. Now we are doing to trigger manually, but how to do this periodically == to do that click on (BuildProject) - configure - build triggers - enable the build periodically check box - now schedule the time (* * * * *) [ this is going to schedule it for every minute]
+
+Task:
+Schedule for task for 1hour; 1day and 1month [Click on the ? on the side for this]
+
+6. now we are going to disable this schedule, as it is going to keep on trigger for every one minute - go inside the (BuildProject) - configure - build triggers - disable the build periodically check box - save
+7. let us do remote triggering [means, if someone located on a different place by using the URL they will be able to start the triggering, mostly Managers will use this] - to do that click on (BuildProject) - configure - build triggers - enable the trigger builds remotely check box - and provide the authentication token [this acts like password] (12345) - copy the url you can see on the bottom of the authentication token (ex: JENKINS_URL/job/BuildProject/build?token=TOKEN_NAME) - now we need to customize this url [http://3.19.62.168:8080/job/BuildProject/build?token=12345] - hit this url in the browser, now we can see all the projects will get triggered automatically.
+
+MASTER-SLAVE:
+=============
+	In a Jenkins master-slave setup, there is one central Jenkins master server that manages and coordinates the build jobs, and multiple Jenkins slave nodes that execute the build jobs. This setup is useful for distributing the workload across multiple machines and achieving better performance and scalability.
+Here's how a Jenkins master-slave setup works:
+	Jenkins Master: The Jenkins master is the central server that manages the entire Jenkins environment. It hosts the web interface where users can configure jobs, view build results, and manage the Jenkins system. The master is responsible for scheduling build jobs, distributing them to the slave nodes, and monitoring their execution.
+	Jenkins Slave Nodes: Slave nodes are individual machines or virtual instances that are configured to offload the actual execution of build jobs from the master. These slave nodes connect to the Jenkins master over the network and await instructions to execute build jobs. Slave nodes can be configured with different operating systems, software environments, and hardware configurations to cater to diverse build requirements.
+	Jenkins also has the capability of distributing build jobs across a large number of systems, which is known as Jenkins distributed builds.
+
+[*FYI: there is something called Job landing path: (cd /var/lib/jenkins/workspace) by going inside this path it will show the entire jobs that we built already, try this on the master machine, move inside the path and give (ls) command]
+
+Jenkins Master is the primary Jenkins server and is responsible for the following tasks:
+
+    - It distributes the builds among the numerous slaves for execution.
+    - It organises the build projects.
+    - It keeps an eye on the slaves at all times.
+    - Master can also run build jobs directly if necessary.
+    - It keeps track of the build outcomes and shows them.
+
+Jenkins Slave runs on a remote machine. A slave is responsible for the following tasks:
+
+    - Slaves can be operated on a number of different operating systems.
+    - It responds to the Jenkins Master's demands. 
+    - we can always arrange the project to run on a certain sort of slave computer.
+
+Steps -
+1. Install Java on master node
+2. Install Jenkins on master node
+3. Connect to the Jenkins dashboard - install suggested plugins - provide the login details
+4. Install java on slave node
+5. Create a user and ssh keys on slave node
+6. Copy keys on master node
+7. Join slave node to master
+8. Test the setup
+
+1. create another machine for slave - Ubuntu 20.04 - storage 30gb - jenkins slave - open all ports - create
+
+2. change as root user (sudo su -) - now we need to download only java on the slaves machines [jenkins is not required, as it was directly connected with the master for jobs]
+	sudo apt-get update
+	sudo apt-get upgrade -y
+	sudo apt-get install default-jdk -y
+	java -version
+
+3. now we need to create the key for the communication between master to slave; hence go to the master machine on the ubuntu home path (exit) - now to confirm give (pwd) [make sure you are on the home path /home/ubuntu] - now list everything inside this path (ls -lrtah) [we can see (.ssh) directory] - go inside the directory (cd .ssh) - now list from this place (ls -larth) [we can see a filename called authorized keys, this is something that holds the public keys]
+
+4. let's try to connect with the localhost using the ssh (ssh localhost) [the connection will get failed, due to the permission issues] - in order to bring the connection give command (ls -larth) [we can see a file called "known_hosts"]
+
+5. create 2 empty files for generating the keys (touch id_rsa.pub) (touch id_rsa) - list to confirm this (ls -lrt)
+
+6. now we need to copy the authorized keys with the rsa.pub (cp authorized_keys id_rsa.pub), list to confirm the size if needed (la -lrt)
+
+7. now we need to ready the private key, for this copy the .pem file which we used for our server, save it inside the file (vi id_rsa), list to make sure (ls -lrt) [we can see the permissions are not the same for every file]
+
+8. I am going to provide only the read access for the ubuntu user alone for security reason (chmod 400 *), now list (ls -lrt)
+
+9. now try to connect to our own localhost (ssh localhost) [the internal connection is successful]
+
+Interview Question:
+1. Will I have the (/var/lib/jenkins/workspace) path on my slaves machine? [this path is called job landing path]
+	No, as we haven't installed jenkins on the slaves machine, it won't be available on this place.
+
+10. now, we are manually going to create a landing path for the slaves, because we need to communicate with our master machine, go to the ubuntu home path in the slaves machine (exit) - (pwd) [/home/ubuntu] - now create a directory manually (mkdir jenkins) - go inside the directory (cd jenkins) - give (pwd) [/home/ubuntu/jenkins == this path considered to be the default landing path for the jenkins]
+
+11. go to the jenkins console page on the browser - click manage jenkins - select nodes [we can see only the master is available there] -click on (new node) click on that - provide a name (Agent1) - enable the permanent agent - create - number of executors (2) [this defines the speed between the connections] - under remote root directory, give the slave machine landing path we created (/home/ubuntu/jenkins) - labels is nothing but an additional/reference name (sample) - in launch method, select (launch agents via SSH) [as we are going to bring the connection using the ssh] - under host, provide the slave machine public ip - in credentials, click add == jenkins == under kind, select SSH username and private key == give the ID as (ubuntu) and username as (ubuntu) - under private key, enable the button "enter directly", then click on add and paste the pem file we are using for this one == add == now scroll down the credentials, we can see our key (ubuntu) select that one - in the Host key verification strategy, select (manually trusted key verification strategy) - now save.
+click back to dashboard
+
+12. now, we are trying to run a new project - new item - provide the name (sample_slave) - freestyle project - ok - under general, enable "Restrict where this project can be run" - select the label we provided on our slave machine (sample) [we will get a match node confirmation] - click build steps - add build step - execute shell, give "pwd" - apply & save.
+
+13. now run this current project (sample_slave) - refresh the browser - once it got success - go to the slaves machine inside the default jenkins path which we created and list (ls), as you can see a new (workspace) got created after the execution
+
+14. go inside the workspace (cd workspace) - list (ls) [we will be able to see our project]
+
+Multi-Node Demo:
+================
+1. How to execute if I am having multiple machines, and I need to execute the tasks, that is where pipeline comes where we can write a Groovy script and try executing the same
+
+2. Let's try using a sample pipeline script, create a New item, give name (Multi-Node-Demo) choose pipeline and add the script
+
+pipeline {
+    agent none
+    stages {
+        stage('Parallel Job on Multiple Nodes') {
+            parallel {
+                stage('Run on Master') {
+                    agent { label 'master' }
+                    steps {
+                        echo "Running on Master"
+                        sh 'hostname'
+                    }
+                }
+                stage('Run on Slave1') {
+                    agent { label 'sample' }
+                    steps {
+                        echo "Running on Slave 1"
+                        sh 'hostname'
+                    }
+                }
+            }
+        }
+    }
+}
+
+[*** Do remember to rename the labels properly, and when comes to master we don't have name label yet, to add one, click on manage jenkins - nodes - click on the settings icon (configure icon) - we can see the Labels there add the name (master) - apply & save
+
+3. Now execute the Pipeline and we can see this got executed on both the machines simultaneously, once the pipeline got successful we are going to check for the output from the console output area.
+
+
+Tasks:
+1. Change the Port number for Jenkins and execute in New Port number.
+
+Jenkins pipeline
+Jenkins running on different port number
+Jenkins git & maven setup for application
+

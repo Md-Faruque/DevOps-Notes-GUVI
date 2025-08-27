@@ -1,0 +1,145 @@
+Groovy Scripting:
+=================
+	Groovy is a dynamic scripting language that runs on the Java Virtual Machine (JVM). Jenkins uses Groovy internally to define jobs, automate tasks, and write Pipelines as Code. It’s lightweight, flexible, and blends easily with Java, which makes it a great fit for Jenkins automation.
+
+Why Groovy in Jenkins?
+ > Jenkins itself is written in Java → Groovy works seamlessly with it.
+ > Used to create Pipelines (Declarative or Scripted).
+ > Allows writing logic (loops, conditions, functions) inside Jenkinsfiles.
+ > Helps define Shared Libraries for reusable code.
+
+Key Features of Groovy
+ > Similar to Java syntax but simpler.
+ > Supports both object-oriented and scripting styles.
+ > Easy integration with Jenkins plugins and APIs.
+ > Can define variables, functions, and classes just like Java.
+
+Sample Groovy Script (Basic):
+-----------------------------
+// A simple Groovy script
+def name = "Akshiv"
+println "Hello, ${name}! Welcome to Groovy."
+
+Explanation line by line:
+-------------------------
+def name = "Akshiv" → Defines a variable using def.
+println "Hello, ${name}!" → Prints output with variable substitution.
+
+Groovy Stages in Jenkins (Pipeline Example):
+--------------------------------------------
+pipeline {
+    agent any
+    stages {
+        stage('Build') {
+            steps {
+                echo "Building the project..."
+            }
+        }
+        stage('Test') {
+            steps {
+                echo "Running tests..."
+            }
+        }
+        stage('Deploy') {
+            steps {
+                echo "Deploying application..."
+            }
+        }
+    }
+}
+
+Explanation:
+------------
+ > pipeline {} → Declarative pipeline block.
+ > agent any → Run on any available Jenkins node.
+ > stages {} → Group of different stages in CI/CD.
+ > Each stage('Name') → Represents a step like Build, Test, Deploy.
+ > echo → Prints messages inside Jenkins console log.
+
+Demo:
+-----
+1. Groovy Scripting inside Jenkins (Console + inline)
+
+1.1 Script Console: Hello Groovy 
+--------------------------------
+Click on Manage Jenkins  - Script Console
+
+Code:
+def name = "Team"
+println "Hello, ${name}! Groovy is working."
+
+paste it there and Run and we can see the output of this is working.
+
+ . What you should see: A greeting printed under the Run output.
+ . Why this matters (brief): Confirms Groovy works inside Jenkins; useful for quick inspection/admin tasks. Avoid using Script Console in production pipelines for risky changes.
+
+1.2 Script Console: Inspect Jenkins
+-----------------------------------
+
+Code:
+import jenkins.model.Jenkins
+Jenkins.instanceOrNull?.items.each { job -> println job.fullName }
+println "Jenkins version: ${Jenkins.instanceOrNull?.version}"
+
+ . Outcome: Lists job names and the Jenkins version.
+
+How do we use Groovy in Jenkins?
+--------------------------------
+1. Direct Groovy Scripts
+ . Run scripts in Script Console or inside a job (via "Execute Groovy script" build step).
+ . Mostly used for admin automation (config changes, mass job updates, reporting).
+
+2. Groovy in Pipelines (Jenkinsfile)
+ . Most real-time projects rely on Jenkinsfiles.
+ . Groovy is embedded inside the pipeline using script {} blocks when you need advanced logic.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

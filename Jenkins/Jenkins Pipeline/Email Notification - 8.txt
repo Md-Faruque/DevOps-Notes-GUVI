@@ -1,0 +1,27 @@
+Email Notifications:
+====================
+	Email notification in Jenkins means sending an automatic email whenever a build succeeds or fails. Jenkins can send these updates to developers, testers, or operations teams so they know immediately what happened in the pipeline.
+
+Think of it like this:
+ > Without notifications → someone must log in to Jenkins and check the build status manually.
+ > With notifications → Jenkins tells you directly (via email), saving time and reducing delays in fixing issues.
+
+Why we use it in real-time
+--------------------------
+1. Instant Feedback → Developers know right away if their code broke something.
+2. Better Collaboration → Teams (QA, DevOps, Developers) get notified at the same time.
+3. Faster Fixes → If a build/test fails, developers don’t waste time; they can fix it quickly.
+4. Audit Trail → Emails serve as proof of who deployed what and when.
+5. Automation Advantage → No need for manual checks; Jenkins does the reporting.
+
+In corporate projects, teams often configure email alerts so:
+ . Developers get notified for failure.
+ . Managers may get notified only for success or when a release is deployed.
+
+Steps:
+------
+1. Install Email-Extension templates: Go to Manage Jenkins - plugins - available plugins, search for Email extension template - Install (Restart Jenkins if needed)
+
+2. Configure SMTP (Mail Server): Go to Manage Jenkins - System - Scroll down to the Extended E-mail Notification, 
+
+

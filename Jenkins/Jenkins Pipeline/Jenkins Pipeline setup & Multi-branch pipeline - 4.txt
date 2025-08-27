@@ -1,0 +1,160 @@
+Pipeline:
+-------
+	Open VSC - create a new folder (Jenkins) - right click - create a file (Jenkinsfile); now let us write the jenkinsfile on our own (make sure we have installed Jenkins from the extensions)
+1. Let us create a job in our jenkins dashboard - click on new item - name (My Pipeline) - choose pipeline - this brings us to the configure place, scroll down and we can see pipeline area for writing script
+
+2. open another docker terminal (+) - check (docker container ls) - we need to install maven on this container, now we are going to copy the container ID
+
+3. we will go inside the container now, (docker exec -it -u root <container id> /bin/bash)
+
+4. now, let us update (apt-get update), let us install "maven" (apt-get install maven) - exit from container
+
+Jenkinsfile:
+----------
+1. this will always start with a pipeline statement
+
+pipeline {} - come to vscode and type this 1st line
+
+2. next is we need to mention the agent, this is where node or jenkins slave should run on, and because we have 1 setup we are going to use (any)
+
+pipeline {
+    agent any
+}
+
+3. next we need to add stages block, and here we are going to add all the stages
+
+pipeline {
+    agent any
+    stages {
+        
+    }
+}
+
+4. now, I am going to create my 1st stage as clean up; the reason why we are adding here the clean up is because when jenkins runs a job it creates a folder on the system, sometimes there can be remains from a previous build, and this might lead to some unwanted errors and stop the job from running; so it is a good practice is to add clean up job at the beginning of your script. 
+
+pipeline {
+    agent any
+    stages {
+        stage("Clean Up")
+    }
+}
+
+5. now let us add steps which we need to get executed during our clean up stage, we are giving here (deleteDir) this will clear the working folder inside Jenkins. 
+
+pipeline {
+    agent any
+    stages {
+        stage("Clean Up"){
+            steps {
+                deleteDir()
+            }
+        }  
+    }
+}
+
+6. now, we are going to add another stage (Clone Repo), this is used to clone our repo from the source code repository using URL where our source code is located; as we are going to use here with the simple application (https://github.com/jenkins-docs/simple-java-maven-app) I am pasting the same
+
+pipeline {
+    agent any
+    stages {
+        stage("Clean Up"){
+            steps {
+                deleteDir()
+            }
+        }
+        stage("Clone Repo"){
+            steps {
+                sh "git clone https://github.com/Akshiv20/java-hello-world-with-maven.git"
+            }
+        }  
+    }
+}
+
+7. next we are going to add the build stage, (dir - with jenkins it usually creates a folder) [mvn clean install = this is now is going to build the java file and clean step removes any previous libraries or binaries that may have been created before]
+
+pipeline {
+    agent any
+    stages {
+        stage("Clean Up"){
+            steps {
+                deleteDir()
+            }
+        }
+        stage("Clone Repo"){
+            steps {
+                sh "git clone https://github.com/Akshiv20/java-hello-world-with-maven.git"
+            }
+        }
+        stage("Build"){
+            steps {
+                dir("java-hello-world-with-maven") {
+                    sh "mvn clean install"
+                }
+            }
+        }  
+    }
+}
+
+8. now, we are going to bring the final stage (Test), and we are going to use the same maven to test and proceed
+
+pipeline {
+    agent any
+    stages {
+        stage("Clean Up"){
+            steps {
+                deleteDir()
+            }
+        }
+        stage("Clone Repo"){
+            steps {
+                sh "git clone https://github.com/Akshiv20/java-hello-world-with-maven.git"
+            }
+        }
+        stage("Build"){
+            steps {
+                dir("java-hello-world-with-maven") {
+                    sh "mvn clean install"
+                }
+            }
+        }
+        stage("Test"){
+            steps {
+                dir("java-hello-world-with-maven") {
+                    sh "mvn test"
+                }
+            }
+        }  
+    }
+}
+
+9. now, we are going to attach this script inside our Jenkins dashboard, make sure you are still logged in, there are chances for logged out if we are not going to be there for a while, now copy paste the entire script under the Pipeline Script and - save
+
+10. now click on Build Now, as we can see this script started to build the pipeline accordingly [if incase we are not able to see the stage view, make sure that going manage jenkins - plugins - pipeline: stage view - install, so we can see the stage view]
+
+Multi-Branch Pipeline:
+-------------------
+	If in case we are having multiple branches with our version control and we need to create pipeline for those branches then this pipeline comes into the picture. [make sure you have multiple branches on your GitHub/Bitbukcet]
+
+1. Create new item - name (Multi Branch) - choose (Multibranch Pipeline) from the items - under branch sources, select (Add soruce) - Git - give the project repository (https://github.com/Akshiv20/java-hello-world-with-maven.git) - under Build configuration (Jenkinsfile) is the available option right now, as we need the build to be taken place using this file - under script path, give (Jenkinsfile) - under scan multibranch pipeline trigger, enable the check box - under Interval, I am choosing (2minutes) - save
+
+2. to view the stage, select the status on top - choose the branches (main) - this shows the output of the Builds.
+
+3. now, let us add another branch in the github from master branch - come back to jenkins dashboard and we can see it is going to automatically scan for the branches in (2minutes) as that is the interval time which we have fixed there, but if we want to see immediately also we can click on (scan multibranch pipeline now) - and this shows with the new branch
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	
