@@ -1,0 +1,546 @@
+Terraform: An Overview
+======================
+	Terraform is an open-source Infrastructure as Code (IaC) tool developed by HashiCorp. It allows users to define, provision, and manage cloud infrastructure using a declarative configuration language called HCL (HashiCorp Configuration Language).
+
+How Terraform Works in Real-Time:
+---------------------------------
+Write Configuration: Define infrastructure using .tf files.
+Initialize (terraform init): Prepares Terraform by downloading necessary provider plugins.
+Plan (terraform plan): Shows what changes will be made before applying them.
+Apply (terraform apply): Creates, updates, or destroys resources.
+State Management (terraform state): Keeps track of deployed infrastructure.
+Destroy (terraform destroy): Removes all managed resources.
+
+Related Terminologies:
+----------------------
+Providers: Connect Terraform to cloud services (AWS, Azure, GCP).
+Modules: Reusable Terraform configurations.
+State File (terraform.tfstate): Stores infrastructure details.
+Backend: Defines where Terraform state is stored (local, S3, etc.).
+Variables (var.tf): Dynamic values for configurations.
+Outputs (output.tf): Returns useful data after deployment.
+Provisioners: Execute scripts on a created resource.
+Workspaces: Isolate different environments (dev, staging, prod).
+
+Benefits of Using Terraform in a Company:
+-----------------------------------------
+Infrastructure as Code (IaC): Automates infrastructure deployment.
+Multi-Cloud Support: Works across AWS, Azure, GCP, and on-premises.
+Version Control: Tracks infrastructure changes in Git.
+Scalability: Easily provisions and modifies infrastructure.
+Collaboration: Teams can work together using remote state storage.
+Cost Optimization: Identifies unused resources to save costs.
+Security & Compliance: Ensures consistent policies and governance.
+
+Terraform - Infrastructure as Code (IaC)
+	Terraform is an Infrastructure as Code (IaC) tool that helps developers and system administrators automate the provisioning and management of cloud resources. It supports multiple cloud providers like AWS, Azure, Google Cloud, and on-premises infrastructure.
+
+1. How Terraform Works:
+-----------------------
+Terraform follows a declarative approach, meaning you define what infrastructure should look like instead of specifying how to create it.
+
+Terraform Workflow:
+-------------------
+1. Write Configuration (.tf files)
+
+ > Define the infrastructure using the HashiCorp Configuration Language (HCL).
+
+Example:
+provider "aws" {
+  region = "us-east-1"
+}
+
+resource "aws_instance" "web" {
+  ami           = "ami-0c55b159cbfafe1f0"
+  instance_type = "t2.micro"
+}
+
+2. Initialize Terraform (terraform init)
+
+ > Downloads the required provider plugins (like AWS, Azure, etc.).
+ > Sets up the backend (local or remote) to store the state.
+
+3. Plan Changes (terraform plan)
+
+ > Shows what Terraform will do before applying changes.
+Example Output:
+
++ aws_instance.web
+    ami: "ami-0c55b159cbfafe1f0"
+    instance_type: "t2.micro"
+
+4. Apply Changes (terraform apply)
+
+ > Deploys the infrastructure based on the plan.
+ > You will be prompted to confirm changes:
+
+Do you want to perform these actions? (yes/no)
+
+5. State Management (terraform state)
+
+ > Maintains a record of resources created and tracks changes.
+ > Stored in a terraform.tfstate file.
+
+6. Destroy Resources (terraform destroy)
+
+ > Deletes all resources created by Terraform.
+ > Useful for cleaning up environments.
+
+2. Key Terraform Components
+---------------------------
+Providers
+ > Providers act as a bridge between Terraform and cloud services.
+ > Example providers: AWS, Azure, GCP, Kubernetes, GitHub.
+
+Example:
+
+provider "aws" {
+  region = "us-east-1"
+}
+
+Resources
+ > A resource defines a cloud service like EC2, S3, RDS, etc..
+Example:
+
+resource "aws_s3_bucket" "my_bucket" {
+  bucket = "my-unique-bucket-name"
+  acl    = "private"
+}
+
+Variables
+ > Variables allow parameterized configurations.
+Example:
+
+variable "instance_type" {
+  default = "t2.micro"
+}
+
+resource "aws_instance" "example" {
+  instance_type = var.instance_type
+}
+
+Outputs
+ > Outputs provide information after Terraform runs.
+Example:
+
+output "public_ip" {
+  value = aws_instance.example.public_ip
+}
+
+Modules
+ > Reusable Terraform configurations that can be shared across projects.
+Example structure:
+
+├── main.tf
+├── variables.tf
+├── outputs.tf
+└── modules/
+    ├── vpc/
+    ├── ec2/
+    └── rds/
+
+Example module usage:
+
+module "vpc" {
+  source = "./modules/vpc"
+}
+
+State Management
+ > Terraform stores infrastructure details in a state file (terraform.tfstate).
+ > It helps track resource changes and prevents conflicts.
+
+Types of Backends for State Storage
+ > Local Backend (default, stores terraform.tfstate locally).
+ > Remote Backend (S3, Azure Blob, etc.) for team collaboration.
+Example remote backend configuration for AWS S3:
+
+terraform {
+  backend "s3" {
+    bucket = "my-terraform-state"
+    key    = "terraform.tfstate"
+    region = "us-east-1"
+  }
+}
+
+3. Benefits of Using Terraform in a Company
+-------------------------------------------
+
+1. Infrastructure as Code (IaC)
+ > Automates infrastructure management using code.
+ > Reduces manual configuration and human errors.
+
+2. Multi-Cloud Support
+ > Supports AWS, Azure, GCP, and on-premises environments.
+
+3. Reproducibility
+ > The same Terraform configuration can be used across different environments (Dev, Staging, Production).
+
+4. Scalability
+ > Easily scales infrastructure up or down as per business needs.
+
+5. Version Control
+ > Terraform configurations can be stored in Git, enabling rollbacks and tracking changes.
+
+6. Collaboration & Remote State
+ > Teams can share infrastructure state using remote backends (S3, Azure Blob, GCS, Terraform Cloud).
+
+7. Cost Optimization
+ > Terraform helps identify unused resources, preventing unnecessary billing.
+
+8. Security & Compliance
+ > Ensures standardized and secure configurations.
+
+4. Real-Time Use Cases of Terraform
+-----------------------------------
+1. AWS Infrastructure Provisioning
+ > Automate EC2, RDS, and S3 creation.
+
+2. Kubernetes Cluster Management
+ > Deploy Kubernetes clusters with Terraform.
+
+3. Multi-Cloud Deployment
+ > Deploy applications on AWS and Azure simultaneously.
+
+4. CI/CD Pipeline with Terraform
+ > Use Terraform in Jenkins or GitHub Actions to automate deployments.
+
+5. Disaster Recovery
+ > Quickly restore infrastructure from Terraform configurations.
+
+5. Terraform vs Other IaC Tools
+-------------------------------
+Feature			Terraform		CloudFormation		Ansible
+Multi-Cloud Support	✅ Yes			❌ AWS Only		✅ Yes
+Declarative Syntax	✅ Yes			✅ Yes			❌ No (Procedural)
+State Management	✅ Yes			✅ Yes			❌ No
+Modules			✅ Yes			✅ Yes			✅ Yes
+Agentless		✅ Yes			✅ Yes			✅ Yes
+
+6. Hands-on Example: Deploying an EC2 Instance with Terraform
+-------------------------------------------------------------
+Step 1: Install Terraform
+ > Download and install Terraform from terraform.io.
+
+Step 2: Create a Directory
+
+mkdir terraform-aws
+cd terraform-aws
+
+Step 3: Create a main.tf file
+
+provider "aws" {
+  region = "us-east-1"
+}
+
+resource "aws_instance" "web" {
+  ami           = "ami-0c55b159cbfafe1f0"
+  instance_type = "t2.micro"
+}
+
+Step 4: Initialize Terraform
+
+terraform init
+
+Step 5: Plan and Apply
+
+terraform plan
+terraform apply
+
+Step 6: Destroy Resources
+
+terraform destroy
+
+What is use of IaC?
+	By running the same code, we can create the infrastructure repeatedly just by executing it. By doing like this, we can save our time and effort and this helps to reduce the error that may happen while creation.
+
+Inside AWS also we have a tool called CloudFormation, that helps us to create the Infrastucture by running the code; but why do I need to use the Terraform code?
+	If we are going to create using CloudFormation, this supports only when we use our cloud provider as AWS; but what if my cloud provider is Azure or GCP or something else, then using Terraform is the best option as they provide services for all providers.
+
+Under Configuration Automation, we already gone through Ansible, Salt; now what is the use of Terraform?
+	Terraform => Creates Infrastructure (Server, Network, Storage etc.,) --- acts like Civil Engg, who build the Infrastructure
+	Ansible/Salt => Run the task inside the Infrastructure (Installing Packages, Running services etc.,) --- acts like Interior Designer, who works inside the Infrastructure.
+So, There is need for both the tools is a must one.
+
+VSC --> Important Application used for Terraform.
+
+Terraform was build by Hashicorp; and this code was wriited by HCL (Hashicorp Configuration Language)
+
+Terraform official website: https://www.terraform.io/
+Go to Registry - Browse Providers (This will show that we got supported by most of the providers around the world) - select AWS (as we are selecting them as our provider) - Select Documentation (next to overview).
+
+Steps:
+1. Create an Instance (ubuntu) - Open all ports - Save and create it
+
+2. Next, we need to download Terraform from official page - go to download and search (terraform download) [https://www.terraform.io/downloads.html] - as we are having ubuntu machine; switch as root user (sudo su -), right click from Linux 64-bit, copy paste the url inside the terminal (wget https://releases.hashicorp.com/terraform/1.4.4/terraform_1.4.4_linux_amd64.zip) - click (ls -ltr) to confirm the file is downloaded or not - now, unzip the file (unzip terraform_1.4.4_linux_amd64.zip) [before that make sure unzip package is downloaded, if not install the package (apt install unzip)] - once done, give (ls -ltr) to confirm the package got unzipped.
+
+3. Make sure we are moving the file into the proper path, to know more about that go to the Terraform download docs page; mostly for Linux that PATH will be (/usr/local/bin/) - now move the file to the specific path (mv terraform /usr/local/bin) - once we moved this into the specified path, it works like an environment variables (Google it to know more about env variables)
+
+4. Now, give (terraform --version) to confirm whether it is working.
+
+5. Important step is to create a role for the ec2 server, because by using this service we are going to create to other services hence communication should happen between service to services - go to IAM - create role - ec2 - attach (ec2 full access and vpc full access) - and attach the role to the server - select the server - actions - security - modify IAM role - attach the role and save.
+
+6. Make sure to download visual studio code, as we are going to use the VSC for all the code editing purpose - go to extensions and select terraform - install the exension that is on the top with highest reviews [what is purpose of extensions? This extensions helps us to provide with a lot of recommended suggestions for the code automatically, through this we will be able to pick one and we can skip typing the code manually]
+
+7. Create a new file - save it (main.tf) [tf = terraform extension] - [*** as we know that terraform support most of the providers, hence we need to start our first step by representing the provider which we are going to use]
+
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 3.0"
+    }
+  }
+}
+
+# Configure the AWS Provider
+provider "aws" {
+  region = "us-east-1"
+}
+
+[*** make sure to change your region accordingly]
+
+8. Now, we need to select the service for which we are going to right the code - on the doc left side you will be able to see all the resources, select vpc - once you clicked on the vpc, this will show all the activities that can be performed under vpc - the 1st activity is to create a vpc (aws_vpc) 
+
+resource "aws_vpc" "main" {
+  cidr_block       = "10.0.0.0/16"
+  instance_tenancy = "default"
+
+  tags = {
+    Name = "main"
+  }
+}
+
+[*** where resouces stands for the services which we are calling out; "main" = can be considered a string/ reference/ id/ variable or anything, on the entire code we are going to refer by this name only {change it if required "myvpc"}; Under tags there is a name = "main", this is the name that is going to come out as a output on our dashboard, if required that can also be changed "ohio-vpc"]
+
+9. Now, we need to create 2 different subnets (public & private) - go to resources select for (aws_subnet)
+
+resource "aws_subnet" "main" {
+  vpc_id     = aws_vpc.main.id
+  cidr_block = "10.0.1.0/24"
+
+  tags = {
+    Name = "Main"
+  }
+}
+
+resource "aws_subnet" "main" {
+  vpc_id     = aws_vpc.main.id
+  cidr_block = "10.0.1.0/24"
+
+  tags = {
+    Name = "Main"
+  }
+}
+
+[*** we need to edit the "main" = accordingly for public and private "pubsub"; "pvtsub"; next we need to edit the vpc_id, as we have mentioned the vpc reference name already, edit it according to the previous name {aws_vpc.main.id -- changed into -- aws_vpc.myvpc.id}, then change the ip address for pub and pvt accordingly; === as we are differentiating both the subnets on different AZ's, copy that from the docs and edit it according to the requirement ====, finaly the name can be changed]
+
+10. We need to create the Internet Gateway - go to resources and copy the code (aws_internet_gateway)
+
+resource "aws_internet_gateway" "gw" {
+  vpc_id = aws_vpc.main.id
+
+  tags = {
+    Name = "main"
+  }
+}
+
+[*** edit the reference name if required {"gw" into "myigw"}; and edit the vpc id to which we are going to bring the IGW {aws_vpc.main.id -- changed into -- aws_vpc.myvpc.id}; and edit the name if we need a different name in our dashboard {"main" into "ohio-igw"}
+
+11. Important step, is to bring the route table - go to resources and get the code from (aws_route_table)
+
+resource "aws_route_table" "example" {
+  vpc_id = aws_vpc.example.id
+
+  route = [
+    {
+      cidr_block = "10.0.1.0/24"
+      gateway_id = aws_internet_gateway.example.id
+    },
+    {
+      ipv6_cidr_block        = "::/0"
+      egress_only_gateway_id = aws_egress_only_internet_gateway.example.id
+    }
+  ]
+
+  tags = {
+    Name = "example"
+  }
+}
+
+[*** We can remove the ipv6_cidr_block, as we dont use one; give a name for the reference id for route table {"example" into "pubrt"}; change the vpc id accordingly {aws_vpc.main.id -- changed into -- aws_vpc.myvpc.id}; change the cidr_block === make sure this is the ip for igw === hence change it to "0.0.0.0/0"; and provide the name of the igw name inside the gateway_id {aws_internet_gateway.example.id -- change to -- aws_internet_gateway.myigw.id}; lastly change the name to which you need to call your public route table {"example" into "ohio-pub-rt"}]
+
+12. Another important step is to associate the subnet to the route table - go to resources and copy the code from (aws_route_table_association)
+
+resource "aws_route_table_association" "a" {
+  subnet_id      = aws_subnet.foo.id
+  route_table_id = aws_route_table.bar.id
+}
+
+[*** We need to change the reference name if needed {"a" into "pubsubassociate"}; change the subnet id properly with the correct name {aws_subnet.foo.id == into == aws_subnet.pubsub.id}; change the route table id name properly {aws_route_table.bar.id == into == aws_route_table.pubrt.id}
+
+13. Now, we need to create an Private route table, copy paste the same Public route table code from above
+
+resource "aws_route_table" "pubrt" {
+  vpc_id = aws_vpc.myvpc.id
+
+  route = [
+    {
+      cidr_block = "0.0.0.0/0"
+      gateway_id = aws_internet_gateway.myigw.id
+    },
+  ]
+
+  tags = {
+    Name = "ohio-pub-rt"
+  }
+}
+
+resource "aws_route_table_association" "pubsubassociate" {
+  subnet_id      = aws_subnet.pubsub.id
+  route_table_id = aws_route_table.pubrt.id
+}
+
+[*** but unfortunately, we cannot proceed here, as we need to use nat_gateway for this private instead of igw, hence search for the code for nat_gaetway under resources {aws_nat_gateway}]
+
+resource "aws_nat_gateway" "example" {
+  allocation_id = aws_eip.example.id
+  subnet_id     = aws_subnet.example.id
+
+  tags = {
+    Name = "gw NAT"
+  }
+
+  # To ensure proper ordering, it is recommended to add an explicit dependency
+  # on the Internet Gateway for the VPC.
+  depends_on = [aws_internet_gateway.example]
+}
+
+[*** again we got an issue here, as we need to have an elastic ip for this nat_gateway to work, hence search for the elastic-ip from resources under aws_ec2, as eip will comes under ec2 concept]
+
+resource "aws_eip" "lb" {
+  instance = aws_instance.web.id
+  vpc      = true
+}
+
+[*** Now, proceed with the changes for everything, change the reference name for the eip {"lb" = "myeip"}; as there is no instance required remove that line]
+[*** Give the reference name for the nat_gateway {"example" = "mynat"}; give the eip name under the allocation_id{aws_eip.example.id == change == aws_eip.myeip.id}; as we are connecting the nat_gateway to the public subnet, privide the public subnet id properly {aws_subnet.example.id == change == aws_subnet.pubsub.id}; give a name that need to be shown on the dashboard {"ohio-nat"}
+[*** Now, change the private route table; give the reference name as {"pvtrt"}; change the vpc id properly; as nat gateway also allows open IP we need to provide the cidr block as {0.0.0.0/0}; below to that we need to change the gateway to nat {aws_internet_gateway.myigw.id == change to == aws_nat_gateway.mynat.id}; change the name accordingly it should represent on the dashboard {"ohio-pvt-rt"}
+[*** Finally, we need to associate the private route table to the private subnet; change the reference name accordingly {"pvtsubassocicate"}; attach the private subnet id {"aws_subnet.pvtsub.id"}; change the route table to private {"aws_route_table.pvtrt.id"}
+
+14. We need to bring the security group, go to vpc resources and search for (aws_security_group)
+
+resource "aws_security_group" "allow_tls" {
+  name        = "allow_tls"
+  description = "Allow TLS inbound traffic"
+  vpc_id      = aws_vpc.main.id
+
+  ingress = [
+    {
+      description      = "TLS from VPC"
+      from_port        = 443
+      to_port          = 443
+      protocol         = "tcp"
+      cidr_blocks      = [aws_vpc.main.cidr_block]
+      ipv6_cidr_blocks = [aws_vpc.main.ipv6_cidr_block]
+    }
+  ]
+
+  egress = [
+    {
+      from_port        = 0
+      to_port          = 0
+      protocol         = "-1"
+      cidr_blocks      = ["0.0.0.0/0"]
+      ipv6_cidr_blocks = ["::/0"]
+    }
+  ]
+
+  tags = {
+    Name = "allow_tls"
+  }
+}
+
+[*** Change the reference name from {"allow_tls" == "allow_all"}; give the same under name also {"allow_all"}; give the vpc id accordingly {aws_vpc.main.id -- changed into -- aws_vpc.myvpc.id}; below we got 2 different options called ingree and egress {means inbound rule and outbound rule *** we will never touch the outbound rule, we can only change the inbound rule}; below ingress we got something call ipv6 remove that as we are not using it; change the from_port and to_port according to the requirement, here we are going to use only linux machine hence we are opening only 22 port, [if incase you want to open all the ports then give from_port as 0 and to_port as 65535][what if i need only 2 or 3 protocols to be opened? then try to copy paste the ingress twice or thrice according to the requirement and change the port number for all the necessary protocols]; under cidr_block, open all the ip for now {aws_vpc.main.cidr_block == change to == 0.0.0.0/0}; change the name, how you wish to show on your dashboard {"ohio-sg"}
+
+Task:
+1. Create 2nd Security Group for Private
+
+15. Finally, we are tyring to launch an instance, go to resource and copy the code from (aws_instance)
+
+resource "aws_instance" "pubec2" {
+  ami                         	=  "ami-0f19d220602031aed"
+  instance_type               	=  "t2.micro"  
+  subnet_id                  	=  aws_subnet.pubsub.id
+  key_name                    	=  "linux-ohio"
+  vpc_security_group_ids      	=  [aws_security_group.allow_all.id]
+  associate_public_ip_address 	=  true
+}
+
+resource "aws_instance" "pvtec2" {
+  ami                         	=  "ami-0f19d220602031aed"
+  instance_type               	=  "t2.micro"  
+  subnet_id                   	=  aws_subnet.pvtsub.id
+  key_name                    	=  "linux-ohio"
+  vpc_security_group_ids      	=  [aws_security_group.allow_all.id]
+  
+}
+
+16. Now, go to putty and create a file (vi main.tf) - copy paste the entire code.
+17. Give command (terraform init) [we are trying to initialize the terraform file]
+18. Provide command (terraform plan) - this will show the changes that is going to happen.
+19. Once everything looks fine, give (terraform apply) - give "yes"
+
+Task & Interview Question:
+2. What is 
+Terraform taint
+Terraform import
+Terraform refresh?
+
+20. Now open the public machine via putty - ping google.com [for confirming the internet connection].
+21. Now, we are going to connect to our private machine from pucblic machine [the steps are already given under connect] - select the server - click on connect
+22. Save our key pair inside the machine (vi linux-ohio.pem) - now copy paste the entire .pem file, then save and quit
+23. Give permission to the keypair [as instructed inside the connect] - (chmod 400 linux-ohio.pem)
+24. Provide the ssh command for connecting to the private machine (ssh -i "linux-ohio.pem" ec2-user@3.144.74.225) - yes - connected - ping google.com [for internet connection confirmation]
+25. Finally, (terraform destroy)  - "yes" == is going to delete all the content that was created using terraform.
+
+[***FYI: Terraform is Immutable ===> means If I am changing someting on my server (ex: adding some additional security group), terraform will not add this on the existing server, instead it is going to delete the previous one and it will create a new one with the recent changes; terraform is doing this changes by checking the state files [*** state files are the very important files, which saves all the informations that happened while execution]]
+
+For installing in Cloudshell:
+Follow this commands:
+1. git clone https://github.com/tfutils/tfenv.git ~/.tfenv
+
+2. mkdir ~/bin
+
+3. ln -s ~/.tfenv/bin/* ~/bin/
+
+4. tfenv install 1.9.5 (check the official documentation for the latest version of the terraform before installing)
+
+5. tfenv use 1.9.5
+
+6. terraform --version
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

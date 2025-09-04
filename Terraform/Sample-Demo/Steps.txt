@@ -1,0 +1,14 @@
+Sample-Demo:
+============
+1. Create an directory (mkdir akshiv)
+2. Change to another directory (cd akshiv)
+3. Create an user and configure with admin permission
+4. Make sure to install the terraform by following the other doc & confirm the version
+
+5. Copy paste the files (main.tf, outputs.tf, providers.tf, var.tf)
+
+6. Save & execute the files 
+
+7. Proceed with (terraform init) (terraform plan) & (terraform apply)
+
+8. Confirm the resource got created & make sure to destroy all the resources once confirmed the same (terraform destroy)

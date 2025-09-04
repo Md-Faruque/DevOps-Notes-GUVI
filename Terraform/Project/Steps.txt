@@ -1,0 +1,16 @@
+Steps:
+======
+1. Open the Cloudshell - install the terraform & confirm the version
+
+2. Make sure to create an user and configure the user with admin access
+
+3. now create a folder (main.tf & outputs.tf)
+
+4. Copy paste the files from the other doc
+
+5. Save and execute the files
+
+6. Proceed with (terraform init) (terraform plan) & (terraform apply)
+
+7. Confirm the resource got created & make sure to destroy all the resources once confirmed the same (terraform destroy)
+

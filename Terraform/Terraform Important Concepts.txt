@@ -1,0 +1,214 @@
+Terraform important concepts:
+=============================
+1. Variables & Output Values in Terraform:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Concept:
+ > Variables in Terraform are like placeholders. Instead of hardcoding values (like AWS region, instance size, database name), you declare variables, and supply values during runtime.
+ > Types of variables:
+String, Number, Boolean, List, Map, Object.
+ > Output values: These are the results you want Terraform to show after deployment (e.g., instance public IP, database endpoint).
+
+Real-time usage:
+----------------
+ . In companies, variables make Terraform code reusable across multiple environments (dev, test, prod).
+ . Output values are used in pipelines to pass critical information (like load balancer DNS) to other automation scripts.
+
+Ex:
+variable "aws_region" {
+  description = "AWS region to deploy resources"
+  default     = "us-east-1"
+}
+
+variable "instance_type" {
+  description = "Type of EC2 instance"
+  default     = "t2.micro"
+}
+
+output "instance_ip" {
+  description = "Public IP of the instance"
+  value       = aws_instance.myserver.public_ip
+}
+
+Demo (simple flow):
+-------------------
+1. Create a file variables.tf with above variable definitions.
+2. In main.tf, reference like:
+
+provider "aws" {
+  region = var.aws_region
+}
+
+resource "aws_instance" "myserver" {
+  ami           = "ami-0c02fb55956c7d316"
+  instance_type = var.instance_type
+}
+
+3. Run:
+
+terraform init
+terraform apply -auto-approve
+
+4. After apply, Terraform will show the instance_ip as output.
+
+2. Environment Variables in Terraform:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Concept:
+--------
+ > Environment variables are external variables passed into Terraform automatically.
+ > Example: Terraform picks up credentials via AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY.
+ > Naming convention: Any environment variable starting with TF_VAR_ maps to a Terraform variable.
+
+Real-time usage:
+ . Teams avoid storing secrets in Terraform code. Instead, they use environment variables for credentials and sensitive values (e.g., DB password).
+ . In CI/CD pipelines (Jenkins, GitLab, GitHub Actions), environment variables are used to inject values securely.
+
+Example:
+
+export TF_VAR_instance_type="t3.micro"
+export AWS_ACCESS_KEY_ID="AKIAxxxx"
+export AWS_SECRET_ACCESS_KEY="xxxx"
+
+Then in Terraform, you can reference var.instance_type without explicitly defining in .tfvars.
+
+3. Terraform Commands:
+~~~~~~~~~~~~~~~~~~~~~~
+Common ones:
+------------
+ > terraform init → Initialize directory and download providers.
+ > terraform validate → Check if code syntax is valid.
+ > terraform plan → Shows what Terraform will do.
+ > terraform apply → Creates/updates infrastructure.
+ > terraform destroy → Destroys resources.
+ > terraform fmt → Format code.
+ > terraform show → Show deployed infrastructure state.
+ > terraform output → Display output values.
+
+Real-time usage:
+----------------
+ . Teams often run terraform plan in CI/CD to review changes before approving apply.
+ . terraform destroy is restricted in prod but used heavily in dev/test automation.
+
+4. Terraform State (local & remote):
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Concept:
+--------
+ > State file = Terraform’s memory of what it has created. Stored in terraform.tfstate.
+ > Local state: Stored in your system (default).
+ > Remote state: Stored in cloud (S3, GCS, Azure Blob, Terraform Cloud).
+ > Why remote? To allow collaboration. Multiple engineers can’t safely share local state.
+
+Real-time usage:
+----------------
+ . Companies store remote state in S3 + DynamoDB for state locking (to prevent two people applying changes at once).
+ . CI/CD pipelines always use remote state for consistency.
+
+Example (remote state on AWS S3):
+---------------------------------
+terraform {
+  backend "s3" {
+    bucket         = "my-terraform-state-bucket"
+    key            = "dev/terraform.tfstate"
+    region         = "us-east-1"
+    dynamodb_table = "terraform-locks"
+  }
+}
+
+5. Provisioners (local-exec & remote-exec):
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Concept:
+--------
+ > Provisioners allow Terraform to run scripts or commands after resource creation.
+ > local-exec → runs on your machine where Terraform is running.
+ > remote-exec → runs inside the created resource (like SSH into EC2).
+
+Real-time usage:
+----------------
+ . Companies use provisioners rarely (not recommended for everything).
+	Example: run a script to bootstrap EC2.
+	Example: trigger an Ansible playbook.
+ . Most infra config is now handled by tools like Ansible, but provisioners are used for small custom actions.
+
+Example:
+--------
+
+resource "aws_instance" "myserver" {
+  ami           = "ami-0c02fb55956c7d316"
+  instance_type = "t2.micro"
+
+  provisioner "local-exec" {
+    command = "echo Instance created with IP: ${self.public_ip} >> output.txt"
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "sudo apt update -y",
+      "sudo apt install -y nginx",
+      "echo 'Hello from Terraform!' | sudo tee /var/www/html/index.html"
+    ]
+  }
+}
+
+Demo Flow (Beginner-Friendly):
+------------------------------
+1. Define variables in variables.tf.
+2. Export environment variables:
+
+export TF_VAR_instance_type="t2.small"
+
+3. Initialize and plan:
+
+terraform init
+terraform plan
+
+4. Apply and check:
+
+terraform apply -auto-approve
+terraform output
+
+5. Verify terraform.tfstate created (local state).
+6. Switch to remote backend (S3).
+7. Add provisioner to EC2 → deploy → SSH into instance and check nginx installed.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
