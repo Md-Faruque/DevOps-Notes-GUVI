@@ -1,0 +1,148 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: VPC and EC2 Instance deployment
+
+Parameters:
+  VPCName:
+    Type: String
+    Description: VPC Name
+    Default: DefaultName
+  ImageId:
+    Type: String
+    Default: ami-0329ba0ced0243e2b
+    Description: Instance ImageId
+  SSHKeyName:
+    Type: String
+    Default: ubuntu-ohio
+    Description: SSH KeyName to register EC2 Instances
+  InstanceType:
+    Description: EC2 instance type
+    Type: String
+    Default: t2.micro
+    AllowedValues: [t2.micro, t2.small, t2.medium]
+    ConstraintDescription: Please choose a valid instance type.
+
+Mappings:
+  SubnetConfig:
+    VPC:
+      CIDR: "10.0.0.0/16"
+    Public1:
+      CIDR: "10.0.0.0/24"
+
+Resources:
+  # VPC in which EC2 instances will be networked.
+  # It has two public subnet.
+  # We distribute the subnets across the first two available subnets
+  # for the region, for high availability.
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      InstanceTenancy: default
+      CidrBlock: !FindInMap ["SubnetConfig", "VPC", "CIDR"] # "10.0.0.0/16"
+      Tags:
+        - Key: Name
+          Value: !Ref VPCName # DefaultName
+
+  # One Public Subnet
+  PublicSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select 
+        - 0
+        - Fn::GetAZs: !Ref "AWS::Region"
+      CidrBlock: !FindInMap ["SubnetConfig", "Public1", "CIDR"] # "10.0.0.0/24"
+      MapPublicIpOnLaunch: true
+
+  # Setup networking resources for the public subnets. Containers
+  # in the public subnets have public IP addresses and the routing table
+  # sends network traffic via the internet gateway.
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+
+  VPCGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      InternetGatewayId: !Ref InternetGateway
+      VpcId: !Ref VPC
+
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+
+  PublicRoute:
+    Type: AWS::EC2::Route
+    DependsOn: VPCGatewayAttachment
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: "0.0.0.0/0"
+      GatewayId: !Ref InternetGateway
+
+  PublicSubnet1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnet1
+      RouteTableId: !Ref PublicRouteTable
+
+  InstanceSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      VpcId: !Ref VPC
+      GroupDescription: Enable SSH
+      SecurityGroupIngress:
+        - CidrIp: 0.0.0.0/0
+          IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+  
+
+  Ec2Instance: 
+    Type: AWS::EC2::Instance
+    Properties: 
+      ImageId: !Ref ImageId # ami-0911e88fb4687e06b
+      KeyName: !Ref SSHKeyName # linux-ohio
+      InstanceType: !Ref InstanceType #t2.micro
+      SecurityGroupIds:
+        - !Ref InstanceSecurityGroup
+      SubnetId: !Ref PublicSubnet1
+      UserData:
+        Fn::Base64: 
+          Fn::Sub:
+            - |
+              #!/bin/bash -xe
+              # Update
+              sudo yum -y update          
+              sudo yum install -y nano
+              # Mount EFS
+              sudo yum install -y amazon-efs-utils
+              echo ${hello}
+            - {
+                "hello": "world"
+              }
+
+Outputs:
+  VPC:
+    Description: VPC ID
+    Value: !Ref VPC
+    Export:
+      Name: !Sub "${AWS::StackName}-VPCID"
+
+  PublicSubnet1:
+    Description: "Public Subnet 1"
+    Value: !Ref PublicSubnet1
+    Export:
+      Name: !Sub "${AWS::StackName}-PublicSubnet1"
+
+  VPCCidr:
+    Description: "VPC CIDR"
+    Value: !FindInMap ["SubnetConfig", "VPC", "CIDR"]
+    Export:
+      Name: !Sub "${AWS::StackName}-VPCCidr"
+
+  Ec2PublicName:
+    Value: !GetAtt Ec2Instance.PublicDnsName
+    Description: "Public name (connect via SSH)"
+    Export:
+      Name: !Sub "${AWS::StackName}-Ec2PublicName"
