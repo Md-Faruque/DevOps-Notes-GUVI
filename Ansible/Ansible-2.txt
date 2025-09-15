@@ -1,0 +1,136 @@
+Class2: Ansible (Playbooks)
+
+If I want to excute Multiple task at the same time, then I can do it by using Playbooks. This works under (.yaml) scripts.
+
+YAML - Ain't Markup Language (It is commonly used for configuration files and in applications where data is being stored or transmitted.)
+
+Go to VSC (Visual studio code - Text Editor) - Extensions - Search for Ansible plugin & Install it - Close and open the VSC once.
+
+We are going to use modules here, search in Google for Ansible modules (https://docs.ansible.com/ansible/2.8/modules/list_of_all_modules.html)
+
+What is a Module?
+	A module is a reusable, standalone script that Ansible runs on your behalf, either locally or remotely.
+
+Scenario 1:
+1. Install Apache  ---- yum install httpd
+2. Start Apache  ----- service httpd start
+3. In Master machine, create index.html file (src path = ./index.html) - copy this to destination path (/var/www/html/index.html)
+
+Steps:
+1. Go to VSC - Open new file - Save it with (.yaml) extension - Create a sample script
+2. Move to Ansible Module Document - search for yum module - examples - get the Apache script from there - Change the state to present.
+3. Create another task (make sure the Indentation should be proper) - change the module to service (service - manage service ) - attach the script
+4. As per scenario - go to master machine and create a file (vi index.html) attach some content into it
+5. Now this is a file, hence go to files modules (under module Index) - get the copy module and edit it accordingly (src: ./index.html; dest: /var/www/html/index.html; [remove owner and group for the moment] edit the mode [permission]: '0777')
+6. Now copy paste the entire .yaml into master machine (vi first.yaml)
+7. Before executing the playbook we need to know if there are any syntax error, by using this command (ansible-playbook -i slaves.txt first.yaml --syntax-check)
+8. Now, we are going to execute the playbook (ansible-playbook -i slaves.txt first.yaml)
+9. Now check the output of Slaves machine in browser
+
+[If I need to execute the task under particular group, then change the hosts from all to particular group name; if it needs to be executed only to particular IP means then we need to mention the particulat IP in the hosts]
+
+Scenario 2:
+1. If client want me to download multiple packages at the same time
+ex:
+mysql  ---- yum install mysql
+php  ---- yum install php
+unzip ----- yum install unzip
+
+[If we are going to use 3 yum modules for 3 packages, then it is going to complicate the task; In real-time if client is going to ask us for installing 20 different packages then we cannot write the script for everything, Instead by using loop we will be able to bring all the items under same task and this helps us to install all the packages under one shot.]
+
+Steps:
+1. Search in Google for Ansible loop, pick the example module from standard loop and edit it accordingly in VSC.
+2. Create second yaml file and save it (vi second.yaml)
+3. Execute it by running this command, (ansible-playbook -i slaves.txt second.yaml)
+
+Scenario 3:
+1. By using Ansible we are going to create an EC2 machine
+
+Steps:
+1. Go to Google, search as (ansible aws ec2 creation) - examples - edit it accordingly in VSC
+[provide a keyname, edit the image name, remove wait and group, change the count to 1, edit the vpc_subnet_id]
+2. Create a 3rd yaml file and save it (vi third.yaml)
+3. Execute it by running this command, (ansible-playbook -i slaves.txt third.yaml)
+
+[*** we will get an error here, for ec2 creation boto module is necessary as a pre-requisite, hence we are getting this error.]
+
+4. We need to install boto module using this command (sudo pip install boto)
+
+[*** Again we will get an error, in order to mention the region]
+
+
+5. Now, edit the third.yaml file, add region below the instance_type as (region: "us-east-2")
+
+[*** Here we got out 3rd error, specifying like "No handler was ready to authenticate"; which means for creating service from one to another we need to attach a role]
+
+6. Create an IAM role with full AdministratorAccess for EC2 - Attach it to the Master machine - select the instance - Actions - Modify IAM role - Now attach the role
+7. Try to execute the command, and we will be able to found another instance as an output in the Dashboard.
+
+Real-Time Used Case:
+
+1st Used Case. Now I need to Install Jenkins package via Ansible Playbook? (because of Multiple server advantage)
+Jenkins default port number: 8080
+1. Go to Google and search for Jenkins RedHat installation (select only jenkins wiki page: https://wiki.jenkins.io/display/JENKINS//Installing+Jenkins+on+Red+Hat+distributions)
+2. According to the steps specified in the Document - We need to create a playbook
+3. We are going to install the Jenkins package only under a single group - (cat slaves.txt) - get the group name
+4. Go to ansible modules - search for yum module - select yum repository - example - copy paste it in the VSC
+5. Now edit the host with the group name - edit the script name: jenkins; description: (can be customized); baseurl should be copied from the jenkins wiki page (copy the url from wiki page and paste it in the browser, so that we will be able to get the baseurl; now copy paste the url in VSC) [http://pkg.jenkins.io/redhat]
+6. Next step is to add the key for the jenkins, search inside yum module as (key) - [we cannot use gpgcakey, because for this we need certificate authority] hence we are going to use gpgkey link - add gpgkey and attach the url (http://pkg.jenkins.io/redhat/jenkins.io.key) from the wiki page.
+7. We have to install java and jenkins, edit the script accordingly by using loop as there are multiple packages
+8. Use the start script below to that, and create a new .yaml file then try to execute the .yaml file (ansible-playbook -i slaves.txt jenkins.yaml)
+
+[*** Interview Question:
+If I got the package already, again I am trying to rerun the same command; will ansible install the package again?
+	No, because Ansible is working under Idompotent, This is one that can be applied multiple times without changing the result beyond the initial application, such as multiplication by zero. Ansible modules are idempotent]
+
+9. Open the Greens machine IP in browser with the port number (ex: 18.222.255.244:8080), so that we will get the Jenkins homepage as an output
+
+2nd Used Case: I was asked by my head to change the default port number of jenkins from 8080 to 9000
+1. We are checking the port number of jenkins, using this adhoc command (ansible greens -i slaves.txt  -a "grep -i JENKINS_PORT /etc/sysconfig/jenkins" -b) [grep = search; -i = avoid case sensitive]
+2. Now, I am going to edit the .yaml file in VSC, by adding variables
+3. Go to ansible files modules - lineinfile - examples - get the 1st syntax - edit it in VSC
+4. Now copy paste the once again inside (jenkins.yaml)
+5. Execute the command (ansible-playbook -i slaves.txt jenkins.yaml)
+6. Now, re-run the adhoc command once again in order to confirm the port number for Jenkins changed.
+7. Confirm the same on the browser by changing the port number of the jenkins
+
+[*** But, we will get an error here, because we haven't restarted the service, if we are making any changes on the configuration files, we need to restart the service in order to get the changes implemented successfully]
+
+3rd Used Case: There was a regular changes going on under configuration file, and we cannot do restart all the time manually, if we need to do everything manually then there is no use of Ansible here, Hence I need to automate this restart as well, How to do?
+[*** Interview Question:
+What is the purpose of handlers in Ansible?
+	If there is any changes happened on the configuration file, by using handlers we can automate the service (no need for manual interaction)
+1. Go to VSC, and edit the script by adding handlers in order to automate the service for restarting.
+2. Edit the jenkins file (vi jenkins.yaml) with the new updated script
+3. Execute the command (ansible-playbook -i slaves.txt jenkins.yaml), it won't get executed because we changed the port number
+4. Now try to update it with another port number, using this command (ansible-playbook -i slaves.txt jenkins.yaml -e "ports=8070") [-e = extended variable]
+5. Now try to check the IP via browser with the port number (ex: http://18.222.255.244:8070) for the output.
+
+Tasks:
+1. Get your Jenkins password by running a playbook
+Steps for getting the password manually:
+1. Go inside the slave machine by giving command (ssh ec2-user@[private ip])
+2. Move as root user
+3. Get password using this command (cat /var/lib/jenkins/secrets/initialAdminPassword)
+4. Now copy the password and give the same inside the jenkins in order to proceed.
+
+[*** There is no need to remember all the modules, even for your ansible certification exam, they will provide access for this module document]
+
+Interview Questions:
+1. What are the modules you have used?
+
+2. Why we are using Handlers/ roles?
+
+
+
+
+
+
+
+
+
+
+
+
+
+

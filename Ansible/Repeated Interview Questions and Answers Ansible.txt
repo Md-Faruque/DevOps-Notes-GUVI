@@ -1,0 +1,321 @@
+Repeated Interview Questions in Ansible"
+========================================
+
+1. What are all the ways to install Ansible?
+   three ways, pip (python installation package and it provide additional python functionalities to ansible), ppa(personal package archiving mainly use in ubuntu)
+   and build a data source
+
+2. how to upgrade or change ansible version?
+   upgrade using pip : sudo pip install --upgrade ansible
+                       sudo pip upgrade --upgrade ansible version number
+
+3. How to see the environment valiables for the host? what is the default host path?
+   using setup module we can see the host environment variables(memory, storage, o/s, network, cpu etc...)
+   command : ansible all -i slaves.txt -m setup   
+   default path: /etc/ansible/hosts
+
+4. What is ansible-galaxy in ansible?
+   it is a hub or community where ansible contents stored, roles has been bundled and kept in galaxy for reusuable to make easy developers work.
+   URL path: https://galaxy.ansible.com
+   it performs following operations: init, import, list, delete and search
+   ex for init: $ ansible-galaxy init project.packer
+   the galaxy project.packer has been created and it will further act as a hub to store and retrieve the ansible contents for reusable
+
+5. What is the diffrence between play and playbook?
+   play is a set of tasks
+   playbook is a set of plays
+   play runs in a playbook
+   play starts -hosts
+
+6. What is ansible Tower in ansible?
+   Ansible tower is a enterprise framework helps to control and manage securely an Ansible automations tasks.through daemon process it enables the connection with 
+   host (Restful API), upto 10 nodes are free and since it is following the agentless we are not required to install into node.
+
+7. What is AWX? What is the diffrence between AWX and TOWER?  
+   AWX is one kind of hub like tower, open-source and mainly uses for upstream projects, but Tower is cost aoplied after 10 nodes
+
+8. What is facts in ansible?
+   moment the playbook run the "facts" start gathering host information such as o/s, storage, mamory, cpu, network information and kept in default path 
+   /etc/ansible/hosts.. whenever the organisation looks out for any configuration changes it plays a vital role to collect the information from single locatiion
+   about host.
+   Disbale the gathered facts using below steps,
+   - hosts: whatever
+     gathered_facts: no or false 
+
+
+9. What is Roles in a Ansible? 
+   Roles is a directory structure of modules in playbook. It usually bundled and located in Galaxy for the reusable to make developers task simple when they need for
+   repeated content
+
+10. Why we apply the test always on playbook and roles?
+    To ensure host environment variables and minimal changes on host to enable the configuration management without any issues
+
+11. What is the command use to check the Inventory variables defined for host?
+    command: -m debug "var=hostvars['hostname']" localhost
+
+12. what is the command or how to retrieve the Variable Name for host?
+    hostvars['Inventory_hostname'] ['ansible_+'which instance] ['IPv4'] ['Address']
+
+13. What is the method to access other Environment Variables?
+    Vars:
+    local_host: {{ lookup('env','Office') }}    
+    
+    for remote host:
+    {{ ansible_env.SOME_VARIABLE }}
+    
+    example: Access the 'Office' values to management machine 
+
+14. What is the main diffrence between Variable Name and Environment Variables?
+    Variable Name: Defined as string and extendable, we define local variables like this: -m debug "var=hostvars['hostname']" localhost
+    Environement Variables: details about the host configuration, using the lookup plugins we can access local or remote other environments
+    local_host: {{ lookup('env','Office') }} 
+    {{ ansible_env.SOME_VARIABLE }}
+
+15. What is Redhat in ansible?
+    It is also known as hub such as Tower, Controlled and secured way of handling the ansible automation tasks. This takes care configuration management
+    end to end project development
+    it plays vital role in all 6 engineerings.
+
+16. What are best ways to Redistributable and reusable:
+    Include/Imports: These uses to create/break a task on a big playbook and distribute on a need basis.
+    Roles: This directory structure will bbundled and kept in galaxy for reusable. It helpful whe developers need same set of playbook. It minimize developers 
+    effort and save time.
+
+17. How to change the priviledges in playbook?
+    using become we can change the priviledge
+    example to convert ec2-user as root as below,
+    - hosts: all
+      remote_user: ec2-user
+      become: yes
+
+18. How to handle the error in Ansible playbook?
+    using the module "block" we can handle the exceptions, Block is the logical collection of tasks where multiple tasks played and it is easy to track the 
+    error it those tasks runs under particular block
+    example
+     - hosts: all
+       remote_user: ec2-user
+       become: yes
+       tasks:
+        - name: block logical collection of tasks 
+          yum:  
+          block: 
+            name: httpd
+            service: latest
+          yum:
+            name: httpd
+            service: absent
+          yum:
+           copy:
+            src: /etc/ansible/config
+            dest: /opt
+          notify:
+             name: httpd
+             service: restarted
+          handlers:
+             name: httpd changed
+             service: restarted
+
+19. How to copy multiple files without a duplications?
+    Using normal copy it will duplicates the same files, so using "synchronization" the duplications can avoided while copy
+    copy:
+      src: 
+      dest:
+
+20. What is the best way in handling all ansible documentation?
+    GIT Repository use to keep all the Ansible automation related documents for the configuration management.
+
+21. What is Idempotency in the Ansible?
+    If same playbook run multiple times then we may expect the duplication entries or repeatation it can be avoided just including the append in the file
+    but the normal script will always print output and will never check whether it is an repeated conotent etc
+
+22. What is modules in ansible and types?
+    Modules is the one execute the task in ansible and it has two types Core modules and custom modules
+
+23. What is cowsay? 
+   apt install cowsay
+   export ANSIBLE_NOCOWS=1  # disable cowsay
+   export ANSIBLE_NOCOWS=0  # disable cowsay
+
+24. How to give access rights to partcular host to other users?
+    Host Entry
+    [Webservers]
+    local host      port no = '8080'  user name = 'mohan'
+    local host      port no = '8080'  user name = 'mohan'
+       
+    [Dbservers]
+    local host      port no = '8080'  user name = 'mohan'
+    local host      port 
+
+25. What are all the components availbale in Ansible?
+    ====================================================================================================================================================================
+host Inventory
+Play
+PLaybooks
+Tasks
+Roles
+Variables
+Templates
+Facts
+
+26.What is variable? how to declare and it's type?
+   ======================================================================================================================================================================
+	Assigning the value to particular identifier is an variable.. pre allocation values to the identifier
+	Types:
+	Global: Config file and Environment information
+	Play: Roles, Tasks, modules etc will take place
+Hosts: host related information IP etc
+5 ways to declare the vaiables
+1. path
+2. roles
+3. groups
+4. command line "port_no =8080"
+5 Vars="hostvars['hostname']" localhost
+
+
+27. What is jinja2 template?
+======================================================================================================================================================================
+it contains environment or configuration parameters. Template is static values. .j2 format
+
+
+
+28. What is the diffrence between SHELL and COMMAND in ansible?
+======================================================================================================================================================================
+SHELL: when we execute the sciprt or playbook through SHELL it happens
+COMMAND: without any SHELL mechanism it execute directly
+
+
+
+29. What is the diffrence between include and import?
+======================================================================================================================================================================
+
+Include - dynamic and ot can added when we need iin mmiddle of the playbook
+import: Dynamic and predefined and it has to imported initially
+both of them are very useful on redistribution using create/breakup
+
+
+
+30. What is the diffrence between Copy and Fetch on File modules?
+======================================================================================================================================================================
+
+Copy - copies the data or file from local host to remote repository or host
+Fetch - copies file from remote repository of machine to local host
+
+
+
+
+31. how to ignore failed command in ansible?
+======================================================================================================================================================================
+using ignore_errors: yes
+
+
+
+
+32. How to run a multiple tasks once?
+======================================================================================================================================================================
+using Asynchronous actions and polling we can achieve
+We can do the same using block but it leads to SSH connection timeout exception
+
+command: run every 15 secs once 
+async: 45
+poll: 5
+  
+
+33. How to add custom modules into ansible?
+======================================================================================================================================================================
+/var/shares/ansible/plugins/modules
+here can add and make use
+
+
+
+34. How to debug playbook in ansible?
+======================================================================================================================================================================
+include debugger inside the block can be the solution on trouble shooting playbook
+
+-hosts: all
+ remote_user: ec2-user
+ become: yes
+ tasks:
+   block:
+   - name: debugger 
+     yum:
+      name: httpd
+      state: latest
+      debugger: yes
+ this is how we can enable the debugging
+
+
+lineinline:
+   line: "configuration latest"
+   dest: /etc/ansible/ansible.confg
+   state: present
+debugger: yes
+
+
+35. What are the diffrent modes in ansible?
+======================================================================================================================================================================
+1. check_mode: yes  => when playbook run without using --check then check mode
+2. check_mode: no   => with checking --check then normal mode
+
+lineinline:
+   line: "configuration latest"
+   dest: /etc/ansible/ansible.confg
+   state: present
+check_mode: yes
+
+
+36. What is pre_tasks and post_tasks in ansible?
+======================================================================================================================================================================
+
+---
+
+- hosts: all
+  remote_user: ec2-user
+  become: yes
+  tasks:
+   pre_tasks: install web using ansible
+   - name: install httpd
+     yum:
+      name:httpd
+      state: latest
+   post_tasks: latest apache installed  
+
+
+
+37.  What is Ansiblevault ?
+================================================================================================================================================================== 
+Sensitive or confidential information kept password protected and also encrypted to visible into unauthorized
+
+
+38.  How to decrypt a vault file ?
+================================================================================================================================================================== 
+ansible-vault decrypt filename => in vi editor can view content in the file
+
+
+39.  How to encrypt a string in Ansible using AnsibleVault ?
+================================================================================================================================================================== 
+ansible-vault encrypt_string "dummy" --vault-password-file pass-ansible.txt
+
+
+40.  If a string is encrypted in a file with a password then how to pass
+the password using parameter while decrypting ?
+================================================================================================================================================================== 
+
+
+
+41.  If a file is encrypted using password &amp; passwo
+[6:46 pm, 23/08/2019] +91 98408 05674: Enjoy
+[6:47 pm, 23/08/2019] +91 98408 05674: rd is stored in a file
+================================================================================================================================================================== 
+
+
+
+42. how to pass the file to decrypt the file ?
+================================================================================================================================================================== 
+
+
+
+
+43.  If a file is encrypted using password &amp; password is also encrypted
+then how to provide the password while decrypting the file ?
+================================================================================================================================================================== 
+

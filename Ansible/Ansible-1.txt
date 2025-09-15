@@ -1,0 +1,122 @@
+clearClass1: Ansible (Basic Intro & Adhoc Commands)
+
+Ansible - It will come under Configuration Management tool (CM)
+
+What is Configuration Management?
+	We have multiple environment in real-time, it is really hard to maintain everything manually; by using configuration tool we can automate the complete process used in the specific Application.
+	In Simple Words, If I have Multiple server (20+), client is asking me to Install Apache, Java, and to create a group, user and directories, (Scenario without Configuration tool: I need to do it one by one server, and this consume my time and effort; but by using configuration tool we can automate it just by pushing it from one server to another.
+
+What are different types of CM tools?
+	Ansible
+	Chef
+	Puppet
+	Saltstalk, etc.,
+
+Why Ansible?
+	For Chef / Puppet I need to know additional scripting knowledge (Groovy / Ruby), But for Ansible Basic Linux commands is more than enough. Ansible automates and simplifies repetitive, complex, and tedious operations. Everybody likes it because it brings huge time savings when we install packages or configure large numbers of servers.Its architecture is simple and effective. It works by connecting to your nodes and pushing small programs to them.
+	Ansible works over SSH and doesn't require any daemons (A daemon is a service process that runs in the background and supervises the system or provides functionality to other processes.), special servers, or libraries to work. A text editor and command line tool are usually enough to get your work done.
+
+What is Master-Slave Configuration?
+	Master is going to command and Slave is going to work
+
+What are the 2 types of mechanism?
+	Push - Pushing the code from Master machine to Slave machine (Ansible)
+	Pull   - Pulling the code by login from Slave machine (Chef / Puppet)
+Saltstalk supports Both Push and Pull mechanism.
+
+docs.ansible.com - Ansible Official Page - It is a RedHat product.
+
+In Ansible We will call Master as (Control Node), and Slave as (Managed Node).
+
+Ansible is an agentless tools, which means we need to install ansible only on the master machine, and there is no need for installing ansible on the slaves machine.
+
+For all DevOps tools, it is important to know the pre-requisites / requirements before installing the tools.
+Ansible Pre-requisites:
+1. Python is required on control machine (If it is Python 2, it should be Python 2.7; If it is going to be Python 3, then the version should be Python 3.5 or Higher) [*** Your Control Node should never be a windows one, it can be anything from Linux]
+2. Under Managed Node, Python is compulsory (If it is Python 2, it should be Python 2.6 or later; If it is going to be Python 3, then the version should be Python 3.5 or later) [***Managed Node can be windows machine]
+	Ansible was writted by Python Language, hence there is a need for Python on all the machines.
+
+What is pip?
+Python package Manager
+
+Application we are going here:
+1. Putty - SSH terminal
+2. Puttygen - Convertor for .pem to .ppk
+3. Pagent - Avoid putting .ppk file everytime while login into the machine (we can add multiple .ppk files into it)
+4. Visual Studio Code - text editor
+
+What are the 2 important files in Ansible?
+	Whenever we are installing Ansible in any OS using installation steps, by default we will get both this files; (***except on pip)
+1. Inventory file -------- /etc/ansible/hosts ---------- we will configure all our slaves machine Private IP under this file
+2. Configuration file --- /etc/ansible/ansible.cfg ---- this holds all the Ansible configuration details
+
+We are going to cover 4 topics here:
+1. Adhoc commands - One task at a time
+2. Playbooks - Mutiple task (.yaml script)
+3. Roles - For Reusable purpose
+4. Vault - Security layer
+
+Most of our Interview questions will be under:
+Ansible
+Docker
+Terraform
+Kubernetes
+
+Steps for adhoc commands:
+1. Create a linux instance - number of instances (4): 1 is going to be my master, 3 are going to be my slave - under user data, use this script
+#! /bin/bash
+yum install python-pip -y
+pip install ansible
+	open all ports.
+2. Make one server as Master by renaming it.
+3. Login into master machine using pagent - being default user, create a file (vi slaves.txt) - input all the slaves machines Private IP into it
+4. Now, we need configuration file, get it from official github link (https://raw.githubusercontent.com/ansible/ansible/devel/examples/ansible.cfg).
+5. Give command (wget https://raw.githubusercontent.com/ansible/ansible/devel/examples/ansible.cfg) - confirm the same by using command (ls -lrt)
+	[[ Now, our Inventory and Configuration file got ready ]]
+6. Now, we need to check the connection between the master and slaves machine, use command (ansible all -i slaves.txt --list-hosts) [use this command to confirm whether the slaves machinesis listed or not] - (ansible all -i slaves.txt -m ping) [-i = Inventory file; -m = Ansible inbuild module]; it will ask host key for all the machines, if we are going to provide "yes" for all the machines then there is no use of this automation, hence we are going to edit the ansible.cfg file.
+7. Open (vi ansible.cfg) - remove # from host key checking and change it to False, now try the same ping command and check the output.
+8. In order to know the Slaves machine OS, use this command (ansible all -i slaves.txt -a "uname -a") [-a = Action / Argument]
+9. To know when the Slaves server got started, use this command (ansible all -i slaves.txt -a "uptime")
+10. For Grouping, go to (vi slaves.txt), Provide the name for the server inside the [] ex: [greens]; and call the server using this command (ansible greens -i slaves.txt -m ping)
+11. Now, we are going to install Apache in only one Slave machine via Master machine, use this command (ansible greens -i slaves.txt -m yum -a "name=httpd state=present")
+	State:
+	1. present/latest = install
+	2. absent = uninstall
+	3. started = start
+	4. stopped = stop
+	5. restarted = restart
+now, it will throw as an error because we are not the root user here
+we need to give (-b) on the end of the command, -b = become (ansible greens -i slaves.txt -m yum -a "name=httpd state=present" -b), now it will automatically download the apache as per requested.
+12. Open the Slaves machine Public Ip into the browser for Apache output, but it will throw an error, because we haven't started the service yet, hence for starting the Apache, use this command (ansible greens -i slaves.txt -m service -a "name=httpd state=started" -b)
+13. Now check for the output via Slaves machine Public IP, and now it should work.
+14. We are going to create a user and provide permissions accordingly, use command (ansible all -i slaves.txt -m user -a "name=greens password=green123" -b)
+	[*** Task: It will show as an output on Password: NOT LOGGING PASSWORD, which means the user cannot login with password; But we have to login user via password]
+15. I got a text file in master machine (slaves.txt), now I need to copy this file to slaves machines using this command (ansible all -i slaves.txt -m copy -a "src=./slaves.txt dest=/tmp/slaves.txt")
+ssh ec2-user@[slaves machine public ip] - yes
+cd /tmp
+ls [you can view the slaves.txt]
+
+[*** 
+What if I am giving the commands without (-i slaves.txt)?
+    	Ansible will reach to it's default location (/etc/ansible/host) and will pick the Inventory file automatically (this will not work for pip, because here we manually configured)
+
+I got 100 Ip's, but I need to do configuration for a single IP, How I can do that?
+	Instead of giving (all) in the command, specify the single IP so that the configuration can we implied on that specific one alone.]
+
+For more adhoc commands: https://docs.ansible.com/ansible/latest/user_guide/intro_adhoc.html
+
+Task & Interview Questions:
+1. How to Install Ansible in ubuntu?
+	[There will be a lot of permission denied issues, troubleshoot using Google, this helps to answer in your Interview]
+2. Suppose client denied us from using pagent, then what is the other alternate options?
+3. Create a file and directory in your slaves machine using adhoc commands
+4. How we are going to use Ansible in windows environment?
+5. Is it possible for me to use multiple Inventory file? Yes, [How?]
+6. For what purpose you have used Ansible in your project?
+7. If I need to execute particular task under certain servers, how can we do that?
+	By grouping we will be able to call the specific server and we can implement the task.
+
+
+
+
+

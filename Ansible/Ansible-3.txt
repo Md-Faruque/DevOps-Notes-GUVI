@@ -1,0 +1,149 @@
+Class3: Ansbile Deployment
+
+Scenario 1:
+1. Installing Tomcat server, Deploying an application
+
+Manual Steps:
+1. yum update
+2. Java 1.8.0 (open jdk - java development kit)
+3. download tomcat from official page
+4. unzip the package
+5. start tomcat
+6. Change the parameter accroding to the environment
+7. Now deploy the applications
+
+[***FYI: For finding and replace all inside VSC, use ctrl+shift+h]
+
+Steps:
+1. Now create a group in the slaves.txt file  (tomcat)
+2. Write the script for all the manual steps which we mentioned earlier
+3. For step number 3, we need to download the tomcat from official page using ansible [search in google as tomcat download], hence search from the Ansible module in Google (ansible download from url) - examples - get the 1st example [edit name: download tomcat; url: https://dlcdn.apache.org/tomcat/tomcat-9/v9.0.73/bin/apache-tomcat-9.0.73.tar.gz; dest: /usr/local; mode: '0777']
+4. Next we need to get the ansible url module for unzip, search in Google - 1st link - example - take the 2nd example and edit it in VSC [src: /usr/local/apache-tomcat-9.0.73.tar.gz; destination: /usr/local; add mode if needed: '0777']
+5. Now, go to the master machine, create a file (tomcat.yaml) attach this script into it
+6. Now execute the playbook using this command (ansible-playbook -i slaves.txt tomcat.yaml)
+7. Confirm the same by going into the selected machine, use this command (ssh ec2-user@172.31.45.123)
+8. Go inside the path (cd /usr/local/apache-tomcat-9.0.73) - list all the files and folders (ls -lrt)
+9. Go to bin folder (cd bin) - There is a startup.sh file inside it - we need to execute this script [in linux we will execute a script using ./scriptname or sh scriptname], but here we are going to execute the script using ansible.
+
+	[*** In normal scenarios, when we are trying to run the script it may take a lot of time, but we all know we cannot run putty for long time, and that is going to stop the script running in between; at that time we got another option to stop this kind of intervention by using (nohup ....script...... &) this command used to run the script on the background even though our putty has stopped] (nohup /usr/local/apache-tomcat-9.0.73/bin/startup.sh &)
+
+10. For executing the script using ansible, search in Google like (ansible shell script example) - get the script and do the needed edit on VSC [add this in shell: nohup /usr/local/apache-tomcat-9.0.73/bin/startup.sh &]
+11. Switch back to Master machine, update the .yaml script; Now execute this script using this command (ansible-playbook -i slaves.txt tomcat.yaml)
+12. Check the output on the browser, by copying the machine public IP with the tomcat port number: (1.1.1.1:8080) - It will open the tomcat webpage.
+
+Real-time scenarios:
+
+1. Now we are going to go inside the slaves machine where tomcat was installed (ssh ec2-user@172.31.45.123)
+2. Go to tomcat conf path (cd /usr/local/apache-tomcat-9.0.73/conf/) - list the files and search for server.xml (this file holds the configuration details) - open the file (vi server.xml) - for real-time env changes.
+3. Change the content of the conf file for all the 4 env according to the PICTURE
+4. We are going to do this by using template module
+
+[**** Interview Question:
+1. What is the purpose of Template module?
+	This module helps us to change the parameters inside the configuration file dynamically under each environment.
+2. What is the unix command to know the process running in the linux machine?
+	ps -ef | grep java
+3. What is the unix command to stop the running applications?
+	kill -9 (process ID) {make sure you need to be a root user for this}
+4. Now I need to copy the server.xml from slave to master machine? what is the command?
+	[*** make sure before doing this, create a /tmp path and copy the file from /conf to /tmp (cp server.xml /tmp) then go inside the /tmp path (cd /tmp), list the files (ls -lrt)]
+	we need to go to master machine 1st, then use this command (scp ec2-user@172.31.45.123:/tmp/server.xml .) [scp = server copy; mention from where the file need to be copied with the complete path "." = present directory]]
+
+5. Open Google (ansible template module) [this module will be supported by Jinja2 templating language - it is an internal language under python]
+6. Open (server.xml) change the port number with an variable (Connector port="{{tomcat_port}}"), now rename the server.xml file (mv server.xml server.xml.j2)
+7. Now, we need to bring the template module using VSC, edit it accordingly [provide the src: ./server.xml.j2; dest: /usr/local/apache-tomcat-9.0.73/conf/server.xml; mode: '0777']
+8. Add the variable, because we have provided the variable name for the connection port; edit in VSC. [tomcat_port:8060]
+9. Open the (vi tomcat.yaml) paste the updated script
+10. Go to slaves machine, (ssh ec2-user@172.31.45.123) open the path (cd /usr/local/apache-tomcat-9.0.73/conf/) check the process (ps -ef | grep java), kill the process now, as we are going to do the changes in the configuration file (kill -9 (process ID) {make sure you need to be a root user for this})
+11. Exit from salves machine, go to master machine to execute the playbook, use this command (ansible-playbook -i slaves.txt tomcat.yaml)
+12. Check the output by using the Ipaddress with the changed port number (1.1.1.1:8060)
+13. Now, we are going to deploy an application into it; hence open the apache war file from Google, copy the link by right clicking on download here button
+14. Go to you master putty, and put this command (wget https://tomcat.apache.org/tomcat-7.0-doc/appdev/sample/sample.war)
+15. Real-time, our developer will provide this (.war, .jar, .ear) file, we are going to deploy this on top of the tomcat.
+16. Inside tomcat page itself, they would have specified where to deploy the file (/webapps) - (/usr/local/apache-tomcat-9.0.73/webapps/sample.war)
+17. Now, we need to use the copy module in order to transfer the file, go and edit the script in VSC [src: ./sample.war; dest: /usr/local/apache-tomcat-9.0.46/webapps/sample.war; mode: '0777']
+18. Now, copy the script and paste it inside the (vi tomcat.yaml)
+19. Execute the playbook command (ansible-playbook -i slaves.txt tomcat.yaml)
+20. Now, check the output via browser by providing IP:port/sample (172.31.45.123:8060/sample)
+
+Scenario 2:
+1. I got multiple task inside my playbook, I want only one task to be executed.
+
+Steps:
+1. Just by adding tags to each and every task; and by calling out their tag name specifically we, can execute this tags alone
+2. Try to edit the Script with multiple tags in VSC
+3. Now, execute the command using this command (ansible-playbook -i slaves.txt tomcat.yaml --tags download)
+
+[For running multiple tags, run within double quotes; ansible-playbook -i tags.yaml --tags "update,java"]
+
+Scenario 3:
+1. If I need to skip only one task from the playbook
+
+Steps:
+1. Use this commad (ansible-playbook -i slaves.txt tomcat.yaml --skip-tags download)
+
+[*** Interview Question:
+1. If I am having multiple task under playbook, If I got a wrong package and my task got failed; will it move forward to the next task?
+	No, It will not move to the next task.
+
+Scenario 4:
+1. Even though my task getting failed, it should move forward to the next task. How
+
+Steps:
+1. We need to bring a module here called (ignore_errors: yes) [check the indendation, which should be below the same line of name]
+
+Scenario 5:
+1. We are going to bring a "when" condition
+
+Steps:
+1. Try to edit the script in VSC, stating that the specific should be executed only when the condition is true
+[ex: tasks:
+    - name: going to update yum package
+      yum:
+        name: greens
+        state: present
+      when: ansible_os_family =='debian']
+
+Roles:
+1. Roles helps us the segregate the content according to their category; Instead of keeping all the files in a single script, this arrange each and every topic on their own
+
+Steps:
+1. Create a sample code in VSC.
+2. Give command (ansible-galaxy init apache) [init = initialize] automatically a role will get created.
+3. Go inside the role (cd apache) - list (ls -ltr) there will be alot of files and folders got automatically created
+4. Come out from this path, (cd ..)
+4. For better vision, we are going to install a simple unix package (sudo yum install tree -y)
+5. Give this command (tree apache), it will give the folders list in tree structure.
+6. Now, I need to bring that sample code inside the task folder (cd apache/tasks/) - open the (vi main.yml) - paste the script [make sure you are attaching only the tasks - starts from name] inside to it [make sure about the alignment]
+7. Now we need to go to the files folder, as we have index.html [is a file]; use this command (cd ../files) - go to (vi index.html) - type some content and save it.
+8. Now, come outside as ec2-user and check the (tree apache)
+9. Now, we are going to write a playbook for roles (vi roles.yaml) 
+[ex: - hosts: all
+         remote_user: ec2-user
+         become: yes
+         roles:
+             - apache]
+[*** we can bring multiple roles under single file by mentioning their names under the roles]
+
+[*** Interview Question:
+1. What are the advantages of roles?
+	It is easy to maintain, and helps us to avoid confusion
+	We can use the same tasks using multiple roles; roles are reusable]
+
+Vault:
+1. If my playbook contains some sensitive information, hence I want to encrypt this file; so that I can protect my file from others.
+
+Steps:
+1. Give command (ansible-vault encrypt tomcat.yaml) - it will ask you to provide the password (greens123) - confirm the password again (greens123) - show the output by giving (cat tomcat.yaml)
+
+[*** Interview Question:
+1. Will I be able to execute the tomcat.yaml when it is encrypted?
+	No, You cannot execute an encrypted file.]
+
+2. In order to execute the encrypted file, use this command (ansible-playbook -i slaves.txt tomcat.yaml --ask-vault-pass) - provide the password.
+3. To view the file, provide this command (ansible-vault view tomcat.yaml) - provide the password.
+4. In order to change the vault password (ansible-vault rekey tomcat.yaml) - provide the password and create your new password
+5. To Decrypt the file, (ansible-vault decrypt tomcat.yaml) - give the password
+
+
+
