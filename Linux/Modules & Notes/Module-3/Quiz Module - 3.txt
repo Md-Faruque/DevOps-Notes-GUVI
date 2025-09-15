@@ -1,0 +1,66 @@
+Quiz: 3
+=======
+1. What are the different ways to access Linux?
+a. Console
+b. Putty or terminal client
+c. SSH from one command line machine to another
+d. All of the above
+Ans: D
+
+2. What should be avoided in Linux file system?
+a. Do not use letter
+b. Do not use case-sensitive letters
+c. Do not use spaces
+d. None of the above
+Ans: C
+
+3. What is the command to change password for a regular user by root?
+a. passwd username
+b. passwd
+c. password
+d. Passwd
+Ans: A
+
+4. Which of the following is the Linux file system type?
+a. xfs
+b. ext2
+c. ext3
+d. All of the above
+Ans: D
+
+5. What is /root directory is used for?
+a. It is used for all users home directory
+b. It is used for temporary space
+c. It is used for system logs
+d. None of the above
+Ans: D
+
+6. Which command is used to list files?
+a. pwd
+b. ls
+c. LS
+d. list
+Ans: B
+
+7. Which command can be used to create a file?
+a. touch
+b. cp
+c. vi
+d. All of the above
+e. A and B
+Ans: D
+
+8. How many new directories will be created after running the following command?
+mkdie {a..c}{1..3}
+a. 0
+b. 2
+c. 3
+d. 9
+Ans: D
+
+9. What is the differene between soft and hard link?
+a. Soft link is created on a directory where hard link is created on file
+b. In soft link if source file is deleted then the link is broken but in hard link deleting a source file will not impact the linked file
+c. In hard link if source file is deleted then the link is broken but in sift link deleting a source file will not impact the linked file
+d. Soft link is created when original source file exist where hard link does not require any source file
+Ans: B

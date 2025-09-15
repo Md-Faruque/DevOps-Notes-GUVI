@@ -1,0 +1,807 @@
+Linux System Administrator:
+===========================
+
+1. Linux File Editor:
+=====================
+	. A text editor is a program which enables you to create an manipulate data (text) in a Linux file.
+	. There are several standard text editors available on most Linux systems: 
+	  > vi		=	Visual editor
+	  > ed		=	Standard line editor
+	  > ex		=	Extended line editor
+	  > emacs	=	A Full screen editor
+	  > pico	=	Beginner's editor
+	  > vim		=	Advance version of vi
+	. (vi) editor available on almost every Linux distribution
+Here, we are going to focus on (vi)
+ . vi supplies commands for:
+	Inserting and deleting text
+	Replacing text
+	Moving around the file
+	Finding and substituting strings
+	Cutting and pasting text
+ . Most common keys:
+	i	=	insert
+	esc	=	escape out of any mode
+	r	=	replace
+	d	=	delete the entire line
+	x	=	delete a single character
+	o	=	create a next new line, do it in the end of the character
+	:q!	=	quit without saving
+	:wq!	=	save and quit
+	shft zz	=	with save and come out of the mode
+
+User Account Management: (useradd, groupadd, usermod, userdel, groupdel)
+========================================================================
+	> Whenever we create a new user th record is maintained in 3 different files: (/etc/passwd) (etc/group) (/etc/shadow)
+	> Make sure to be a root user to do the same
+
+Commands:
+---------
+ > useradd spiderman	=	command to create an user [whenever we are creating a user, they will become part of the default group; along with this there will be a home directory that gets created (cd /home) and we can see the directory]
+ > groupadd superheros	=	command to create group [dedicated group], to confirm it give (cd /etc/group) and we can see the group got created at the bottom
+ > userdel -r spiderman	=	command to delete the user along with the /home directory [if this is not working, try to come inside the /home, path and execute the command]
+ > groupdel superheros	=	command to delete the group, to confirm (cd /etc/group) and this got deleted
+ > usermod -G superheros spiderman	=	command to modify the user group (grep spiderman /etc/group)
+
+Files:
+------
+ > cat /etc/passwd	=	Place where we can see the password in encrypted format	(x)
+ > cat /etc/group	=	This shows the information about the group info (like group name, password & group ID)
+ > cat /etc/shadow	=	This command is strictly for passwords of users that we create, even this won't show the actual password but this will provide info about the passwords (like expiry, password length restrctions and other things)  
+
+real-time command: useradd -g superheros -s /bin/bash -c "Ironman character" -m -d /home/ironman ironman
+	This one command will create the user along with the group with some description attached to it, to confirm this (cat /etc/passwd) file we can view that at the bottom.
+ > let us create a password for this user (passwd ironman) - it will prompt for the new password and we can provide one (ironman123) [we might get a message like: The password fails the dictionary check; until we are root user we can proceed, if not it will force us to change the password]
+
+Password Aging:
+---------------
+	> Change Age command is used per user. (In real-time it is not easy for us to create every user account individually and to setup all this default criterias like expire, length, min, max etc., hence we have a file here to be accomadate with those info so we will be able to set up things once on this file and this default values will get applied for all the user accounts)
+	> File = /etc/login.defs
+		. PASS_MAX_DAYS	99999
+		. PASS_MIN_DAYS	0
+		. PASS_MIN_LEN	5
+		. PASS_WARN_AGE	7
+
+ > The chage command: per user
+ex: chage [-d lastday] [-m mindays] [-M maxdays] [-W warndays] [-I inactive] [-E expiredate] user
+ > -d = Last password change (lastchanged): Days since Jan 1, 1970 that password was last changed
+ > -m = Minimum: The minimum number of days required between password changes i.e. the number of days left before the user is allowed to change his/her password
+ > -M = Maximum: The maximum number of days the password is valid (after the user is forced to change his/her password)
+ > -W = Warn: The number of days before password is to expire that user is warned that his/her password must be changed
+ > -I = Inactive: The number of days after password expired that account is disabled
+ > -E = Expire: Days since Jan 1, 1970 that account is disabled i.e an absolute date specifying when the login may no longer be used.
+
+ . Create a user (useradd akshiv) - to check give (id akshiv) and this shows the userid, groupid and groups, set a password for the user (passwd akshiv) and set the passwd
+
+ . to check the password info give (grep akshiv /etc/shadow) - and we can see all the informations related to password here, here also the password will show in encrypted format.
+
+ . now, lets setup the requirements for the password (chage -m 5 -M 90 -W 10 -I 3 akshiv)
+
+[-d = it is not recommended because by changing this we might lose the track when the password got changed last, as we can see normally for systems, the days calculated from Jan 1, 1970; changing this we might not able to check details properly]
+
+[-m = we can setup some days here, means user will not be able to change the password very frequently, setting a days like (5), user cannot change the password for 5 days from the day password has been set; normally this will be set to (0) means there are no restrictions to the change the password]
+
+[M = number of days your password will be valid after that user will be forced to change the password, by default it will be (99999), here we change that to every 3 months (90) days] 
+
+[-W = warning before the password expiration,  (10) means on 80th day this is going to send a warning automaticaly this will get calculated]
+
+[-I = inactive, the number of days after password expires, the account is temporarily suspended; so if the password expires today it will get disabled by the number of days we mentioned, as we mentioned (3) which means if the user is not changing the password after the expired day it will hold till 3 days and it will suspended the account the next upcoming day]
+
+[-E = Expire, is like a the user hasn't logged in for the number of days, we can mention days, so if the user hasn't logged in till that, then the user account will get expired]
+
+ . now, lets confirm the same through the output (grep akshiv /etc/shadow) - here we can see it took the value which we mentioned.
+
+[Do remember, if we need to setup the same value for all the users, then we need to do the modification on the file (cat /etc/login.defs)
+
+
+Switch Users and Sudo Access:
+-----------------------------
+ > Command to switch one user to another = su - username [this will prompt for the password if we setted one] [ex: su - akshiv] as I already have this user, hence doing the same, if you don't have a user then create one along with the password [useradd akshiv] [useradd shiva] [passwd akshiv] [passwd shiva] and try executing the command. [Do remember when you are trying to switch user from root account it will not prompt for the password as this user is the superuser account; when you are trying to switch from one user to another then it will prompt for the password; so create 2 different user and try to check for the same]
+
+ > sudo = this command we can run along with the existing command if we don't have the root priveledges or you cannot become root; but make sure that user needs to have enough permission to run this as well. [ex: fdisk -l] [dmidecode] (this commands give error msg as permission denied if you are trying to be a normal user)
+
+ > visudo = this edits the etc sudoers file, which is a configuration file that allows user to add or remove the rights (cat /etc/sudoers) [you need to be root to run this command] - now scroll down and we can see these lines 
+
+## Allow root to run any commands anywhere
+root    ALL=(ALL)       ALL
+
+## Allows members of the 'sys' group to run networking, software,
+## service management apps and more.
+# %sys ALL = NETWORKING, SOFTWARE, SERVICES, STORAGE, DELEGATING, PROCESSES, LOCATE, DRIVERS
+
+## Allows people in group wheel to run all commands
+%wheel  ALL=(ALL)       ALL
+
+## Same thing without a password
+# %wheel        ALL=(ALL)       NOPASSWD: ALL
+
+ > By adding using under the root, the user will overall admin previledge; if you want to provide limited priveledge with overall access, then add the user under the (wheel) group
+
+ > now, give the command (usermod -aG wheel akshiv) [-a = add; G = group] 
+
+ > to confirm the same, give (grep wheel /etc/group) and we can see the user has been added here
+
+ > now, switch user to (su - akshiv) and try to run the same command with sudo [sudo fdisk -l] [sudo dmidecode], where it will ask for the password verification and we can see that it is showing the output accordingly. [Do remember, running this command without sudo will through you with an permission denied message]
+
+
+Monitor Users:
+--------------
+ > Commands: who (who logs into the system & number of systems logged in; if you are opening 3 terminal and ask "who" means then it will shows (3) responses)
+ > last = command shows all the details of every users that have been logged in since day 1
+ > w = little bit more information when comes to "who" commands, where we can see the login time, the idle time, what are the processes is being run by what user.
+ > finger = by default it won't be there, we need to add this program; where this command helps to trace the user, where is it coming from, what kind of protocol used etc.,
+{to install finger in CentOS 7 = yum install finger -y
+ to install finger in CentOS 8 or more = replace with pinky
+ > id = will provide info about the user, group, and other groups they belongs to etc., [try this command as "akshiv" user]
+These are few basic commands where you could monitor users. 
+
+Account Authentication:
+-----------------------
+ > How to manage multiple users, how to change passwords? how to add multiple users to multiple servers? how to provide permissions? like this we have a lot things.
+	Let's take a scenario, assume a user joins a company and we have 1000 servers, is it possible to go into each and every server individually and to add the user accounts? usually companies don't work that way; they don't create user accounts individually to each server separately.
+
+Types of Accounts:
+ > Local accounts = create user through command, adding the user to the group and providing permissions and so on.
+ > Domain/Directory accounts = in a Linux environment is a user account that is managed centrally instead of being created individually on each machine. These accounts are stored in a directory service like Active Directory (AD), LDAP, or FreeIPA and allow users to log in to multiple Linux machines using the same credentials.
+
+Key Terms & Examples:
+Term				Meaning							Example
+Local Account == A user account that exists only on one Linux machine ==> useradd akshiv creates a user named "akshiv" on one server.
+
+Domain Account (Directory Account) == A user account managed by a central directory and can be used on multiple machines ==>	"akshiv" logs into any company computer with akshiv@company.com.
+
+Directory Service == A system that stores and manages domain accounts ==> Active Directory (AD), LDAP, FreeIPA
+
+Authentication == The process of verifying a user’s identity ==> akshiv enters a password, and the system checks it with LDAP.
+
+SSSD (System Security Services Daemon) == A service that connects Linux to a directory service ==> Allows Linux machines to fetch users from Active Directory.
+
+Kerberos == A protocol used for secure authentication ==> akshiv logs in once and gets a "ticket" to access other systems without re-entering the password.
+
+Why Use Domain Accounts?
+✅ Centralized Management – Admins can create, modify, or delete accounts from one place.
+✅ Single Sign-On (SSO) – Users don’t need to remember multiple passwords for different servers.
+✅ Access Control – Permissions can be managed for different groups easily.
+✅ Security – Helps in enforcing password policies and user tracking.
+
+Example Scenario:
+Imagine a company with 100 Linux servers. Instead of creating a local user on each server, the company sets up LDAP (a directory service). Now:
+1. Admin creates "akshiv" in LDAP
+
+ldapadd -x -D "cn=admin,dc=company,dc=com" -W -f akshiv.ldif
+
+2. akshiv logs in from any Linux server
+
+ssh akshiv@server1.company.com
+
+3. The system checks his credentials in LDAP and grants access if correct.
+
+How to Integrate Linux with a Directory Service:
+To connect a Linux machine to a directory service like Active Directory:
+
+sudo yum install realmd sssd adcli samba-common
+sudo realm join domain.company.com -U admin
+
+Now, users from domain.company.com can log in to this Linux machine.
+
+Difference between Active Directory, LDAP, IDM, WinBIND, OpenLDAP etc.,
+-----------------------------------------------------------------------
+1. Active Directory (AD)
+💡 What it is?
+A directory service developed by Microsoft to manage users, computers, and resources in a Windows-based network.
+
+💡 Where it is used?
+Used in Windows environments but can also be integrated with Linux systems.
+
+💡 Example Scenario:
+A company has 500 employees. Instead of creating separate user accounts on each computer, the admin uses Active Directory to store all users centrally. Now, employees can log in to any system in the network using the same credentials.
+
+💡 Key Features:
+✔ Centralized user & group management
+✔ Supports Single Sign-On (SSO)
+✔ Uses LDAP and Kerberos for authentication
+
+🔹 Command to check if a Linux machine is joined to AD:
+realm list
+
+2. LDAP (Lightweight Directory Access Protocol)
+💡 What it is?
+A protocol used to access and manage directory services. LDAP is not a directory service itself, but a way to communicate with one.
+
+💡 Where it is used?
+Used in Active Directory, OpenLDAP, FreeIPA, and other directory services.
+
+💡 Example Scenario:
+A university has a central student database stored in LDAP. Whenever a student logs in to a computer, the system checks their details in the LDAP directory before granting access.
+
+💡 Key Features:
+✔ Works as a phone book for storing and retrieving user details
+✔ Can be used with Linux & Windows
+✔ Used in Active Directory, OpenLDAP, FreeIPA
+
+🔹 Example LDAP Query to find a user:
+ldapsearch -x -LLL -H ldap://ldap.company.com -b "dc=company,dc=com" "(uid=akshiv)"
+
+3. IDM (Identity Management)
+💡 What it is?
+A system that manages users, roles, policies, and authentication across multiple platforms (Linux, Windows, Cloud). It often integrates with LDAP, Kerberos, and Active Directory.
+
+💡 Where it is used?
+Used in enterprise environments for managing identity and access control.
+
+💡 Example Scenario:
+A cloud provider offers IDM so that customers can manage users, groups, and permissions from a single place, whether on Windows, Linux, or cloud services.
+
+💡 Key Features:
+✔ Works across multiple platforms
+✔ Integrates with LDAP, Active Directory, Kerberos
+✔ Helps in managing user roles, policies, and authentication
+
+🔹 Popular IDM Solutions:
+
+Red Hat Identity Management (FreeIPA)
+Microsoft Identity Manager (MIM)
+Okta, Keycloak, and AWS IAM (Cloud-based IDM solutions)
+
+4. WinBIND
+💡 What it is?
+A service that allows Linux systems to authenticate users using Windows Active Directory. It acts as a bridge between Linux and Windows authentication systems.
+
+💡 Where it is used?
+Used in Linux servers that need to authenticate users from Windows Active Directory.
+
+💡 Example Scenario:
+A company has Windows Active Directory but also some Linux servers. Instead of creating separate accounts on Linux, they install WinBIND, allowing Linux to authenticate users directly from AD.
+
+💡 Key Features:
+✔ Helps Linux authenticate users from Windows AD
+✔ Uses Kerberos & NTLM authentication
+✔ Works with Samba for file sharing between Linux & Windows
+
+🔹 Check if WinBIND is running:
+wbinfo -u  # List AD users in Linux
+
+5. OpenLDAP
+💡 What it is?
+An open-source implementation of LDAP, used for storing and managing users, groups, and authentication data.
+
+💡 Where it is used?
+Used in Linux environments as an alternative to Active Directory.
+
+💡 Example Scenario:
+A startup wants a free and open-source directory service to manage its employees. Instead of using Microsoft AD, they set up OpenLDAP to handle user authentication and access control.
+
+💡 Key Features:
+✔ Fully open-source and runs on Linux
+✔ Can be used for user authentication, email directories, and application access
+✔ Works with Kerberos, PAM, and SSSD
+
+🔹 Command to install OpenLDAP on RHEL:
+sudo yum install -y openldap openldap-servers openldap-clients
+
+Summary:
+Active Directory (AD) → Microsoft’s user management service, used in Windows but can integrate with Linux.
+LDAP → A protocol used to access directory services like AD or OpenLDAP.
+IDM → A broader identity management system that includes user roles, authentication, and security policies.
+WinBIND → A tool for Linux to authenticate users from Windows Active Directory.
+OpenLDAP → An open-source alternative to Active Directory, used for managing users and authentication in Linux environments.
+
+Processes and Jobs:
+-------------------
+
+ > Application = Service is like a program that runs in your computer, and that could be anything like in windows we have like Microsoft Word, Powerpoint, In Linux like NTP, NFS, Apache etc.,
+1. Application
+💡 What is it?
+An application is a software program that we run on a computer to perform tasks. It can be a GUI-based program (like a web browser) or a CLI-based tool (like vim or top in Linux).
+
+💡 Related Terms:
+✔ Executable – A file that can be run, like /usr/bin/firefox.
+✔ User-space program – Runs as a normal user (not a system process).
+✔ Process – When an application runs, it becomes a process.
+
+💡 Example in Terminal:
+firefox &   # Opens Firefox in the background
+
+which firefox   # Shows the path of the Firefox executable
+
+ps aux | grep firefox   # Checks if Firefox is running
+
+ > Script = A script is something that is written in a file and then packaged it in a way that it will execute, any application that is running in your computer you would have to run that as a script and that will run in the background. 
+2. Script
+💡 What is it?
+A script is a file containing a set of commands that are executed sequentially. It is often used for automation.
+
+💡 Related Terms:
+✔ Shell Script – A script written for the terminal (.sh files).
+✔ Bash, Python, Perl – Common scripting languages.
+✔ Shebang (#!) – The first line of a script (#!/bin/bash) that tells which interpreter to use.
+
+💡 Example in Terminal:
+1. Create a simple script:
+echo -e "#!/bin/bash\necho 'Hello, World!'" > myscript.sh
+
+2. Make it executable:
+chmod +x myscript.sh
+
+3. Run the script:
+./myscript.sh
+
+Output:
+Hello, World!
+
+ > Process = when you run an application or when you start up an application, it actually generates process, where this has an ID and that's called Process ID.  Now, this could be one associated to that application, or it could be multiple processes. 
+3. Process
+💡 What is it?
+A process is an instance of a program that is running. Every application or script runs as a process.
+
+💡 Related Terms:
+✔ PID (Process ID) – Unique number assigned to each process.
+✔ Foreground Process – Runs in the terminal and blocks input (vim).
+✔ Background Process – Runs without blocking (firefox &).
+
+💡 Example in Terminal:
+1. Check running processes:
+ps aux
+
+2. Find process by name:
+ps aux | grep bash
+
+3. Kill a process (replace <PID> with actual process ID):
+kill <PID>
+
+ > Daemon = which is also process but this is something that continuously runs in the background and it keeps listening to the incoming/outgoing traffic. 
+4. Daemon
+💡 What is it?
+A daemon is a background process that runs continuously and performs system tasks (like logging, networking, or scheduling).
+
+💡 Related Terms:
+✔ Systemd – The Linux system that manages daemons (systemctl).
+✔ Service – A daemon that provides functionality (e.g., sshd for SSH).
+✔ No Terminal Dependency – Unlike normal processes, daemons do not need a terminal to run.
+
+💡 Example in Terminal:
+1. List active daemons (services):
+systemctl list-units --type=service
+
+2. Check if the SSH daemon is running:
+systemctl status sshd
+
+3. Restart the SSH daemon:
+sudo systemctl restart sshd
+
+ > Threads = Every process could have multiple threads associated with it. An application that is running your background, it could have many threads. Whenever there is a communication happening beween this process there will be a thread that will get generated.
+5. Thread
+💡 What is it?
+A thread is a lightweight unit of a process that can run independently but shares memory with other threads in the same process.
+
+💡 Related Terms:
+✔ Multithreading – A process that runs multiple tasks at the same time.
+✔ Concurrency – Running multiple threads at once.
+✔ pthread (POSIX threads) – Used for threading in Linux.
+
+💡 Example in Terminal:
+1. Check threads of a process (e.g., firefox):
+ps -T -p $(pidof firefox)
+
+Output:
+  PID  SPID TTY          TIME CMD
+12345 12345 ?        00:00:02 firefox
+12345 12346 ?        00:00:00 firefox
+12345 12347 ?        00:00:00 firefox
+
+ > Job = Created by a Scheduler like a work order, to run those application and services. 
+6. Job
+💡 What is it?
+A job is a process running in the foreground or background, tracked by the shell.
+
+💡 Related Terms:
+✔ Foreground (fg) – A job running in the terminal.
+✔ Background (bg) – A job running in the background (& at the end).
+✔ Job Control (jobs) – A list of running/stopped jobs.
+
+💡 Example in Terminal:
+1. Run a command in the background:
+ping google.com > pinglog.txt &
+
+2. List Background jobs:
+jobs
+
+3. Bring job to the foreground:
+fg %1
+
+Process Management:
+-------------------
+	Process management in Linux is the method used by the operating system to create, manage, monitor, and terminate processes. Every running program is a process, and the system ensures efficient execution, prioritization, and resource allocation.
+
+Key Concepts in Process Management
+✔ Process ID (PID) – A unique identifier for each process.
+✔ Parent and Child Processes – A process (parent) can create new processes (children).
+✔ Foreground & Background Processes – Running a process interactively or in the background.
+✔ Daemon – A system process that runs in the background.
+✔ Process States – Running, Sleeping, Zombie, Stopped, etc.
+
+Commands						Description
+1. ps aux					List all processes
+
+USER       PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+root       1234  0.0  0.1  12345  6789 ?       S    12:00   0:00 nginx
+user       5678  0.1  0.5  23456 12345 pts/0   R+   12:05   0:01 firefox
+
+✔ PID → Process ID
+✔ %CPU → CPU usage
+✔ %MEM → Memory usage
+✔ STAT → Process state (S = Sleeping, R = Running, Z = Zombie)
+✔ COMMAND → Command that started the process
+
+2. top						Show real-time/active process usage
+3. htop						Enhanced real-time process viewer
+4. pgrep <name>					Find process by name
+5. `ps aux					grep <name>`
+6. kill <PID>					Kill a process
+7. kill -9 <PID>				Force kill a process
+8. pkill <name>					Kill process by name
+9. killall <name>				Kill all instances of a process
+10. &						Run process in the background
+11. jobs					List background jobs
+12. fg %1					Bring job 1 to the foreground
+13. bg %1					Resume job 1 in the background
+14. nice -n 10 <command>			Start process with priority 10
+15. renice -5 -p <PID>				Change priority of a running process
+16. strace -p <PID>				Trace system calls of a process
+17. lsof -p <PID>				List open files by a process
+
+System Monitoring:
+------------------
+	System monitoring in Linux refers to the process of observing and analyzing system performance, resource utilization, and behavior to ensure smooth operation. It helps detect performance bottlenecks, troubleshoot issues, and optimize system resources like CPU, memory, disk, and network.
+
+Real-Time Perspective: Why is System Monitoring Important?:
+ > Server Performance Optimization: Monitoring CPU and memory usage in a web server ensures efficient resource allocation.
+ > Troubleshooting Issues: Detecting high disk usage or abnormal network traffic can help in identifying security threats or software issues.
+ > Preventing Downtime: Monitoring log files and system processes can prevent failures and reduce downtime in production environments.
+ > Capacity Planning: Helps businesses scale their infrastructure by understanding resource usage trends.
+
+Command Linux System Monitoring Commands with Examples:
+1. CPU Monitoring - "top" = shows real-time CPU and memory usage of processes (press 'q' to exit, press 'k' and enter a PID to kill a process, press 'M' to sort by memory usage, press 'P' to sort by CPU usage.
+[htop = similar to top but with a better interface, make sure to download the package and then execute it, this command might not work for some of the OS]
+
+2. Memory (RAM) Monitoring - "free -m' = Displays memory usage in MB; "free -k" = Displays memory usage in KB; "free -g" = Displays memory usage in GB
+
+3. Disk Usage Monitoring - "df -h" = Shows disk space usage in human-readable format; "du -sh /path" [ex: du -sh /var/log] = shows the total size of a directory
+
+4. Process Monitoring - "ps aux" = Lists all running processes; "pidstat" [ex: pidstat 1 5] = Monitors individual process CPU usage [Make sure to install the package 'yum install sysstat']
+
+5. Network Monitoring - "netstat -tulnp' = Displays active network connections and listening ports; [this is the older command we used, for the newer one try (ip & ss) commands
+
+6. Log File Monitoring - "tail -f /var/log/syslog" = Monitors system logs in real time [Make sure about the log path]; call for "journalctl -f" = to get the logs from cloud side
+
+7. Uptime & Load Monitoring - "uptime" = Shows system uptime and load average; "w" = shows logged-in users and system load
+
+8. Atomated System Monitoring - "sar -u 5 10" = Collects and displays system performance data [Make sure to download "sysstat" before proceeding with this one]
+
+9. Kernel Log Messages - "dmesg | tail -20" = command displays system boot messages and kernel logs [ex: dmesg | grep -i "error"], command helps to check for the logs in drive
+
+10. Monitor CPU and DIsk I/O Performance - "iostat" = command shows CPU usage and disk I/O statistics [ex: iostat -x 5 3] {-x = Detailed CPU and disk stats; 5 3 = Refresh every 5 seconds, 3 times}
+
+11. Network configuration and Monitoring - "ip" command replaces the older "ifconfig" command and is used to manage network interfaces; "ip a" = show all IP addresses; "ip r" = show routing table; "ip link show" = show network interfaces [ex: ip a | grep "inet"]
+
+12. Network Connections - "ss" = (socket statistics) command displays open network connections; [ex: ss -tulnp] {-t = TCP connections, -u = UDP connections, -l = Listening ports, -m = Show numberical addresses, -p = Show process names} [ex: ss -tulnp | grep 8080]
+
+13. CPU Information - "cat /proc/cpuinfo" = file contains details about the system's CPUs; [ex: cat /proc/cpuinfo | grep "model name" this shows the model name of our system]
+
+14. Memory Information - "cat /proc/meminfo" = file provides detailed RAM statistics [ex: cat /proc/meminfo | grep "MemTotal"]
+
+System Log Monitoring:
+----------------------
+ > System log monitoring in Linux involves collecting, analyzing, and managing log files to track system activities, detect issues, and ensure system security. Logs provide valuable insights into system behavior, user activities, application performance, and security threats.
+
+Why is Log Monitoring Important? (Real-Time Use Cases)
+ > Troubleshooting Issues – Developers and sysadmins analyze logs to debug application crashes or performance problems.
+ > Security Auditing – Security teams monitor logs for unauthorized access attempts, failed login attempts, and system changes.
+ > System Performance Analysis – Engineers analyze logs to identify slow processes, failed services, or resource exhaustion.
+ > Compliance Requirements – Companies maintain logs for auditing and compliance (e.g., HIPAA, GDPR, PCI-DSS).
+ > Intrusion Detection – Security professionals monitor system logs to detect potential cyberattacks.
+
+Common System Log Files and Their Locations
+Linux logs are stored in /var/log/ directory. Some common log files include:
+
+Log File				Purpose
+/var/log/syslog			General system messages (used in Ubuntu/Debian)
+/var/log/messages		General system logs (used in CentOS/RHEL)
+/var/log/auth.log		User authentication logs (successful/failed logins, SSH access)
+/var/log/dmesg			Kernel ring buffer logs (hardware issues, boot process)
+/var/log/kern.log		Kernel-related logs
+/var/log/secure			Security logs (used in CentOS/RHEL)
+/var/log/boot.log		Boot process logs
+/var/log/httpd/access_log	Apache web server access logs
+/var/log/httpd/error_log	Apache web server error logs
+/var/log/nginx/access.log	Nginx web server access logs
+/var/log/nginx/error.log	Nginx web server error logs
+/var/log/mysql.log		MySQL database logs
+/var/log/maillog		Email logs (Postfix, Sendmail)
+
+Commands for System Log Monitoring:
+1. Systemd Logs = journalctl - is used for viewing logs managed by systemd [journalctl -xe  # View detailed error logs; journalctl -f   # Real-time log monitoring; journalctl --since "2 hours ago"  # View logs from the last 2 hours; journalctl -u sshd  # View logs related to the SSH service]
+
+2. Kernel Log Monitoring = dmesg - diplays boot-time and hardware-related messages [dmesg | tail -20  # Show last 20 kernel messages; dmesg | grep -i error  # Filter errors in kernel logs]
+
+3. View Logs in Real-Time = tail - is used to continuously monitor logs [tail -f /var/log/messages  # Monitor system logs in real-time; tail -f /var/log/secure  # Monitor authentication logs; tail -n 50 /var/log/nginx/access.log  # View the last 50 lines of the Nginx access log] {as we don't have nginx here we will not be able to found out}
+
+4. Search for Keywords in Logs = grep - helps filter log files on specific terms [grep "error" /var/log/syslog  # Find error messages; grep "Failed password" /var/log/auth.log  # Find failed login attempts] {Task, complete according to the OS given}
+
+5. View Logs = cat, less, more - commands help view log files in different ways [cat /var/log/messages  # View entire log file; less /var/log/messages  # View log file page by page; more /var/log/messages  # Similar to less, but with scrolling limitation]
+
+6. Extract Specific Log Data - awk = is useful for extracting structured information from logs [awk '{print $1, $2, $5}' /var/log/messages  # Show date, time, and message; awk '/error/ {print}' /var/log/messages  # Extract only error messages]
+
+7. Log File Management - logrotate = is used to manage and rotate logs automatically
+[cat /etc/logrotate.conf]
+
+8. Centralized Log Management - rsyslog = is a powerful logging daemon that can collect and forward logs 
+
+Related Log Monitoring Terminologies:
+Term					Meaning
+----					-------
+Syslog			A standard logging protocol for Unix-based systems.
+Daemon Logs		Logs related to background services (e.g., cron, systemd).
+Log Rotation		The process of archiving and managing old logs.
+Audit Logs		Security-related logs for tracking user activities.
+SIEM			Security Information and Event Management – centralized logging and security analysis.
+Log Aggregation		Collecting logs from multiple sources for centralized monitoring.
+Log Parsing		Extracting meaningful information from raw log data.
+
+
+Log Files and Their Purposes:
+Log File			Purpose			Common Path	    OS Distribution
+--------			-------			-----------	    ---------------
+1. /var/log/syslog	General system messages	      Ubuntu, Debian		Ubuntu, Debian
+
+2. /var/log/messages	General system logs 	       CentOS, RHEL	CentOS, RHEL, Fedora
+		     (system daemons, kernel messages)
+
+3. /var/log/boot.log	Boot process logs	    /var/log/boot.log	CentOS, RHEL, Fedora, Ubuntu
+
+4. /var/log/dmesg	Kernel ring buffer 	      /var/log/dmesg         All Linux OS
+		    (hardware, drivers, startup)
+
+5. /var/log/cron	Cron job execution logs	      /var/log/cron	 CentOS, RHEL, Fedora
+
+6. /var/log/maillog	Mail server logs 	    /var/log/maillog	 CentOS, RHEL, Fedora
+		     (Postfix, Sendmail, Exim)
+
+7. /var/log/mail.log	Mail server logs	   /var/log/mail.log	   Ubuntu, Debian
+
+8. /var/log/secure	Security-related logs 	    /var/log/secure	 CentOS, RHEL, Fedora
+		    (SSH login attempts, sudo commands)
+
+9. /var/log/auth.log	Authentication logs 	   /var/log/auth.log	     Ubuntu, Debian
+		        (sudo, login, SSH)
+
+10. /var/log/httpd/access_log	Apache web server access logs	/var/log/httpd/access_log	CentOS, RHEL, Fedora
+
+11. /var/log/httpd/error_log   Apache error logs   /var/log/httpd/error_log  CentOS, RHEL, Fedora
+
+12. /var/log/nginx/access.log	Nginx web server access logs	/var/log/nginx/access.log	Ubuntu, Debian, CentOS
+
+13. /var/log/nginx/error.log	Nginx error logs	/var/log/nginx/error.log	Ubuntu, Debian, CentOS
+
+14. /var/log/chronyd.log	NTP (Network Time Protocol) logs for time synchronization	/var/log/chronyd.log	CentOS, RHEL, Fedora
+
+Log Files by OS Type:
+Some log file names and locations change based on the Linux distribution.
+1. Debian-based OS (Ubuntu, Debian)
+General logs: /var/log/syslog
+Authentication logs: /var/log/auth.log
+Boot logs: /var/log/boot.log
+Cron logs: /var/log/syslog
+Kernel logs: /var/log/dmesg
+Mail logs: /var/log/mail.log
+Apache logs: /var/log/apache2/access.log, /var/log/apache2/error.log
+Nginx logs: /var/log/nginx/access.log, /var/log/nginx/error.log
+
+2. Red Hat-based OS (CentOS, RHEL, Fedora)
+General logs: /var/log/messages
+Authentication logs: /var/log/secure
+Boot logs: /var/log/boot.log
+Cron logs: /var/log/cron
+Kernel logs: /var/log/dmesg
+Mail logs: /var/log/maillog
+Apache logs: /var/log/httpd/access_log, /var/log/httpd/error_log
+Nginx logs: /var/log/nginx/access.log, /var/log/nginx/error.log
+Time synchronization logs: /var/log/chronyd.log
+
+Tasks:
+======
+1. Monitoring Authentication and Securty Logs: 
+📌 Scenario: A company wants to track failed SSH login attempts and potential brute-force attacks.
+Command to Monitor Failed Login Attempts
+grep "Failed password" /var/log/auth.log  # Ubuntu/Debian
+grep "Failed password" /var/log/secure    # CentOS/RHEL
+👉 Outcome: Identifies failed login attempts, useful for detecting unauthorized access.
+
+2. Monitoring Boot Issues:
+📌 Scenario: A system administrator wants to check why a server failed to boot properly.
+Command to Check Boot Logs
+cat /var/log/boot.log | less
+journalctl -b -1  # View logs from the previous boot session
+👉 Outcome: Helps in diagnosing boot failures and hardware issues.
+
+3. Monitoring Cron Jobs:
+📌 Scenario: A scheduled cron job is not running as expected, and the admin needs to debug it.
+Command to Check Cron Logs:
+tail -f /var/log/syslog | grep CRON   # Ubuntu/Debian
+tail -f /var/log/cron                # CentOS/RHEL
+👉 Outcome: Helps troubleshoot failed or incorrect cron job executions.
+
+4. Monitoring Apache/Nginx Web Server Logs:
+📌 Scenario: A DevOps engineer checks if a website is receiving requests.
+Command to Monitor Apache Logs
+tail -f /var/log/httpd/access_log    # CentOS/RHEL
+tail -f /var/log/apache2/access.log  # Ubuntu/Debian
+
+Command to Monitor Nginx Logs
+tail -f /var/log/nginx/access.log
+👉 Outcome: Tracks incoming web traffic, useful for debugging and analytics.
+	
+5. Checking Mail Server Logs
+📌 Scenario: An email server admin wants to troubleshoot why emails are not being sent.
+Command to Check Mail Logs
+tail -f /var/log/maillog  # CentOS/RHEL
+tail -f /var/log/mail.log  # Ubuntu/Debian
+👉 Outcome: Helps in diagnosing email delivery failures.
+
+6. Checking Kernel and Hardware Issues
+📌 Scenario: A sysadmin checks for kernel-related errors after a server crash.
+Command to View Kernel Logs
+dmesg | tail -20   # Show last 20 kernel messages
+dmesg | grep error  # Filter errors
+👉 Outcome: Identifies hardware or driver failures.
+
+7. Monitoring Time Synchronization (NTP)
+📌 Scenario: A financial institution needs accurate time synchronization for transactions.
+Command to Check Chrony Logs
+cat /var/log/chronyd.log
+👉 Outcome: Ensures time is synchronized correctly across systems.
+
+Special Permissions with (setuid, setgid and sticky bit):
+---------------------------------------------------------
+	In Linux, special permissions allow additional control over files and directories beyond standard read (r), write (w), and execute (x) permissions. These include:
+
+setuid (Set User ID)
+setgid (Set Group ID)
+Sticky Bit
+These permissions are essential for security, privilege escalation, and multi-user environments.
+
+1. setuid (Set User ID)
+🔹 What is setuid?
+The setuid (Set User ID) bit allows a file to be executed with the permissions of the file's owner, rather than the user executing it.
+🔹 Use Case: This is commonly used for system utilities that require root privileges but should be executable by normal users.
+
+Example: setuid in Real Time
+📌 Scenario: A user needs to change their password using the passwd command, which requires root access to modify /etc/shadow.
+📌 How it Works? The passwd command is owned by root and has setuid enabled, allowing normal users to execute it with root privileges.
+
+Checking setuid on passwd
+ls -l /usr/bin/passwd
+
+🔹 Output:
+-rwsr-xr-x 1 root root 54192 Jul  5  2023 /usr/bin/passwd
+📌 The s in -rwsr-xr-x indicates that setuid is enabled.
+
+Setting setuid on a Custom Script:
+> Create a script that prints the current user
+echo -e '#!/bin/bash\nwhoami' > myscript.sh
+chmod +x myscript.sh
+
+> Make root the owner and enable setuid
+sudo chown root:root myscript.sh
+sudo chmod u+s myscript.sh
+
+> Check if setuid is applied
+ls -l myscript.sh
+
+🔹 Output:
+-rwsr-xr-x 1 root root 21 Mar 10 14:00 myscript.sh
+
+> Execute the script as a normal user
+./myscript.sh
+
+🔹 Output:
+root
+👉 The script runs as root, even if executed by a normal user.
+
+2. setgid (Set Group ID)
+🔹 What is setgid?
+The setgid (Set Group ID) bit allows a file to be executed with the group permissions of the file's group owner.
+🔹 Use Case: Commonly used for shared directories where files should be created with the same group ownership.
+
+Example: setgid on Directories
+📌 Scenario: A company has a shared directory where multiple users need access, and all files should inherit the same group.
+
+Step 1: Create a shared directory
+sudo mkdir /shared
+
+Step 2: Assign a common group
+sudo groupadd projectgroup
+sudo chown :projectgroup /shared
+sudo chmod 2775 /shared
+
+🔹 Breaking Down 2775:
+2 → setgid enabled
+775 → Group members have read, write, and execute permissions.
+
+Step 3: Verify setgid
+ls -ld /shared
+
+🔹 Output:
+drwxrwsr-x 2 root projectgroup 4096 Mar 10 14:10 /shared
+👉 New files in /shared will inherit the projectgroup ownership.
+
+3. Sticky Bit
+🔹 What is the Sticky Bit?
+The sticky bit prevents users from deleting files in a directory unless they are the owner or root.
+🔹 Use Case: Used for shared directories like /tmp, where users can create files but not delete others' files.
+
+Example: Sticky Bit in Real Time
+📌 Scenario: Prevent users from deleting others' files in a shared folder.
+
+Step 1: Enable Sticky Bit on a Directory
+sudo chmod +t /shared
+
+Step 2: Verify Sticky Bit
+ls -ld /shared
+
+🔹 Output:
+drwxrwxrwt 2 root root 4096 Mar 10 14:20 /shared
+👉 The t in drwxrwxrwt shows that the sticky bit is enabled.
+
+Testing Sticky Bit:
+User A (user1) creates a file:
+echo "Hello" > /shared/testfile
+
+User B (user2) tries to delete it:
+rm /shared/testfile
+
+🔹 Output:
+rm: cannot remove 'testfile': Operation not permitted
+✅ Only user1 or root can delete the file.
+	
+Summary of Special Permissions:
+Permission			Effect				               		Usage Example
+----------			------					       		-------------
+setuid (4xxx)	     File executes as the file owner 		              		/usr/bin/passwd
+		        (not the user executing it)
+setgid (2xxx)	Files inherit group ownership; executables run as the group owner	Shared team directories (/shared)
+Sticky Bit (1xxx)   Users can only delete their own files in a shared directory		/tmp, /shared
+
+Real-Time Uses of Special Permissions:
+Use Case		      Permission Used			    Example
+--------		      ---------------			    -------
+Password Management	         setuid				/usr/bin/passwd
+Shared Directories	         setgid			 /shared directory for projects
+Secure Temporary Directory	Sticky Bit	/tmp directory to prevent deletion of others' files
+
+Additional Commands for Special Permissions:
+Command						 Description
+-------						 -----------
+chmod u+s filename				Enable setuid
+chmod g+s directory				Enable setgid
+chmod +t directory				Enable sticky bit
+ls -l					View special permissions on files
+ls -ld directory			View special permissions on directories
+
+Different Commands for Different OS:
+OS			Check Special Permissions		Set Special Permissions
+--			-------------------------		-----------------------
+Ubuntu/Debian		  ls -l /usr/bin/passwd			 chmod 4755 script.sh
+CentOS/RHEL		  ls -l /etc/shadow			 chmod 2775 /shared
+macOS			  ls -l /private/tmp	 		 chmod 1755 /Users/Shared
+
+
+
+
+
+
+
+
+
+
+

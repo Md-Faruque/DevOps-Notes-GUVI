@@ -1,0 +1,234 @@
+Networking, Services and System Updates:
+========================================
+
+1. Client-Server Relationship:
+------------------------------
+	 > Client is the one who are requesting, where Server is the one who provides the services; and they provide multiple services.
+	 > A Client could be a web browser, a mobile app, or any other software application that requests services or resources from a server, On the other hand, a server could be a physical machine or a software program running on a machine that provides services or resources to clients. These services could include web hosting, database management, file sharing, etc., [*** Please note, both client and the server are computers running any kind of Operating system. 
+	 > According to Wikipedia, a client is a computer or a program that, as part of its operation, relies on sending a request to another program or a computer hardware or software that accesses a service made available by a server.  > Server is a piece of computer hardware or software that provides functionality for other programs or devices, called clients. 
+	 > The Client-Server relationship is basically how 2 parts of a computer network talk to each other. The client asks for things like data or services, and the server provides them. They use specific rules knows as protocols like HTTP (or) TCP/IP to communicate over different types of network, such as the internet or a local network. This setup is a key part of how distributor computing works allowing for efficient data exchange and resources access across the network. 
+
+How It Works:
+1. Server Setup: A machine (server) runs a service or application that listens for client requests on a specific port.
+2. Client Request: A client sends a request to the server using a network protocol like HTTP, SSH, FTP, or SMTP.
+3. Processing: The server processes the request and prepares a response.
+4. Response to Client: The server sends the response back to the client.
+5. Connection Handling: Some connections are persistent (e.g., SSH), while others are stateless (e.g., HTTP).
+
+Important terms:
+1. Server
+A machine or software providing services to clients. Examples:
+Web Server (Apache, Nginx) – Serves web pages.
+Database Server (MySQL, PostgreSQL) – Manages databases.
+File Server (Samba, NFS) – Shares files over a network.
+
+2. Client
+A device or software that requests services from a server. Examples:
+Web browsers (Chrome, Firefox) act as HTTP clients.
+SSH clients (PuTTY, OpenSSH) connect to remote servers.
+
+3. Protocols
+Rules for communication between client and server. Examples:
+HTTP/HTTPS – Web communication.
+SSH – Secure remote access.
+FTP/SFTP – File transfers.
+
+4. Ports
+Logical endpoints for communication. Examples:
+80 (HTTP), 443 (HTTPS) – Web traffic.
+22 (SSH) – Secure shell login.
+3306 (MySQL) – Database connections.
+
+5. Daemon
+A background service process that listens for client requests. Example:
+sshd (SSH daemon) runs in the background to handle SSH connections.
+
+6. Socket
+An endpoint for sending/receiving data. Example:
+socket(AF_INET, SOCK_STREAM, 0) creates a network socket in programming.
+
+7. IP Address & Hostname
+IP Address – Unique identifier for a machine on a network.
+Hostname – Human-readable name mapped to an IP (e.g., example.com).
+
+8. Firewall
+Controls network traffic between clients and servers.
+Example command to allow SSH (port 22):
+
+sudo ufw allow 22/tcp
+
+Network Components:
+-------------------
+ > IP = Internet Protocol, a unique string of numbers separated by periods that identified each computer using the Internet Protocol to communicate over a network.
+ > Subnet mask = is a 32-bit number that masks an IP address, and divides the IP address into network address and host address. Subnet Mask is made by setting network bits to all "1"s and setting host bits to all "0"s
+
+Class	IP Range			Default Subnet Mask	Usable Hosts per Network	Usage
+---------------------------------------------------------------------------------------------------------------------
+A	1.0.0.0 – 126.255.255.255	255.0.0.0 (/8)		16.7 million			Large networks (ISPs, big companies)
+
+B	128.0.0.0 – 191.255.255.255	255.255.0.0 (/16)	65,534				Medium networks (universities, enterprises)
+
+C	192.0.0.0 – 223.255.255.255	255.255.255.0 (/24)	254				Small networks (LANs, offices)
+
+D	224.0.0.0 – 239.255.255.255	No subnet mask	N/A					Multicast (video streaming, conferences)
+
+E	240.0.0.0 – 255.255.255.255	No subnet mask	N/A					Experimental use
+
+1. Class A
+IP Range: 1.0.0.0 to 126.255.255.255
+Default Subnet Mask: 255.0.0.0 (or /8)
+Network Bits: 8
+Host Bits: 24
+Total Networks: 128 (from 0 to 127, but 0 and 127 are reserved)
+Hosts per Network: 16,777,214
+📌 Used for: Large networks like ISPs or multinational companies.
+
+2. Class B
+IP Range: 128.0.0.0 to 191.255.255.255
+Default Subnet Mask: 255.255.0.0 (or /16)
+Network Bits: 16
+Host Bits: 16
+Total Networks: 16,384
+Hosts per Network: 65,534
+📌 Used for: Medium-sized organizations and universities.
+
+3. Class C
+IP Range: 192.0.0.0 to 223.255.255.255
+Default Subnet Mask: 255.255.255.0 (or /24)
+Network Bits: 24
+Host Bits: 8
+Total Networks: 2,097,152
+Hosts per Network: 254
+📌 Used for: Small businesses, home networks, and LANs.
+
+4. Class D (Multicast)
+IP Range: 224.0.0.0 to 239.255.255.255
+Purpose: Used for multicast (one-to-many communication).
+No Subnet Mask: Multicast doesn’t use subnetting.
+📌 Used for: Streaming, video conferencing, and real-time data distribution.
+
+5. Class E (Experimental/Reserved)
+IP Range: 240.0.0.0 to 255.255.255.255
+Purpose: Reserved for experimental purposes.
+Not Used in Regular Networks
+
+ > Gateway = which route you have to pick to sent you traffic out and to recieve your traffic in. [If you are in your home network, the IP address of the modem will be the gateway]
+ > Static vs. DHCP = fixed one, no matter how many times we restarts; whereas DHCP, the IP address will change whenever system reboots.  
+ > Interface = The port that connected to the CAT-5 cable, that's a interface (NIC card) [Network Interface Controller]
+ > Interace MAC = Interface always have a MAC address that is the permanent one to you NIC associated with your card.
+
+Network Files and Commands:
+---------------------------
+ > Interface Detection = is the process of finding and identifying these network interfaces when your system starts.
+ > Assigning an IP address  = giving your computer a unique address so it can connect to the internet or a local network.
+ > Interface configuration files
+	. cat /etc/nsswitch.conf = Controls where the system looks for hostname resolution (mapping domain names to IPs).
+	. cat /etc/hosts = A local file for mapping hostnames to IP addresses (used before checking DNS).
+	. cat /etc/sysconfig/network = Sets global network configurations like hostname and default gateway.
+	. cd /etc/sysconfig/network-scripts = Contains files for configuring individual network interfaces [ifcfg-eth0]
+	. cat /etc/resolv.conf = Stores DNS server addresses for domain name resolution. 
+
+Network Commands:
+ > ping = check network connectivity - sends small data packets to a target (website, server, or another computer) to check if it is reachable and how long it takes to respond.
+Real-Time Usage in Companies:
+✅ Checking if a server is online before deploying an application.
+✅ Verifying if internet connectivity is working.
+✅ Diagnosing network delays between offices.
+Example:
+ping google.com
+
+ > ifconfig = View & Configure Network Interfaces (Deprecated, replaced by ip command) - Displays or modifies network interface settings (like IP address, MAC address).
+Real-Time Usage in Companies:
+✅ Checking the current IP address assigned to a server.
+✅ Enabling or disabling a network interface.
+✅ Troubleshooting network disconnection issues.
+Example:
+ifconfig = Displays all network interfaces and their status.
+ifconfig eth0 192.168.1.100 netmask 255.255.255.0 up = Assigns IP 192.168.1.100 to eth0 and brings it up.
+ifconfig eth0 down = Disables (turns off) the interface eth0.
+
+ > ifup & ifdown = Enable or Disable Network Interfaces - ifup activates a network interface, ifdown disables a network interface.
+Real-Time Usage in Companies:
+✅ Restarting network interfaces after configuration changes.
+✅ Disabling an interface temporarily for security or troubleshooting.
+✅ Automating network configuration in shell scripts.
+Example:
+sudo ifdown eth0 = Turns off the eth0 network interface.
+sudo ifup eth0 = Turns eth0 back on.
+
+ > netstat = Monitor Network Connections & Ports - Shows active network connections, open ports, routing tables, and more.
+Real-Time Usage in Companies:
+✅ Checking which ports are open on a server.
+✅ Identifying which services are running on a machine.
+✅ Troubleshooting high CPU usage due to network connections.
+Example:
+netstat -tulnp = Shows all listening ports (-l), TCP (-t) & UDP (-u) connections, and the process ID (-p) of services using them.
+netstat -an | grep ESTABLISHED = Lists all active network connections.
+netstat -r = Displays the routing table, showing how packets travel through the network.
+
+ > tcpdump = Capture Network Packets for Analysis - Captures and analyzes real-time network traffic.
+Real-Time Usage in Companies:
+✅ Troubleshooting network latency issues.
+✅ Capturing malicious network packets for security analysis.
+✅ Debugging API requests between microservices.
+Example:
+sudo tcpdump -i eth0 = Captures all packets on the eth0 network interface.
+sudo tcpdump -i eth0 port 80 = Captures only HTTP traffic (port 80) for debugging website requests.
+sudo tcpdump -i eth0 -w capture.pcap = Saves captured packets to a file (capture.pcap) for later analysis in Wireshark.
+
+NIC = Network Interface Card
+----------------------------
+	> A Network Interface Card (NIC) is a hardware component (or sometimes software-based virtual interface) that allows your Linux system to connect to a network. It helps in sending and receiving data over the internet or a local network.
+	> Each NIC has a unique MAC address (Media Access Control), which acts like an identity for network communication. NICs can be physical (wired/wireless network adapters) or virtual (like interfaces used in virtual machines or cloud environments).
+
+Commands to Find NIC:
+1. List all network interfaces, including their status and MAC addresses = ip link show (command)
+
+2. Show detailed information about interfaces = ip addr show
+
+3. Display a list of network devices, their states, and connections = nmcli device status
+
+4. Command lists the Ethernet NICs on the system = lspci | grep -i ethernet
+
+5. To check the NIC driver and module information = ethtool -i enp0s3
+
+Tasks:
+6. View network configuration files (for static IP or DHCP settings) = cat /etc/sysconfig/network-scripts/ifcfg-enp0s3
+
+NIC and Port Bonding:
+---------------------
+ > NIC bonding is also known as Network bonding. It can be defined as the aggregation or combination of multiple NIC into single bond interface
+ > It's main purpose is to provide high availability and redundancy.
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

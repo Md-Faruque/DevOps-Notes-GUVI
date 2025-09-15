@@ -1,0 +1,67 @@
+Quiz: 2
+=======
+1. What is Virtual Box?
+a. It is pre-configured at the hardware level
+b. It is installed on top of an operating system for applications to share resources
+c. It is installed on top of an operating system to run multiple operating system and share resources
+d. It allows us to run only MAC on a Windows PC
+Ans: C
+
+2. Which of the following are Linux distributions?
+a. CentOS, Redhat, SUSE
+b. Windows, CentOS, RedHat, SUSE
+c. CentOS, Redhat, SUSE, Debian, Ubuntu, MAC
+d. CentOS, Redhat, SUSE and VMWare
+Ans: A
+
+3. A virtual machine can run which of the following?
+a. Operating system
+b. Database
+c. Application
+d. Storage
+Ans: A
+
+4. What is Linux Open Source?
+a. It cannot be copied
+b. It cannot be replicated
+c. The programming source code is available and cannot be editable
+d. The programming source code is available which can be copied and then it can be editable
+Ans: D
+
+5. The Linux installation wizard ask you the following questions
+a. Language, Hostname, Network, Packages, File Partition, root password
+b. Language, Hostname, and the number of employees
+c. Language, Hostname, Network, Packages, File Partition, and RAID
+d. All the above
+Ans: A
+
+6. What are the different ways to install an operating system?
+a. ISO image
+b. Disc
+c. Network install
+d. All of the above
+Ans: D
+
+7. What are the 2 Linux Desktops?
+a. KDE and GNome
+b. KDE and Windows
+c. GNome and LinuxGUI
+d. None of the above
+Ans: A
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 

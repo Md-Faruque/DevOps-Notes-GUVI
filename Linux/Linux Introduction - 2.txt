@@ -1,0 +1,141 @@
+Linux is a free (where we don't want to pay anything; but there are certain linux distribution which requires license if need you support) and open-source (the code that is written on is completely open to public and you could change it depending on the requirement of your application) operating system, project by Linus Torvalds in 1991, most used OS in the world.
+	Linux is very popular for its stability, security, and flexibility. It can be modified and distributed by anyone, which has led to many different versions, known as "distributions", and each distribution is tailored for different users. 
+
+What is an OS?
+It's software, that enables you to use your computer to perform the tasks you need to get your work done. 
+
+Before Linux, we had Unix OS developed in 1970s at AT&T's Bell labs by Ken thompson and Dennis Ritchie, that was popular and costly, then come the GNU project in 1983, Richard stallman launched the GNU, it is actually not a unix project, but this created with the aim of free UNIX-like operating system; while many tools and utilities where developed, a complete free OS was missing a kernel. 
+Then Linux was born, 
+In 1991, a 21-year old Finland student named Linus Torvalds, started developing a free operating system kernel as a hobby project. On Aug 25, 1991 he announced his project on MINIX Newsgroup with a famous words "I am doing a (free) operating system just a hobby, won't be big and professional like GNU" the 1st version 0.01 was released in sept 1991, even though it is not functional but was released to the public to view and comment upon, then later 1991, version 0.01 was released with fully functional and combined with the utilities from the GNU project. He created just to boot up the computer and nothin else, hence he planned to create an OS that can be used by everyone without cost (or) incur some less charges. But, Linux quickly evolved into a full OS, it directly manages the computer resources like (CPU, memory, storage, and device are attached to it).
+
+Why learning Linux is important?
+> widely used in servers and cloud computing
+> Most of the Corporate companies are running Linux as their primary OS to run their applications
+> Free software philosophy
+> Strong command line interface
+> Faster processing as it has CLI
+> Enhaced security for the same reason
+> Customization because of open-source nature
+> Community support
+> More career opportunities.
+
+RedHat is the major contributor of Linux OS
+This s a combinations of 3 major sections:
+	- The Kernel
+	- The system user space
+	- Applications
+
+The Kernel:
+1st, it has to "boot"
+ - this is the lowest layer
+ - On startup, the computer "bootc' up
+
+	We do have 2 different mechanisms to start the system:
+1. Either the BIOS (Basic Input/Output system) or
+2. UEFI (Unified Extensible FIrmware Interface)
+
+both this "run" a bootloader. This bootloader loads the kernel image
+The "kernel" initializes and starts up everything else that is required to run (e.g., drivers and software) == this is actually a compressed file that will decompress and run the image.
+
+The system user space (An Administrative Layer):
+This is the configuration or software installation layer, it includes the shell or command interpreter, this also includes daemons (this are the background process or the subsystem to make sure about how things works)
+
+Applications:
+these are the main use for Linux.
+ - Allows you to perform tasks, this can be anything from graphical interface.
+
+Distrubutions (different versions)
+
+Originally, Linux was not so easy to use, it's difficult to install, we don't have enough "drivers" according to your hardware; and Graphical interfaces were difficult to get working. 
+
+Different Versions of Modern Linux:
+	Linux distributions are versions packaged up with associated software, usually from different companies or groups. Versions diverged over time, but the core of Linux, its kernel, as a common factor. Package managers, or methods to install new software, changed depending on the distribution. 
+
+Software is released in packages, these packages available for distribution are typically managed by the vendor and consist of multiple files combined into one package for installation using a package manager. 
+	- Red Hat are related distributions use the "yum" or "dnf" commands
+ 	- Ubuntu or Debian use the "apt" command
+Pacakages and package managers allow for easy installtion of software
+There are 1000s of packages are available
+
+The Kernel ties it all together. 
+Other common componenets are the supporting system software and libraries [it is a collection of software that is used by computer programs]
+
+There are lots of linux distributions available: 
+Reference: https://en.wikipedia.org/wiki/List_of_Linux_distributions
+
+Most famous/popular distributions are:
+Red Hat == which includes CentOS and Fedora (this is based on Red Hat)
+Ubuntu == Which is based on Debian
+OpenSUSE == which comes from the SUSE project
+
+RedHat we do have some charges, but we can use CentOS for free
+OpenSUSE is the free version of SUSE
+Ubuntu has no license fee as well as free to use. 
+
+If the Linux distribution is too old, there are no bug fixes or support.
+Each distribution has different lifespans for their support of particular Linux releases.
+
+Ubuntu have (LTS = Long Time Support) releases with support for 5 years, extended support for security upto 10 years (for some extra charges)
+Red Hat support depends on the level you pay for
+SUSE support also depends on the support level related to payments.
+
+Ensure updates are current:
+1. Rather than use Long Term Support, it's better to keep your distribution current.
+2. New features and performance increases occur regularly
+3. New kernels have support for newer hardware built in
+4. Having support available is important for unexpected issues or situations
+
+What is Open Source Software (OSS)?
+	It means the source code (building blocks) is available for use, examine, modify & share; in other words, it's publicly available to be modified and distributed. Proprietary software is closed source or unavailable. The code that used to create the source is available without any additional cost. The source code can be resued according to your requirement, Once modified, you can thenr redistribute it; Depending on the license, you may need to "give back" a copy of your changes to the originator of the code. 
+
+You may get the source code, but you have paid for it:
+examples
+Red Hat Enterprise has a cost. With the license fee, you get access to the source code with exceptions.
+
+Might not be 100% open source, Some distributions have proprietary code, such as drivers that are included but not open source. But the kernel is 100% free, you can always take a copy if required. 
+		
+The Free Software Movement, originally created by Richard Stallman, when he was working on the GNU GPL Project (Gnu's Not Unix) pronounce as g-noo GPL (General Public License) (Fully open source) - Debian is one of the original fully open-source Linux distributions including the drivers.
+GIve It Back: THe source code is free, but if you change it, those changes must be shared.
+ 	- When Red Hat makes changes or updates to open-source code, it shares those changes and updates back to the community.
+	- Open source and software from the Free Software Foundation (FSF) isn't about cost. Both can be sold or given away. 
+	- The difference is sharing. You can charge, but the original project must get a copy of what you changed. 
+
+Some Popular Licenses:
+1. MIT License = has few restrictions and one of the shortest license
+2. GNU GPL 2 = very common license and used widely. It does a good job of protecting your rights. 
+3. Apache License 2.0 = good license for use, if you want to open-source your own code.
+4. GPL 3.0 = this stipulates that nobody should be restricted by the software they use. 
+5. 3-Clause BSD License = Simple license with 3 clauses
+6. Gnu Lesser GPL (LGPL) 2.1: not as protective of the Free Software Foundation rules. 
+
+Other than Linux:
+1. Microsoft Windows: servers and personal use
+2. macOS: not used for servers and is supplied with Apple computers
+
+Famous Unix OS:
+1. BSD or FreeBSD (Berkeley Software Distributions)
+2. Oracle or Sun Solaris
+3. AIX = Proprietory OS from IBM, high end mainframe computers
+4. HP-UX = mainframe hardware from HP
+
+	- macOS is based on BSD and has been heavily modified since its beginning
+		. like Linux, macOS can use Linux commands on their own way
+		. they provide graphical desktop and thats easy to use
+		. required to use apple hardware
+
+	- Windows (Desktop or Server)
+		. popular for use on individual desktops as well as servers
+		. for desktop or personal use, windows are the most popular one
+
+Cost is always an issue:
+1. Buying and licensing windows desktop and server can be expensive
+2. The same with macOS, since Applie computers can cost a lot, through there are times it's required
+3. Linux can cost you a lot less to use
+
+Linux can be used for most tasks:
+If you use software as a service, then the OS is less important
+1. Microsoft Office 365 or Google for documents or email
+2. Zendesk for customer service or customer relationship management
+3. Jira for issue tracking
+4. Confluence as a team workspace
+	If all you need is a browser and internet access, you can save a lot of money.

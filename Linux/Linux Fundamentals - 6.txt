@@ -1,0 +1,201 @@
+File Permissions:
+=================
+	Linux is a multi-user system. Every file and directory in your account can be protected from or made accessible to other users by changing its access permissions. Every user has responsibility for controlling access to their files.
+> Permissions for a file or directory may be restricted by its types (r- read, w- write, x- execute = running a program)
+> Each permissions can be controlled at 3 different levels (u - user = yourself, g - group = can be people in the same project/ same department, o - other = everyone on the system)
+> Command to change permission is = chmod
+The chmod (change mode) command is used to modify file and directory permissions. You can use alphabetic or numeric methods to set permissions.
+
+Using Alphabetic Permissions
+----------------------------
+Symbols:
+u → user (owner)
+g → group
+o → others
+a → all (user, group, and others)
++ → add permission
+- → remove permission
+= → set exact permission
+
+Examples:
+---------
+1. Add execute permission to the user (owner):
+
+chmod u+x file.txt
+🔸 Gives the owner execute (x) permission.
+
+2. Remove write permission from the group:
+
+chmod g-w file.txt
+🔸 Takes away write (w) permission from the group.
+
+3. Give read and write permissions to others:
+
+chmod o+rw file.txt
+🔸 Adds read (r) and write (w) for others.
+
+4. Set exact permissions (user: rw-, group: r--, others: ---):
+
+chmod u=rw,g=r,o= file.txt
+🔸 Adds read and write (rw) for user, read for group and no permission (-) for others.
+
+Using Numeric Permissions
+-------------------------
+Permission Values:
+
+r → 4 (read)
+w → 2 (write)
+x → 1 (execute)
+Format: [user][group][others]
+
+Sum the values for each category.
+
+Examples:
+---------
+1. chmod 755 file.txt
+
+User: 7 → rwx (4+2+1)
+Group: 5 → r-x (4+0+1)
+Others: 5 → r-x (4+0+1)
+🔸 User has full permissions, group and others can read and execute.
+
+2. chmod 644 file.txt
+
+User: 6 → rw- (4+2)
+Group: 4 → r--
+Others: 4 → r--
+🔸 Common for text files where only the owner can write.
+
+3. chmod 700 file.txt
+
+User: 7 → rwx
+Group: 0 → ---
+Others: 0 → ---
+🔸 Only the owner has full access.
+
+4. chmod 777 file.txt
+
+User/Group/Others: 7 → rwx
+🔸 Everyone has full permissions (usually unsafe).
+
+File Ownership:
+===============
+	There are 2 owners of a file or directory (User = the one who creates the file or the directory & group = the user where the group belongs to)
+> Command to change file ownership 
+	chown = changes the ownership of a file
+	chgrp = changes the group ownership of a file.
+> Recursive ownership change option (Cascade)
+	-R = if you are using an option with change own or change group with (-R) it will not only change that directory but also all the files and directories within that parent directory. 
+
+Example:
+--------
+Create a file (file.txt) & directory (dir1)- check the output by calling (ll) and then execute the below commands to check for the output.
+
+1. Change owner to john:
+
+chown john file.txt
+
+2. Change owner to john and group to developers:
+
+chown john:developers file.txt
+
+3. Change only the group to staff:
+
+chown :staff file.txt
+
+4. Recursively change owner and group for a directory:
+
+chown -R john:developers /dir1
+
+[Task: Execute the same in Terminal and confirm the output accordingly]
+
+Access Control List: (ACL)
+==========================
+	This is another layer (or) a top layer (or) an aditional layer that runs on top of your permissions which allows you to assign permission per user. 
+	Definition: ACL provides an additional, more flexible permission mechanism for file systems. It is designed to assist with UNIX file permissions. ACL allows you to give permissions for any user or group to any disc resource. 
+
+Purpose of ACL:
+---------------
+	Think of a scenario in which a particular user is not a member of group created by you but still you want to give some read or write access, how can you do it without making user a member of group, here comes in picture ACL, this helps us to do this trick. [instead of providing permissions to all the users, we are setting up the permission only for the particular user/group]
+ > Basically, ACLs are used to make a flexible permission mechanism in Linux
+ > From Linux man pages, ACLs are used to define more fine-grained discretionary access rights for files and directoring
+ > Commands to assign and remove ACL permissions are: (setfacl [set file ACL] = this allows to set the way we need to provide permissions and getfacl [get file ACL] = this gives information about the existing permissions of a file)
+
+Examples:
+---------
+List of commands for setting up ACL:
+
+1. To add permission for user = setfacl -m u:user:rwx /path/to/file [set file ACL, -m (modify), u (username), for providing the permission to a specific file also we need to mention the complete path, ex: setfacl -m u:akshiv:rwx /path/to/file]
+
+2. To add permission for a specific group = setfacl -m g:group:rw /path/to/file [set file ACL, -m (modify), g(groupname), then mention the complete path of the file, ex: setfacl -m g:dev:rw /path/to/file]
+
+3. To remove a secific entry for a specific user = setfacl -x u:user /path/to/file [-x (remove)]
+
+4. To remove all entries = setfacl -b /path/to/file [-b (all users)]
+
+Note:
+ > Once we assinged the ACL permission to a file/directory it adds (+) sign at the end of the permission (ll), this shows that it has ACL assigned to it.
+ > Setting (w) permission with ACL does not allow to remove a file, (we can modify/edit but the file cannot be deleted)
+
+Practical Steps: (Tasks)
+------------------------
+1. Open Virtual OracleBox - connect to the machine - become root user - create a (tmp) dir - create a file (touch test)
+
+2. now (ll) and check the permissions, to know in detail (getfacl test) and we can see the permissions along with the user info
+
+3. Now, let us try to provide access only to a particular user, (if we are going to modify permissions by chmod, this changes access for all the user, group, others; it will get applied to everyone belongs there) and that is why we are trying to provide access only to the specific user
+
+4. Let us provide permission only for the specific user, if you don't have one then create a user and try setting the same, (setfacl -m u:akshiv:rw /tmp/test)
+
+Help Commands:
+==============
+ > There are 3 types of help commands
+	. whatis command [quicker/shorter explanation about the command] [depends upon OS it might or might not work]
+	. command --help [longer version of the help with more details/options]
+	. man command [complete information along with the description about the command]
+
+Tee Command:
+============
+ > "Tee" command is used to store and view (both at the same time) the output of any command
+ > The command is name after the T-splitter used in plumbing. It basically breaks the output of a program so that it can be both displayed and saved in a file. It does both the tasks simultaneously, copies the results into the specified files or variables and also display the result.
+
+	command --> tee --> stdout
+		      |			==> this shows the output and will save the content inside the file.
+		    File
+
+ex: echo "This is a sample one" | tee file1 [this is going to show the content along with that it will save the content inside (file1)]
+
+Pipe Command:
+=============
+ > A pipe is used by the shell to connect the output of one command directly to the input of another command.
+ > The symbol for a pipe is the vertical bar ( | ). The command syntax is: Command 1 | command 2 (ex: ls -l | more)
+
+File Maintenance Commands:
+==========================
+ > cp = copy
+ > rm = remove
+ > mv = rename/move
+ > mkdir = make directory
+ > rmdir (or) rm -r = remove directory; remove directory with content
+ > chgrp = change group
+ > chown = change ownership
+ > chmod = change permission
+
+File Display Commands:
+======================
+ > cat (file name) = view the content of a file no matter with the number of pages
+ > more (file name) = view the content of a file one page at a time
+ > less (file name) = view text files one screen at a time. It provides a convenient way to read and navigate through large text files such as log files, configuration files, or documentation. 
+ > head (followed by the number of lines) = want to view a few lines at the top of a file [ex: head -10 (file name)]
+ > tail (followed by the number of lines) = want to view a few lines at the bottom of the file [ex: tail -10 (file name)]
+
+
+
+
+
+
+
+
+
+
+

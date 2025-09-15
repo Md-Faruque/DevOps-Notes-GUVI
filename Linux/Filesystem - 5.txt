@@ -1,0 +1,108 @@
+Filesystem:
+===========
+	It is a system used by an operating system to manage files. The system controls how data is saved or retrieved from your computer hard disk. 
+	Operating system stores files and directories in an organized and structured way
+	. System configuration file = Folder A
+	. User files = Folder B
+	. Log files = Folder C
+	. Commands or scripts = Folder D and so on
+	There are many different types of filesystems. Each filesystem has been given a different name [ex: ext3, ext4, xfs [linux file systems] ntfs, fat [windows file system] etc.,]
+
+File System Structure and its Description:
+==========================================
+/boot	=	Container file that is used by the boot loader (grub.cfg or configuration file); what happen is every time your system boots up, the first thing the operating system that needs to boot up, the system looks for /boot.
+
+/root	=	root user home directory
+
+/dev	=	system devices (eg: disk, cdrom, speakers, flashdrive, keyboard etc.,) any of those peripheral devices that are attached to your linux system, they are created as a file as well
+
+/etc	=	all the Configuration files that runs on top of the Linux systems
+
+/bin -> /usr/bin	=	Everyday user commands
+
+/sbin -> /usr/sbin	=	System/filesystem commands 
+
+/opt	=	Optional add-on applications (Not part of OS apps)
+
+/proc	=	Creating files for all the running processes (only exist in memory)
+
+/lib -> /usr/lib	=	C programming library files needed by commands and applications
+
+/tmp	=	Directories for temporary files
+
+/home	=	Directory used for regular users 
+
+/var	=	for systme logs, every time operating system writes some output or some logs, all those logs will be available here.
+
+/run	=	System daemons that start very early to store temporry runtime files like PID files
+
+/mnt	=	To mount external filesystem (eg: NFS), if nothing is mounted on your existing file system, then you could use this to create another subdirectory and mount an external NFS file system to it.
+
+/media	=	used for CD-ROMs, in virtual machines that virtual iso image will be shown under this.
+
+to try this practically, 1st go inside the filesystem (cd /), then try
+
+Linux File or Directory Properties:
+===================================
+	Each file or directory in linux has detail information or properties
+
+ex:
+Type		# of links	owner	Group	Size	Month	Date	Time	Name
+drwxr-xr-x	21		root	root	4096	Feb	27	13:33	var
+lrwxrwxrwx	1		root	root	7	Feb	27	13:15	bin
+-r-xr-xr-x	1		root	root	0	Mar	2	11:15	testfile
+
+d = directory
+l = link or point to another file/path/directories
+- = regular file
+
+# of links = number of hard links to the file. For a directory, the number of hard links is the number of immediate subdirectories it has plus its parent directory and itself
+
+owner = who owns this file/directory
+
+group = which group owns the files/directories
+
+What is root?
+=============
+There are 3 types of root on linux system
+ > root account: root is an account or a username on Linux machine and it is the most powerful account which has access to all commands and files; it is just like the administrator account in windows.
+
+ > root as / : the very 1st directory in linux is also referred as root directory; whenever we are hearing go to root directory it means we need to go to the slash (/) directory.
+
+ > root home directory: the root user account also has a directory located in /root which is called root home directory.
+
+Changing password:
+==================
+	You should change your initial password as soon as you login, this is when your account is created for the first time in the system, and you log in with the password that's been given to you. 
+Command = passwd userid [userid is nothing other than the username] (ex: passwd akshiv) [try this being the root user]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

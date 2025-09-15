@@ -1,0 +1,17 @@
+As we all know, that linux is an Operating System, let's understand about OS 1st: According to Wikipedia, An OS is system software that manages computer hardware and software resources, and provides common services for computer programs. 
+	In simple words, An OS is software that acts as a middleman or a bridge between computer hardware and the computer user. It provides a user interface and controls the computer hardware so that software can function.
+
+Types of OS:
+1. Desktop Operating Systems: These are OS designed for regular users like you and me, who use computers for tasks like browsing the internet, playing games, or working on documents. (eg: Microsoft windows, macOS, and Linux such as Ubuntu)
+
+2. Server Operating systems: Server OS are built to manage and support multiple users and services, like hosting websites or managing databases. These OS need to be stable, secure, and efficient for long-term use. (eg: Windows server, Linux distributions like CentOS, RedHat Enterprise linux etc.,)
+
+3. Mobile Operating systems: These are made for smartphones and tablets. They are optimized for touch screens and mobile apps. (eg: Android, iOS, Windows mobile etc.,)
+
+4. Embedded Operating Systems: These are designed for specific devices like smart appliances, cars, or medical equipment. They are lightweight and efficient. (eg: routers, smart TVs, automobiles, etc.,)
+
+5. Real-time Operating systems (RTOS): RTOS are used in systems where tasks need to be done in a specific time frame, like in industrial machines or air traffic control. (eg: home security system, medical equipment, aerospace etc.,)
+
+6. Distributed Operating systems: These systems run on a network of computers, allowing them to work together as if they were one large machine. This helps in tasks like scientific simulations or complex data analysis. (eg: Apache Hadoop, Microsoft Azure etc.,)
+
+

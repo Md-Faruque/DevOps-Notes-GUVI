@@ -1,0 +1,15 @@
+Linux Installation:
+	Open VMware or Oracle Virtualbox [I am going to use Oracle Virtualbox] - provide the name (CentOS), the moment I gave the name, we can see it is automatically picking up the the Type, Subtype & Version, if you find it not right we can change accordingly; - next - where we need to choose the hardware, select atleast 2GB of RAM & 1CPUv - next - select the storage, make sure to allocate atleast 20GiB - rest leave everything default - finish.
+
+	click on settings - network - chage the adapter from NAT to Bridged Adapater (if we are using this, we can directly get connected with our wifi connection)
+
+	For VMware - click new machine - ISO file later - select the OS (Linux), Distributor (CentOS 7) - provide a name (CentOS 7) - Storage min (20GiB) - customize hardware - network (Change it to Bridged adapter) - close - Finish.
+
+        In virtual box, start the machine, and it will prompt for the .iso image, now select and attach the image which we downloaded; samewise in vmware we can see CD/DVD, click on that and attach the .iso image, then power on the virtual machine.
+	
+	Now once we are inside the vm, click and select Install centos 9 - next, select the language (English) - English (India) - select the Installation destination, Done - choose Network & Hostname, provide the Hostname (CentOS) apply, make sure the ethernet is enabled, if not then enable one, Done - Create Root password (admin), enbale the checkbox (Allow root SSH login with password), Done - Click on Begin Installation [It will take sometime, so wait until the process completes] - Start Setup, turn off the location - connect to online accounts (skip) - Create user (Full name) and username - provide the password - start using CentOS.
+
+Taking Snapshot:
+	It is always advisable to take a copy of your OS, so in future if the machine went down due to some reasons, we can recover from this snapshot, to do so, power off you VM, select the navigation and select snapshot, provide a name; once done we can see restore option to bring back our VM to its original state.
+
+	

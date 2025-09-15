@@ -1,0 +1,50 @@
+Quiz: 1
+=======
+1. What is Linux?
+a. It is computer system
+b. It is an operating system
+c. It is an application runs on windows
+d. All of the above
+Ans: B
+
+2. Which one of the following is correct?
+a. Hardware -> operating system -> applications -> users
+b. Operating system -> users -> networking -> storage
+c. Hardware -> operating system -> users -> applications
+d. Hardware -> users
+Ans: A
+
+3. Unix was first developed in which decade?
+a. 2010-2018
+b. 1970-1980
+c. 1990-2000
+d. 1991-1997
+Ans: B
+
+4. Who came up with Linux?
+a. Linus Torvalds
+b. Linus James
+c. Pengium
+d. Bell Labs
+Ans: A
+
+5. Which of the following is incorrect?
+a. Linux is open source
+b. Mostly Linus is virus free
+c. Linux is not as user friendly as Windows
+d. Commands used in Linux are exactly same as Windows DOS commands
+Ans: D
+
+6. Unix is mostly used by?
+a. Oracle/Sun
+b. HP-UX
+c. AIX
+D. All of the above
+Ans: D
+
+7. Which of the following is correct?
+a. MAC operating system can only be installed and supported on Apple hardware
+b. CentOS is same as Redhat but without technical support
+c. Windows cannot be installed on SPARC processor
+d. All of the above
+Ans: D

@@ -1,0 +1,76 @@
+Quiz: 4
+=======
+1. Which command syntax is correct if you want to assign read only permission to everyone and write permission to the owner of the file?
+a. chmod a+r+u+w filename
+b. chmod a+r filename
+   chmod u+w filename
+c. chmod a+w filename
+   chmod u+r filename
+d. chmod g+r filename
+   chmod u+w filename
+Ans: B
+
+2. Which command is used to change file owership?
+a. chowner
+b. chgrp
+c. chmod
+d. chown
+Ans: D
+
+3. Why do we need pipes?
+a. To connect user with a new command
+b. To further process the input of the preceding command
+c. To further process the output of the preceding command
+d. To join two files
+Ans: C
+
+4. List 3 basic commands of file navigation?
+a. ls, pwd, cd
+b. ls, pwd, chmod
+c. pipe, pwd, cd
+d. ls, chgrp, cd
+Ans: A
+
+5. Which command is used to remove a directory?
+a. rm -r DIRECTORYNAME
+b. rm DIRECTORYNAME
+c. mv -r DIRECTORYNAME
+d. rm -i DIRECTORYNAME
+Ans: A
+
+6. Which command is used to change group ownership of a file?
+a. chgrp
+b. chgroup
+c. chown
+d. chmod
+Ans: A
+
+7. What are the different ways to view a file?
+a. cat
+b. vi
+c. more
+d. less
+e. All of the above
+Ans: E
+
+8. How to rename a file?
+a. rename
+b. mv
+c. rm
+d. chown
+Ans: B
+
+9. Which command is used to search for a key word or pattern in a file?
+a. awk
+b. sort
+c. grep
+d. echo
+Ans: C
+
+10. Why do we need to use help or man commands?
+a. It helps us remember the commands
+b. It helps us remember the purpose of a command and its options
+c. Help commands are useful to list directory contents
+d. All of the above
+Ans: B
+

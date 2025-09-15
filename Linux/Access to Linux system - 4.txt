@@ -1,0 +1,23 @@
+System Access:
+==============
+	Linux has super-user account called root (it is the most powerful account that can create, modify, delete accounts and make changes to system configuration files)
+	Linux is case-sensitive system (ABC is NOT same as abc)
+	Avoid using spaces when creating files and directories, instead we can use hyphens or dashes.
+	Linux kernel is not an operating system. It is a small software within Linux operating system that takes commands from users and pass them to system hardware or peripherals.
+	Linux is mostly CLI not GUI
+	Linux is very flexible as compared to other operating systems.
+	
+
+Access to Linux System:
+=======================	
+	There are 2 types of access (console & remote)
+Console is a direct access to an operating system when it is connected through VGA, HDMI, DVI etc.,
+Remote type of access where you connect to your operating system remotely over the network, it is connected through client called Putty.
+FYI: if you are using windows 10 or above then it support with inbuilt SSH client, to test open the command prompt and give command (ssh -l [username] [ipaddress]) [ex: ssh -l akshiv 192.168.0.104] of the linux machine so that it will get connected, (to know the ip address of the machine, give command [ifconfig], make sure the newer version might not work on this command, hence use the alternate one [ip addr] command); you can do the same via putty also, give the ip address, provide the username which you have given when created the virtual machine [ex: akshiv] and provide the password; there we will be able to login to our machine directly.
+
+
+
+
+	
+	
+	
