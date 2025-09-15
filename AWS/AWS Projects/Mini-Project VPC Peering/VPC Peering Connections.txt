@@ -1,0 +1,125 @@
+VPC-Peering Steps:
+==================
+
+What is a VPC?
+A Virtual Private Cloud (VPC) in AWS is like your own private network in the cloud where you can launch resources (like EC2 instances, databases) securely.
+
+What is VPC Peering?
+A VPC Peering Connection is a way to connect two VPCs so they can talk to each other privately (without going through the public internet). Think of it as a private tunnel between two separate networks.
+
+Example: Imagine you have two offices in different cities (VPC A and VPC B), and you set up a private road (VPC Peering) so employees can travel between offices without using public roads (the internet).
+
+Key Terminologies:
+------------------
+1. Requester VPC:
+The VPC that initiates the peering request.
+
+2. Accepter VPC:
+The VPC that accepts the peering request.
+
+3. CIDR Block (Classless Inter-Domain Routing):
+The IP range assigned to a VPC. Important: The two VPCs must have non-overlapping CIDR blocks to establish peering.
+
+4. Route Tables:
+Used to direct traffic between the peered VPCs. After peering, you must update route tables in both VPCs so they know how to reach each other.
+
+5. DNS Resolution:
+AWS allows private DNS names to resolve to private IPs across peered VPCs if enabled.
+
+6. Transitive Peering (Not Supported):
+If VPC A is peered with VPC B, and VPC B is peered with VPC C, VPC A cannot communicate directly with VPC C through VPC B. Direct peering is needed.
+
+Advantages of VPC Peering
+-------------------------
+1. Secure Communication:
+Traffic stays within AWS and doesn’t pass through the public internet.
+
+2. Cost-Effective:
+No need for VPN or Direct Connect. You only pay for the data transfer between VPCs.
+
+3. Low Latency & High Bandwidth:
+Since the traffic stays within AWS, it’s faster and more reliable.
+
+4. Cross-Account & Cross-Region Peering:
+ > You can peer VPCs across different AWS accounts.
+ > You can also peer VPCs in different regions (called inter-region VPC peering).
+
+5. Simplifies Architecture:
+Enables easy resource sharing (like databases, microservices) between VPCs.
+
+Use Case Scenarios:
+-------------------
+1. Microservices Architecture:
+Different services in separate VPCs can communicate securely.
+
+2. Centralized Logging or Monitoring:
+Multiple VPCs can send logs to a single VPC with a logging system.
+
+3. Merging Environments:
+Connect development and production VPCs to share specific resources.
+
+4. Multi-Account Strategy:
+In organizations using multiple AWS accounts, VPC peering connects resources securely across accounts.
+
+Steps:
+------
+Zone 1:
+1. Create VPC (Ohio) - name (vpc-a) - ip (10.100.0.0/16) - actions - edit vpc settings - dns settings (enable dns hostnames) - save.
+
+2. Create 2 Subnets (public & private) - name (pubsub-a) AZ (2a) - ip (10.100.10.0/24) == name (pvtsub-a) AZ (2b) - ip (10.100.20.0/24) - save == actions - edit subnet settings - enable auto-assign public ipv4 address (for both public & private subnets) - save.
+
+3. Create Internet Gateway (myigw-a) and attach to VPC 
+
+4. Create 2 Route tables (public & private) - name (pubrt-a & pvtrt-a) - VPC - save == select (pubrt-a) - update routes - edit routes - (0.0.0.0/0 - IGW) - subnet associations - edit subnet associations - (pubsub-a) - save == [for private do only subnet assocaitions] select (pvtrt-a) - subnet associations - edit subnet associations - (pvtsub-a) - save. 
+
+5. Create nat gateway - name (mynat-a) - attach public subnet - connectivity type (public) - allocate elastic ip - save.
+
+6. Go to private route table - edit routes - add nat gateway with open cidr block (0.0.0.0/0)
+
+7. Create 2 ec2 windows instance (public-a & private-a) - for public machine (vpc, public subnet, enable public ip, select all tcp with open cidr blocks) == for private machine (vpc, private subnet, disable public ip, under security group select all tcp and provide public machine subnet id on the source [10.100.10.0/24])
+
+8. Open putty and check for both the public and private machine connections.
+
+Zone 2:
+9. Create VPC on 2nd account different region (Mumbai) - name (vpc-b) - ip (20.200.0.0/16)
+
+10. Create 2 Subnets (public & private) - name (pubsub-b) AZ (1a) - ip (20.200.10.0/24) == name (pvtsub-b) AZ (1b) - ip (20.200.20.0/24) - save.
+
+11. Create Internet Gateway (myigw-b) and attach to VPC
+
+12. Create 2 Route tables (public & private) - name (pubrt-b & pvtrt-b) - VPC - save == select (pubrt-b) - update routes - edit routes - (0.0.0.0/0 - IGW) - subnet associations - edit subnet associations - (pubsub-b) - save == [for private do only subnet associations] select (pvtrt-b) - subnet associations - edit subnet associations - (pvtsub-b) - save.
+
+13. Create nat gateway - name (mynat-b) - attach public subnet - connectivity type (public) - allocate elastic ip - save.
+
+14. Go to private route table - edit routes - add nat gateway with open cidr block (0.0.0.0/0)
+
+15. Create only private windows ec2 machine (vpc, private subnet, disable public ip, under security group customize "rdp" souce with private subnet id "10.100.20.0/24" along with that select "all ICMP - IPv4" source with private subnet id "10.100.20.0/24")
+
+[ICMP === network level protocol, used for sending messages related to the destination unreachability, route failure]
+
+Zone (A & B)
+16. For peering connection setup - A-zone account - peering connections - name (peer-atob) - select "a" zone vpc - provide the secondary account id - if different region then specify the region - provide the secondary account vpc id.
+
+17. Go to "b" zone - peering connection - accept the request under actions
+
+18. come to "a" zone - pvt route table - edit routes - provide "b" zone VPC ip and select the peering connections under target - save === try vice versa.
+
+Note down Ip's of A-zone as well as B-zone:
+A-zone:
+Public: 3.15.198.181
+Private: 10.100.20.123
+
+B-zone:
+Private: 20.200.20.167
+
+Finally try to connect from a-zone private with b-zone private machine and check for the internet connectivity.
+
+Deletion:
+1. A-zone peering connection (delete related route table entries)
+2. Instance (a & b zone)
+3. nat gateway (a & b zone)
+4. vpc (a & b zone)
+5. elastic ip (a & b zone)
+
+
+

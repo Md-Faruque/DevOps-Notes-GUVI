@@ -1,0 +1,119 @@
+CI/CD:
+======
+	CI/CD (Continuous Integration and Continuous Deployment/Delivery) is a set of practices in DevOps that helps developers release software faster, with higher quality, and fewer errors by automating the process of integrating code, testing, and deployment.
+
+1. Continuous Integration (CI)
+------------------------------
+Continuous Integration focuses on integrating code changes from multiple developers into a shared codebase frequently (often multiple times a day).
+
+How CI Works:
+-------------
+Code Commit: Developers write code and push it to a shared version control system (like GitHub or GitLab).
+Trigger Pipeline: A CI tool (like Jenkins, GitHub Actions, or GitLab CI) detects the code push and starts the pipeline.
+Build Stage: The code is compiled and built into an executable format (like .jar, .war, or Docker images).
+Automated Testing: Various tests are run automatically, including:
+Unit Tests: Testing individual pieces of code (e.g., functions, methods).
+Integration Tests: Ensuring different parts of the app work together.
+Static Code Analysis: Checking code quality and security issues.
+Feedback: If any tests fail, the pipeline stops, and the developer is notified immediately.
+Benefits of CI:
+Catches bugs early in the development process.
+Ensures code is always in a working state.
+Reduces the time spent on manual testing.
+
+Example: In a team of 5 developers working on a web app, when one developer pushes code, the CI system builds the app and runs tests. If tests fail, it alerts the developer to fix the issue before it affects others.
+
+2. Continuous Delivery (CD)
+---------------------------
+Continuous Delivery automates the process of preparing the code for deployment after CI has completed successfully.
+
+How Continuous Delivery Works:
+------------------------------
+After CI: Once the code passes all tests, it is packaged (as an artifact) and made ready for deployment.
+Staging Environment: The packaged code is deployed to a staging or UAT (User Acceptance Testing) environment for further testing.
+Manual Approval: A human (like a QA engineer) reviews the changes and approves them for production deployment.
+Ready for Production: The code is always in a deployable state, waiting for manual release.
+Benefits of Continuous Delivery:
+Code is always ready to be deployed.
+Reduces the risk of deployment failures.
+Speeds up release cycles with minimal manual work.
+
+Example: A mobile app company uses CD to push features to a staging environment. After QA testing, they manually approve it for release to the Play Store.
+
+3. Continuous Deployment (CD)
+-----------------------------
+Continuous Deployment takes things a step further by automatically deploying code to production after it passes the CI pipeline — no manual approval required.
+
+How Continuous Deployment Works:
+--------------------------------
+Post Testing: Once the code passes all tests, it is automatically deployed to the production environment.
+Monitoring: The deployed application is monitored using tools like Prometheus or Datadog to ensure it works as expected.
+Rollback if Needed: If issues are detected, an automated rollback can occur to revert to a stable version.
+Benefits of Continuous Deployment:
+Faster delivery of new features and bug fixes.
+Developers get immediate feedback on live environments.
+Reduces manual work and human error.
+
+Example: Facebook uses Continuous Deployment to push updates to millions of users multiple times a day.
+
+CI/CD Pipeline Example
+-----------------------
+A CI/CD pipeline is a series of steps that code goes through to move from development to production.
+
+Source Stage: Detects code changes in the repository.
+Build Stage: Compiles code and builds artifacts.
+Test Stage: Runs unit, integration, and functional tests.
+Deploy Stage: Deploys the code to staging or production.
+Monitor Stage: Monitors app health post-deployment.
+
+Related Terminologies in CI/CD:
+===============================
+   Term				Explanation							Example
+1. Pipeline		A sequence of automated steps (build, test, deploy) in CI/CD.		[Jenkins pipeline]
+
+2. Build		The process of converting source code into executable software.		[Compiling Java code into .jar]
+
+3. Artifact		The output from the build stage, ready for deployment.			[Docker images, .war, .jar files]
+
+4. Test Automation	Running tests automatically to check code quality.			[JUnit tests for Java code]
+
+5. Deployment		Releasing the built code to an environment (staging, production).	[Deploying to AWS EC2]
+
+6. Rollback		Reverting the app to a previous version if the new one fails.		[Using Kubernetes to revert a pod]
+
+7. Version Control	Tracking changes in code using tools.					[GitHub, GitLab]
+
+8. Blue-Green Deploy	A deployment strategy where two identical environments (blue and green) are used to avoid downtime.		[Switching traffic between environments]
+
+9. Canary Deploy	Releasing a new version to a small subset of users before a full rollout.[Testing a new feature with 10% users]
+
+Advantages of Using CI/CD:
+--------------------------
+Advantage					Description
+Faster Releases			Automates the process, allowing quicker code releases.
+Reduced Errors			Automated testing catches bugs early in the process.
+Improved Code Quality		Frequent testing and integration lead to better, more stable code.
+Early Feedback			Developers are alerted immediately if their code breaks the build.
+Scalability			Easily handles large codebases and multiple developers.
+Customer Satisfaction		Regular updates and new features lead to a better user experience.
+Reduced Manual Work		Automation reduces repetitive tasks like manual testing and deployment.
+Quick Rollbacks			If something goes wrong, automated rollback strategies ensure stability.
+
+AWS Developer Tools Overview
+----------------------------
+AWS offers a suite of tools to build a complete CI/CD pipeline:
+
+AWS CodeCommit: Git-based source control repository.
+AWS CodeBuild: Compiles source code, runs tests, and produces build artifacts.
+AWS CodeDeploy: Automates code deployments to services like EC2, ECS, or Lambda.
+AWS CodePipeline: Orchestrates the entire CI/CD workflow.
+
+Architecture Overview
+---------------------
+CodeCommit stores your React and Python code.
+CodePipeline triggers on code changes.
+CodeBuild builds Docker images for both frontend and backend.
+CodeDeploy deploys Docker containers to ECS (Elastic Container Service) or EC2.
+
+
+

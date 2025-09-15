@@ -1,0 +1,176 @@
+DataBase Engineering - RDS & DynamoDB
+
+This will be coming under PAAS
+Under PAAS, we got DB & Security
+
+What is Database?
+It is collections of Data.
+
+Example:
+www.hdfc.com --> Public subnet (Webserver: static content = Home page)
+  Login page --> [username & password] Private subnet (Appserver & Database) [Directly, we cannot login to the private subnet; we need to come to the public subnet from there we can be redirected to the private subnet for a secured connection]
+So, whatever the transactions we are doing this will get updated into the Database for future reference purpose.
+
+Under Database, we will be able to perform multiple activities like Updation / Deletion / Insert / Table Creation / Alter / Drop etc.,
+
+Types of Database Management System:
+1. Structured DB --> This will follow certain format / set of rules to store or retrieve the datas; in other words it is called as [schema based storage] ex: oracle, mysql etc.,
+2. Semi-Structured --> It is a form of structured data, but doesn't follow/obey any tabular structured of data models associated with RDS or other forms of data tables ex: NOSQL DB, Email, EDI (Electronic data interchange) etc.,
+3. Unstructured --> This support either [schema based or non-schema based], here we will do manual upload and analysis, ex: hadoop, ETL tools (exract, transform, load) tabuleau, data stage etc.,
+
+Different types of Schema:
+Physical --> This is going to mention where our data's are going to get saved
+Logical --> This will mention how our data's are going to get represented
+
+DB will default have only read/write permissions.
+
+RDS: (Relational Database)
+In real-time we will run DB under primary-replica basis [other words, we will have one for primary contact, if that gone down, the backup db will come into actions], this is called as Business Contunity Plan (BCP). 
+We will bring this under grouping, where Master/Primary DB will be running under one subnet; and Replica will be in a different subnet, this is how we can bring high availability for our DB as well. Only by grouping we can bring sync inbetween Primary and Replica DB.
+
+So, here we are going to create grouping for subnet inorder to bring sync inbetween our DB's
+
+[Reference to RDS-Theory Document, Slide 2]
+What is Integrity constraints?
+   Setting up conditions for our database, ex: primary key should not be null.
+
+Scenario:
+1. We are going to create subnet-group for Multi AZ deployment. [backup and recovery purpose]
+2. MYSQL datasbase under free-tier - t2.micro
+3. Linux Instance creation
+4. We are going to catalog the Instance and DB together
+5. We are going to create some queries and tables using DDL & DML [data-definition language, data-manipulation language].
+
+General Steps:
+1. Subnet Group creation
+2. Mysql- DB creation
+3. Linux server creation
+4. Check for mysql listener/client [by default it won't be present, we need to install it]
+5. Database catalog mysql db with ec2 instance using endpoint
+6. Create some queries
+7. Master and Replica Setup
+
+Step by Step:
+1. Go to Database - Select RDS - click subnet group - give name [ex: mysubnetgroup] - paste the same name under description - select and reload the default VPC once again to enable the AZ - selecct all the 3 AZ - select all the 3 subnets as well - create
+
+2. Select Databases - create database [switch to original interface - for better hands-on experience] - select Mysql [only it is eligible for free-tier] - select dev/test under use case - [it is must to attach the license model for the DB, except oracle; Amazon has license for all the other 5 Db's] - select the recent version of mysql - select t2.micro under Db instance class - [we are going to manually create the replica zone, hence give no under Multi AZ deployment] - Disable Storage autoscaling [Extra cost] - Provide a name, master username, master password & confirm password [ex: greensmaster; admin; admin123 & admin123] - select default VPC - select our subnet group - [as db is private one hence give no for public accessibility] - under AZ select one AZ [ex: us-east-2a] - attach existing security group [make sure all the ports are open for this testing purpose] - give a name for your databse [ex: greens] - [no need for IAM, kerbaros authentication, backup {disable copy tage to snapshots}, monitoring, logs, disable auto minor version upgrade {as it is only for testing purpose} mantainence window, deletion protection --> as all this are going to bring extra charges for us] - create database.
+
+3. Create an linux Instance - bring 30gb for storage - open all ports [If you are not opening all ports, make sure you enabled mysql protocol under SG].
+
+4. Login into Instance - Change as root user [sudo su -] - [by default mysql will not be available inside the instance] - install mysql [yum install mysql -y]
+
+5. Now, we are going to catalog the ec2 instance with db server using endpoint - copy the endpoint from the db [ex: greensmaster.crtwtqq2zk6a.us-east-2.rds.amazonaws.com] - go to the instance - give command (mysql -h [endpoint] -P 3306 -u admin -p) {-h = host; -P = mysql port number; -u = username; -p = password} if facing error like (error 1049: unknown database) then use command, (mysql -h [endpoint] -u admin -p) [port number is not needed here]; enter - it will prompt for the db password which we generated already - provide the password - this will comes inside our mysql db.
+
+6. Now, we are going to create queries [get the queries from another document (RDS Queries)]
+
+7. Now, we are going to take replica; select the database - actions - Create read replica - provide DB instance identifier with a name [ex: greensreplica] - disable storage autoscaling [as it is going to charge as extra] - select different AZ for replica [for high availability] - disable maintanence for minor updates - create read replica.
+
+Once we created the replice, now the Role will be changed from Instance to Primary.
+
+Common things between Primary and Replica:
+1. Credentials: admin / admin123
+2. Endpoint for both Primary and Replica will be same
+[primary: greensmaster.crtwtqq2zk6a.us-east-2.rds.amazonaws.com
+ replica:   greensreplica.crtwtqq2zk6a.us-east-2.rds.amazonaws.com]
+
+when primary will be on healthy state, this will perform: Read/Write actions --> and replica will perform: Read actions --> because both the DB's are under sync
+when Primary went down --> then replica will take the primary role and it will perform both the Read/Write actions.
+
+Try Delete the Primary Database: click actions - delete - [make sure to diasble create snapshot] - enable the acknowledge - type delete me - delete
+Once this got deleted - the role will be changed from Replica to Instances
+Now go to putty - provide the command using replica endpoint - check for the database and tables inside it.
+
+when the activity is performed by 1 single endpoint for both the Read/Write operation then the performance will be normal.
+
+Additional Info:
+If we need to take a backup image of the RDS, we can take the snapshot
+select the DB - actions - take snapshots - this will get saved in snapshot under RDS dashboard; from there we can send the snapshot to S3 [exports in amazon s3] {*** make sure you have created an IAM role before this activity for RDS and S3, create role for RDS and attach the full access permission to S3} 
+If we need to create a DB using the Snapshot, that is also possible
+click Restore from S3 button.
+
+Under which scenario, do we need a snapshot for DB?
+For Restoration pupose
+
+Depends upon the Application criticality, they are going to take the snapshot.
+
+[*** Delete the Replica Database]
+
+Clustering --> Amazon Aurora --> for faster reach Read/Write operations [cluster means: group of anything]
+Amazon Aurora is going to create a group of endpoints, [by default it has 1 endpoint for Read operation; 1 endpoint for Write operation --> but according to the application we can additionally bring 15 extra Read operaion], through this we can increae the performance of DB]
+
+1. Create Database - amazon aurora - select mysql5.6 under edition - make the DB engine version to current one - select the DB instance class as t2.small [t2.micro is not available for this one] - give no to Multi AZ  deployment - provide the identifier name, username, password & confirm password [ex: amazonaurora, admin, admin123 & admin123] - Select our own subnet group - select anyone AZ - attach the existing SG [make sure you opened all the ports] - provide the identifier name once again, database name [ex: amazonaurora] - make sure to disable [encyption, failover: no preference, copy tags to snapshots, backtrack, monitoring, logs, maintanence, deletion protection]
+
+we will be able to see 2 different identifiers with 2 different endpoints as it is working under cluster base.
+
+Once you opened the database now you will be able to see 2 different endpoint for reader and writer
+[ex: Reader --> amazonaurora.cluster-ro-crtwtqq2zk6a.us-east-2.rds.amazonaws.com
+      Writer  --> amazonaurora.cluster-crtwtqq2zk6a.us-east-2.rds.amazonaws.com]
+
+Now, we are going to catalog the DB and server
+Go to putty - exit from previous DB - give the command (mysql -h [provide write operation endpoint] -P 3306 -u admin -p) - show databases [this will show the amazonaurora database] - now try to use the queries and try it.
+
+We have option to clone the DB [clone = duplication]
+Why do we need to clone?
+In real-time, we do have multiple environments like dev, test, stage, prod; hence we can create 1 DB and clone it to all the other environments.
+
+[*** Delete the DB, Instance and Subnet group]
+
+Task:
+1. Take a backup on snapshot – export to S3 bucket – Delete the Database – restrore the DB from S3.
+
+
+DynamoDB:
+This is a NoSql DB
+We are going to create a table directly and there is no need to run any schema for this.
+
+1. Create table - Provide name (Music) - provide the primary key (Artist) [Partition key is mandatory], Sort Key (SongTitle) [This one is optional) - Dafault settings - create; Once the table is ACTIVE status, now add Point-in-time recovery, Select table - backups - edit in the Point-in-time recovery section - Enable it - Save.
+2. Write data - select table - click Explore table items button on the right side - under the items returned, Choose create item - Add new attribute, choose "string" = under attribute name "AlbumTitle", repeat it for another attribute, choose "number" = under attribute name "Awards"
+Enter the values: 
+    A. For Artist, enter "No One You Know" as the value.
+    B. For SongTitle, enter "Call Me Today".
+    C. For AlbumTitle, enter "Somewhat Famous".
+    D. For Awards, enter 1.
+Create item.
+Repeat this process and create another item with the following values:
+    A. For Artist, enter "Acme Band".
+    B. For SongTitle enter "Happy Day".
+    C. For AlbumTitle, enter "Songs About Life".
+    D. For Awards, enter 10.
+Do this one more time to create another item with the same Artist as the previous step, but different values for the other attributes:
+    A. For Artist, enter "Acme Band".
+    B. For SongTitle enter "PartiQL Rocks".
+    C. For AlbumTitle, enter "Another Album Title".
+    D. For Awards, enter 8.
+
+[Try creating multiple tables, read table, update it; try creating global secondary index, update and check for the better exposure]
+[make sure to delete DynamoDb, If created]
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

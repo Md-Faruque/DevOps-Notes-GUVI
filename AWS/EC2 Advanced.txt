@@ -1,0 +1,78 @@
+EC2 Advanced:
+
+1. Dynamic IP to Static IP/Elastic IP
+        Create an instance - Go to elastic IP and allocate a elastic IP - Select Asscociate Elastic IP and try restarting the server to confirm the same
+   *** Terminate the Instance, and release the elastic IP.
+
+2. Adding and Modifying Volume
+        Create an instance (windows-2012 base) - attach additional volume. Open the server and confirm the same (2 drives C:// & D://)
+        Modify the volume, go to server - allocate the volume and confirm the modified is reflected on the server or not.
+
+3. Snapshot (Volume)
+       Create 2 different folders inside the D:// drive.
+       Go to snapshot - get the volume ID and paste it - create snapshot
+       Create another instance (windows-2016 base) - attach the snapshot - open remote server and confirm the same folders availability
+   *** Terminate the Instance, windows-2012.
+   *** Terminate the Instance, windows-2016.
+         Manually delete all the snapshots.
+
+4. AMI (Complete OS)
+      Create an linux OS - open the server - create 2 different directory (mkdir test)
+      Create an image from linux os
+      Create another instance by taking this linux image as base image, open putty and confirm the directory availability.
+
+5. Changing the RAM size
+      Stop the server - Change the Instance type.
+   *** Terminate the Instance, Degister the AMI, and Delete the snapshot manually.
+
+(Link for Calculating the Charges: https://calculator.s3.amazonaws.com/index.html)
+
+
+Interview Question:
+1. I got an stopped Instance, which has elastic IP, will I be charged by AWS?
+2. I created an Elastic IP but I haven't attached it to any server; will I still be charged? 
+	For both the answer is yes, as elastic IP is a chargable service.
+3. How many Elasstic IP's, I am eligible for?
+	Under one region, we will be able to get 5 Elastic Ip's, if there is a need for more we need to contact the support either via email, chat or call.
+4. How Termination protection works on Instances?
+
+
+Tasks:
+1. Try modifying the Volume on Linux server.
+2. Try Snapshot in Linux server.
+3. Learn about Volume types, Instance Family types
+4. Is it possible to decrease the volume size
+5. I do have dynamic IP, now I need to assign static/elastic Ip for that
+6. What does it mean by Hibernate Instance?
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

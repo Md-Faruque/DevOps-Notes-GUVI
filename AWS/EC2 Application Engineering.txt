@@ -1,0 +1,53 @@
+Ec2 Application Engineering:
+
+step1:
+create 2 instances (windows and linux) for linux don't open http and https port to show the negative result
+login to windows machine
+convert .pem to .ppk file
+login to linux machine
+go as root user, as we need full priveledge 
+
+step2:
+Installing middleware on both the servers; for windows it is IIS, and for Linux Apache
+	server manager are also called as repository manager; this holds all the freely available product files.
+	for linux this repository manager can be called via "yum" command; this holds all the packages
+confirm whether the middleware is working or not (for linux it won't work because we haven't enabled the http/https protocol)
+download sample web templates
+copy paste the folder to windows and move it to the {default host path: C:\inetpub\wwwroot}
+open the ip address and confirm the same application are running in the windows machine
+download winscp for linux app engr
+copy paste the source code from local to remote machine {default host path: /var/www/html}
+provide permission chmod 777 /var/www/html (if it got denied)
+open the ip address and the application should be installed successfully inside to it.
+
+Terminate the Instances ***
+
+we are going to try with 2 different dummy application, in real-time Developer will provide this; 
+
+till developer --> code
+once it reaches end user --> apps; this changes will happen once the code got deployed into the server
+
+what is deployment?
+	It is a process of Installing/Updating a code on top of the real-time/runtime server
+both installation and update are considered to be deployment; ex: applications we are using day by day in google play store
+
+webserver - static application  this will be constant one; if there is any changes need to be updated it will be done by Administrator		ex: Apache, IHS, IIS
+Apache is a free-tier product
+IHS - (IBM HTTP Server) it is an IBM product; for this we need to get license tool
+IIS - Internet Information service - microsoft product; so we can do this only on windows machine
+
+appserver - dynamic application 	(weighted application) which will get changed regularly	ex: WAS, weblogic, JBOSS
+WAS - Websphere application server - IBM product
+weblogic - oracle product
+JBOSS - open-source product
+All this applications are used to maintain heavy weighted applications like FB, twitter etc.,
+
+This will be decided by developer according to the client need
+
+In linux, we will use winscp to copy and paste the sample application, open winscp provide the linux machine public Ip, provide the usename as ec2-user, click on advanced - authentication - attach the password - ok, now select the sample application from left side and drag it to the right side, before doing this we need to change the path from /home/ec2-user to /var/www/html (we will be able to get the path from apache webpage also), and go to putty and go as root user provide the necessary permission to /var/www/html by using this command chmod 777 /var/www/html; now click and drag everything from left to right. 
+
+[***In real-time, we used to deploy multiple application using different Port numbers and this method is called as virtual hosting]
+
+Task:
+Create an dynamic application by taking sample code from google
+what is the difference between monolithic and microservices? and it's uses.

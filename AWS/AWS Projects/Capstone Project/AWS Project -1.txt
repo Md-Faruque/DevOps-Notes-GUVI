@@ -1,0 +1,77 @@
+AWS Real-time Integration Project:
+
+What are the main activity we need to know as a AWS- Solution Architect?
+1. Create
+2. Manage
+3. Maintanence
+
+1. Creation can be done by anyone and this is an one-time activity
+2. But after that we need to manage the services, followed by
+3. Maintanence - we need to know how to troubleshoot if issue happens
+[As a Architect, we need to know everything about this]
+
+During Interviews If they are going to ask about your day to day activities
+	My daily activity as a cloud engineer, is to create server and deploy application on top of them, and also I manage my applications, I support with other engineers for Application contunity.
+	I also create s3 buckets, and I will take care of the data's that got uploaded on the S3 bucket; and I manage it completely end to end.
+So, for whatever the services you are going to speak, make sure you are talking about the entire content that are relevant to it.
+
+Real-time Env:
+Dev
+Test
+UAT/CAT (User Acceptance env / client acceptance env)
+Pre-Prod
+Prod => Live  (Active) 
+DR => Disaster Recovery (Passive)
+
+Other ways:
+Dev - Development
+QA/QC - Quality Analyst/Quality Control
+SIT - System Intergration Testing
+UAT/Staging - User Acceptance Env
+Prod - Production
+DR - Disaster Recovery
+
+Why we are having this many env's?
+	We are using these many env's for delivery refinement - means each env will help us to make our application smoother and easier for our customer while using. Instead of one team trying with the final output it will be good when multiple teams/env's trying that.
+
+Why do we need this setup?
+Prod means Active -- if something went wrong with our prod env then DR (passive) is going to take it's place -- we are using this for BCP (Business continuity) -- both this will be in-sync, so that if something goes wrong, the DR can take the position from the place where it left. Normally the Live traffic will be routed only to the Prod env, only during the time of issue the traffic will be re-routed to the DR env for Application contiuation.
+
+Services We are going to Cover in this Project:
+1. EC2 - Elastic Cloud Compute
+2. S3 - Simple Storage Service
+3. ELB - Elastic Load Balancer
+4. Route53
+5. IAM - Identity and Access Management
+6. RDS - Relational Database
+7. ACM - AWS Certificate Manager
+
+More About ACM:
+	This service used for our Application security, In order to know about this, click on the lock symbol on the website, it will tell the connection is secure - click on more information - we can see more about this certificate content.
+
+what is mean by CERT? (certificate)
+	The purpose of certificate is to provide Recognition to the website/application that it is safe and secured to use. In other words, this acts like unique proof for the application - This certifications will be provided by certain (Certification Authorities).
+Some of the CA available in Markets are:
+1. Verizon
+2. comodo certificates
+3. DigiCert
+etc.,
+These authorities will analyze the application, data privacy, customers information's which goes to be involved inside the application before providing the certificate.
+
+If you are viewing the certificate this will give information about the certificate provider, type of certificate, encrypted key, validation, serial number etc.,
+
+When we are checking our Amazon console, we can see the certificate issued by Amazon itself; they are also one of the CA; when we are trying to bring our application we can even purchase our certificate from Amazon by using this ACM.
+
+When I am having more than one ec2 machines on my Active env, what is the purpose? The Answer is Load Balancing, in order to balance the load we are using multiple ec2 machines under the same env.
+When I got 2 different servers, but additionally servers are getting created then it means Auto Scaling Group. 
+
+What is the purpose of Route53 in an Architecture? This acts as the Gateway for our Traffic to reach our Application. Normally our Application URL will be like https://172.31.15.62:9060/appname - If we are going to provide this direct URL to our customers it is not easy for everyone to remember or to access.
+
+Task:
+Sign Up with cloudcraft - create an architecture with the services that you can integrate and bring up with an plan and steps.
+
+
+
+
+
+

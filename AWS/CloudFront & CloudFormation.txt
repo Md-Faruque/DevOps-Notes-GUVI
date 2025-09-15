@@ -1,0 +1,92 @@
+CF - CloudFront (CDN = Content Delivery Network)
+	This service is an optional one, depends on company and scenario this may/may not be needed. 
+
+Each and every services will have some catchy words (ex: ec2 = instances, sns = topic, s3 = buckets,objects etc., same like that for CF also we have something called cache servers, edge locations, distributed networks)
+what is cache? - this means temporary storage / content.
+
+What is CDN?
+	When I am having an content on my S3 bucket in London region, and users from worldwide are going to access that content means this may delay my response time (Latency = response time); that leads to affect my performance, customer satisfaction and business as well. Hence, in order to avoid that we are using a tool called Edge Location.
+
+To know the Edge Locations: https://aws.amazon.com/about-aws/global-infrastructure/
+click on the map, it will provide with the entire information about the location details.
+
+What is Edge Location?
+	We have data centers in multiples regions all around the world but this edge location means a place where we have additonal servers for better and faster communications.
+What is the purpose of Edge Locations?
+	This locations helps us to save our data's like cache; by enabling the edge loctions, we don't want to connect to our main storage/server all the time, instead the information's will be saved in the edge location places and via that we will be able to reach our content sooner.
+
+Totally there are 121 edge locations across the globe.
+
+Once, I enabled the edge locations, automatically this places are going to store our content, and through this we can avoid connecting to our origin server everytime.
+
+For example: Go to google and search for (s3 transfer acceleration comparison),  when we check the upload speed normally and with the upload speed on accelearator, you can see a difference on the speed when it works from edge location.
+How this works:
+When I am trying to upload a file from my location (chennai) to the S3 data center storage location, it will provide us an output; and when we are trying via S3 accelearated transfer then this will be comparitively faster (*** this depends upon our internet speed also) - it's just like a speedtest
+
+By default, AWS has provided us with a seperate connection between the edge location and the origin, when our connection happened via this way, it will be faster by default.
+
+This is a chargable service, (for 1st 12hours it will be free, after that it is going to cost us)
+
+When we are accessing our data for the 1st time, this will reach to the edge location; as there is no information available from there it will reach the origin server, and from the next time we don't want to go to the origin for the same information as it got already got a copy saved under edge location.
+[FYI: as I said earlier, this will be a temporary memory, so this is going to be saved there only for sometime and this depends on the TTL (Time To Live), whch we are going to set for the connection]
+
+Interview Question:
+1. What if I deleted my origin? will I be able to access my content?
+	We can access our data from our edge location, if we are trying to reach the content within that TTL.
+
+Mostly for static data only we are going to use this edge locations; [static data means, the website content are same]; if incase my application are like instagram/facebook [dynamic data], then everytime the content is going to get updated and there is no use of edge location as it is always going to reach the origin server for most of the needs, at that time they will create a seperate servers on the specific locations itself.
+
+Practical Steps:
+Go through another document for reference purpose: Application deployment on CloudFront with S3
+
+===========================================================================================================
+
+CloudFormation:
+This is considered to be the IAAC (Infrastructure as a code) service on AWS.
+This service helps us to create infrastructure using code.
+Normally when we are doing via GUI/manually, this is going to consume so much time, in-order to make this automatic we have this service in our AWS
+CloudFormation code can be written on either json/yaml (this supports both this languages)
+When I am run this code, automatically whatever the services I mentioned on the code, it will get created.
+
+[*** FYI: Anyway, we are going to use Terraform on real-time
+why?
+Because this supports multi-cloud providers, and the code which we are going to use here is comparitively easier when compared to others.]
+
+The catchy word for cloudformation is going to be stack.
+what is a stack? In simple words, we will call them as sample templates for easy creation.
+A stack is a collection of AWS resources that you can manage as a single unit. In other words, you can create, update, or delete a collection of resources by creating, updating, or deleting stacks. All the resources in a stack are defined by the stack's AWS CloudFormation template.
+
+1. Create stack - [we got 3 options here (1. Template is ready - means we are using our own template stored either on s3 or on local; 2. use a sample template - we can use sample templates given by AWS; 3. create template in designer - just by drag and drop we can create the infrastructure)]
+2. Now, we are use the sample template from AWS - wordpress blog - provide stack name (my-stack) - dbpassword (admin123) - confirm the same - db user (admin) - select key pair - create stack.
+3. confirm the same on our ec2 instances, this creates a new instance now.
+4. If we need to delete those resources, then just select the stack and delete it, by doing like this whatever the cloudformation created it will get deleted automatically in a single click.
+5. Here, we are trying to run our own code (yaml) via cli - for doing this make sure we are creating an IAM user, because we are going to execute the command via cmd prmpt.
+6. Go to IAM - users - provide username - progammatic access - permissions (ec2 full access, vpc full access & cloudformation full access).
+7. Now we need to integrate our cmdprmpt with AWS - for this download the AWS CLI from google - install the latest version; once done check for the command (aws --version) this will show the output now.
+8. Give command (aws configure) - provide the access key, secret access key, region name, output format for the specific IAM user.
+9. U can even try with this sample command (aws ec2 describe-instances)
+10. Now, we are going to use our own (yaml) - edit the command according to your file location, make sure to change the instance id and keypair name
+[aws cloudformation create-stack --stack-name akshivlab-ec2 --template-body "file://D:/Documents/Learning Materials/AWS/A-Square Technologies Docs/CloudFront & CloudFormation Doc/infra-1.yml" --parameters "file://D:/Documents/Learning Materials/AWS/A-Square Technologies Docs/CloudFront & CloudFormation Doc/parameters.json"]
+11. Now, go to cloudformation - stacks - we will be able to see a new stack that got created
+12. In order to know what are all got created - open the stack - select events, where we will be able to view all the services that got created using this stack.
+13. Go to VPC, EC2 instance to check all the creation are done or not.
+14. Then to delete the entire stackflow, we need to provide this command (aws cloudformation delete-stack --stack-name <StackName>)
+
+Links for Sample Templates:
+1. https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-sample-templates.html
+2. https://github.com/awslabs/aws-cloudformation-templates
+3. https://github.com/aws-quickstart/quickstart-aws-vpc/blob/main/templates/aws-vpc.template.yaml
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,234 @@
+Database Fundamentals:
+
+What is Data?
+	Data can be anything or everything, any information or fact can be considered as data, (ex: name, age, DOB etc.,) and these can be stored into Database. Data can be any form like image, plain text, video, file. Now we need to know where to store this data and the purpose of using it.
+
+What is Database?
+	Database can be considered as a container filled with data or information which is electronically stored inside a computer, THe purpose of storing these data is to easily access, modified, protected and alaysed. In our day-to-day basis we are using/accessing multiple databases, because most of softwares has become mobile applications.
+
+Is Database same as DBMS?
+	Database is just a container to store data, whereas DBMS (Database Management System) is a software used to manage our database, we need DBMS to communicate with our database in order to store, modify, protect & retrieve your data's. ex: MySQL, PostgreSQL, MongoDB, Neo4j, Cassandra etc., every DBMS has their own set of language to communicate with your data's. 
+
+Evolution of Database: (1960s)
+Flat File Database: data's were stored in simple structure like .csv, text etc.,
+Hierarchical Database
+Network Database: Both these databases were incapable of storing complex data relationships. hence soon it was replaced by Relational Database. 
+
+Types of Database:
+1. Relational === Over 70% of data used today belongs to this category, 
+2. Non-Relational == Over the huge incerase in data recently this Non-relational database becomes popular, (mainly because of social media platforms); 
+
+Companies are even combining both these database according to their requirement. 
+Oracle is the most widely used Relational Database
+MongoDB is the highly used Non-Relational Database
+
+Relational Database, data's are stored through collection of tables, each informational theme (business concept) is stored in its own table, these tables are related to one another. Each table consist of a Columns & Rows. Each Column has a Name and Data Type (is a data rule which is associated to every column; only those data's satisfy this rule can be inserted in the specific column. Row can be treated as a record which is formed by single or multiple columns. 
+
+Non-Relational Databse, there are variety of range of this, such as Key value Database, Document Database, Graph Database, Wide Column Database, Search Engine Database, Time Series Database etc., each of these databases stores differently and are useful to manage data's specifically.  
+
+	Key Value store == simplest database, where every data will be assigned to a key. These are useful to store certain type of data such as, configuration data, state information, any data represented by a dictionary or a # "hash" in any programming language. (ex: Redis, Memcached)
+	
+	Document store == this also use unique key to identify database, however unlike key-value store this database store, store their data in structured format store called documents often using .Json, XML etc., (ex: Mongo DB, COuchDB etc.,)
+
+	Graph Database == this brings relations by following nodes, edges & properties. (ex: Neo4j database)
+
+	Wide Column Database (or) Column family database: this use rows and columns but they don't use tables here. Instead of tables they use structure called as column families (ex: Cassandra, HBase etc.,)
+
+SQL Basics:
+	This is the core of Relational database properties, stands for Structured Query Language; this was developed by IBM in the early 1970s. THis is powerful language that uses simple english sentences, this is a Declarative language. They maintain well-defined standards. 
+
+Deploy Application on EC2 Instance with AWS RDS
+
+1. Create EC2 instance (Linux) - name (tutorial-ec2-instance-web-server) - OS (amazon linux 2) - select for security groups (SSH = MyIP, enable HTTP & HTTPS)
+
+2. Create Database - (mysql - 8.0.28 - free-tier, - db instance identifier (tutorial-db-instance) master username (admin) - (admin123)- db.t3.micro - uncheck autoscaling - connect with ec2 (instance) - select vpc, subnet group (automatic setup) - Public access (no) - existing SG (select the SG used for instance) - additional configuration (database name: sample) - disable all the other services)
+
+3. open putty - login as (ec2-user) - update the packages (sudo yum update -y)
+
+4. Install apache web server, PHP, and mariadb (sudo yum install -y httpd php php-mysqli mariadb105)
+
+5. Start the service and enable the apache (sudo systemctl start httpd) (sudo systemctl enable httpd)
+
+6. Set file permissions for the Apache web server 
+	add the ec2-user user to the apache group (sudo usermod -a -G apache ec2-user)
+
+	log out from the terminal once to refresh your permissions (exit)
+
+	log back in and verify the apache group exists (groups), the output looks like this (ec2-user adm wheel apache systemd-journal)
+
+	change the owndership group of the "/var/www" directory and its contents to the apache group (sudo chown -R ec2-user:apache /var/www)
+
+	change the directory permission (sudo chmod 2775 /var/www
+find /var/www -type d -exec sudo chmod 2775 {} \;)
+
+	Change the permissions for files (find /var/www -type f -exec sudo chmod 0664 {} \;)
+
+7. Connect your Apache web server with your DB instance (cd /var/www/) - (mkdir inc) - (cd inc)
+
+8. Create a new file (vi dbinfo.inc)
+
+<?php
+
+define('DB_SERVER', 'db_instance_endpoint');
+define('DB_USERNAME', 'tutorial_user');
+define('DB_PASSWORD', 'master password');
+define('DB_DATABASE', 'sample');
+?>
+ (edit accordingly)
+
+Example:
+
+<?php
+
+define('DB_SERVER', 'tutorial-db-instance.cjuyq8ccsata.us-east-2.rds.amazonaws.com');
+define('DB_USERNAME', 'admin');
+define('DB_PASSWORD', 'admin123');
+define('DB_DATABASE', 'sample');
+?>
+
+9. change the directory apache web server (cd /var/www/html)
+
+10. Create and edit the application file (vi SamplePage.php)
+
+<?php include "../inc/dbinfo.inc"; ?>
+<html>
+<body>
+<h1>Sample page</h1>
+<?php
+
+  /* Connect to MySQL and select the database. */
+  $connection = mysqli_connect(DB_SERVER, DB_USERNAME, DB_PASSWORD);
+
+  if (mysqli_connect_errno()) echo "Failed to connect to MySQL: " . mysqli_connect_error();
+
+  $database = mysqli_select_db($connection, DB_DATABASE);
+
+  /* Ensure that the EMPLOYEES table exists. */
+  VerifyEmployeesTable($connection, DB_DATABASE);
+
+  /* If input fields are populated, add a row to the EMPLOYEES table. */
+  $employee_name = htmlentities($_POST['NAME']);
+  $employee_address = htmlentities($_POST['ADDRESS']);
+
+  if (strlen($employee_name) || strlen($employee_address)) {
+    AddEmployee($connection, $employee_name, $employee_address);
+  }
+?>
+
+<!-- Input form -->
+<form action="<?PHP echo $_SERVER['SCRIPT_NAME'] ?>" method="POST">
+  <table border="0">
+    <tr>
+      <td>NAME</td>
+      <td>ADDRESS</td>
+    </tr>
+    <tr>
+      <td>
+        <input type="text" name="NAME" maxlength="45" size="30" />
+      </td>
+      <td>
+        <input type="text" name="ADDRESS" maxlength="90" size="60" />
+      </td>
+      <td>
+        <input type="submit" value="Add Data" />
+      </td>
+    </tr>
+  </table>
+</form>
+
+<!-- Display table data. -->
+<table border="1" cellpadding="2" cellspacing="2">
+  <tr>
+    <td>ID</td>
+    <td>NAME</td>
+    <td>ADDRESS</td>
+  </tr>
+
+<?php
+
+$result = mysqli_query($connection, "SELECT * FROM EMPLOYEES");
+
+while($query_data = mysqli_fetch_row($result)) {
+  echo "<tr>";
+  echo "<td>",$query_data[0], "</td>",
+       "<td>",$query_data[1], "</td>",
+       "<td>",$query_data[2], "</td>";
+  echo "</tr>";
+}
+?>
+
+</table>
+
+<!-- Clean up. -->
+<?php
+
+  mysqli_free_result($result);
+  mysqli_close($connection);
+
+?>
+
+</body>
+</html>
+
+
+<?php
+
+/* Add an employee to the table. */
+function AddEmployee($connection, $name, $address) {
+   $n = mysqli_real_escape_string($connection, $name);
+   $a = mysqli_real_escape_string($connection, $address);
+
+   $query = "INSERT INTO EMPLOYEES (NAME, ADDRESS) VALUES ('$n', '$a');";
+
+   if(!mysqli_query($connection, $query)) echo("<p>Error adding employee data.</p>");
+}
+
+/* Check whether the table exists and, if not, create it. */
+function VerifyEmployeesTable($connection, $dbName) {
+  if(!TableExists("EMPLOYEES", $connection, $dbName))
+  {
+     $query = "CREATE TABLE EMPLOYEES (
+         ID int(11) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+         NAME VARCHAR(45),
+         ADDRESS VARCHAR(90)
+       )";
+
+     if(!mysqli_query($connection, $query)) echo("<p>Error creating table.</p>");
+  }
+}
+
+/* Check for the existence of a table. */
+function TableExists($tableName, $connection, $dbName) {
+  $t = mysqli_real_escape_string($connection, $tableName);
+  $d = mysqli_real_escape_string($connection, $dbName);
+
+  $checktable = mysqli_query($connection,
+      "SELECT TABLE_NAME FROM information_schema.TABLES WHERE TABLE_NAME = '$t' AND TABLE_SCHEMA = '$d'");
+
+  if(mysqli_num_rows($checktable) > 0) return true;
+
+  return false;
+}
+?>                        
+                
+12. now logout to refresh the application (exit)
+13. Test by copying the EC2 machine Public DNS with the applciation name (http://ec2-3-144-168-162.us-east-2.compute.amazonaws.com/SamplePage.php)
+
+While entering the data we may face an issue, this is happening because of the PHP version, to sort out the issue, follow these commands
+
+sudo yum -y remove php*
+sudo amazon-linux-extras disable php7.4
+sudo amazon-linux-extras enable php7.2
+yum clean metadata
+sudo yum install php php-{pear,cgi,common,curl,mbstring,gd,mysqlnd,gettext,bcmath,json,xml,fpm,intl,zip,imap}
+php -v
+sudo apachectl restart
+exit
+
+check for the output now, and try entering the data to confirm the same.
+
+Reference Link: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/TUT_WebAppWithRDS.html
+
+Deletion:
+Delete your DB instance
+Terminate your instance

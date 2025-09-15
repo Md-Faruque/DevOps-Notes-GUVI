@@ -1,0 +1,99 @@
+CD - Code Deploy
+CP - Code Pipeline
+
+Under AWS, we will call this as AWS-DevOps tool.
+These are considered to be the Developer component.
+
+Under DevOps, there is a lot of tools, this called as Generic DevOps.
+
+Within AWS, Azure, GCP also they are supporting tools for DevOps, hence they are called as AWS-DevOps / Azure-DevOps / GCP-DevOps
+
+Basically, DevOps helps us to Deliver our project soon, by using DevOps, we can reduce our time, cost as well as effort.
+
+Under this we are going to use services like,
+EC2 - 2 (One as Developer machine [where Developer is going to use it for code], another one will act like a production/webserver machine)
+S3 - This is going to act like a repository, where the application code from EC2 is going to be pushed to S3 (which is going to replace GIT)
+CD - From code, we are going to automate the deployment using Code Deploy (which is going to replace Ansible)
+CP - Code Pipeline helps the application to run continously without any manual intervention (which is going to replace Jenkins)
+SNS - Simple Notification service is going to helps us for Notifying/Alerting via messages to our subscribers
+CW - CloudWatch is going to monitor the entire Architecture
+IAM - This won't get involved in the Architectural Diagram, but this supports for providing the needed permissions/roles for the services.
+
+General Steps Information:
+1. Create 2 IAM role for bringing internal communication in between the services: EC2- S3- Code Deploy
+2. Create IAM user for Developer, as he is the one and only user in this Architecture
+3. Creating 2 EC2 server (one for developer, another one for production)
+4. Configure Developer into their ec2 server
+5. Install the Code Deploy Agent inside the webserver/production machine for deploying the code inside the server
+6. Create a sample code in the Developer machine
+7. Create an S3 bucket
+8. Create Code Deploy Application and push it to S3 bucket from Developer machine for automatic process
+9. Create Deployment Group, inorder to specify the server for which the application deployment is going to happen
+10. Create Deployment, and this helps to idetify from where you need to deploy the code, here we are going to pick the code from the S3 bucket.
+11. Test the Website.
+
+Steps for CodeDeploy:
+1. Create full access role (Administrator role) inbetween EC2-S3
+2. Create 2nd role for CodeDeploy - create role - Select Code Deploy - Select the use case as CodeDeploy (1st scenario) - Automatically the permissions will be picked - Provide name.
+3. Create a user - Developer - Select both Dashboard and CLI access - Under permissions (AmazonS3fullaccess and AWScodedeployfullaccess is enough) but for time-being we are going to provide him Administrator Access.
+4. Create a linux instance for Developer - Open all ports.
+5. Now, we need to configure EC2 with user, open putty - change into root user (sudo su -) - bring the user (aws configure) - provide the user access and secret key and complete the configuration
+6. Create Webserver/Production instance by attaching the role (EC2-S3-fullaccess) - Provide the tag with this reference specification (key: AppName, Value: SampleApp) - Open all ports.
+7. Open the machine via putty - switch as root user (sudo su -)
+	Now, use the set of commands under it
+		1. yum update -y : for updating the linux environment
+		2. yum install ruby -y : CodeDeploy Agent was build by ruby, hence we need to install this language
+		3. yum install wget -y : This will be available by default, this wget helps to connect with outside url's
+		4. wget https://aws-codedeploy-us-east-1.s3.amazonaws.com/latest/install : This url will activate "install" for futher codedeploy agent installation
+		5. chmod +x install : As "install" doesn't have executable permission, we are using this command to provide the necessary access
+		6. ./install auto : After this command, Codedeploy agent got successfully installed within the server
+		7. service codedeploy-agent status : Inorder to know the status and PID (Process ID) of the codedeploy-agent.
+8. Now, we are going to develop a sample code on Developer machine
+		1. Create a Directory, as we are going to keep all the code inside the directory (mkdir deploy_dir), Go inside the directory, (cd deploy_dir)
+		2. Create another directory by representing the application name (mkdir sampleapp) - go inside that directory (cd sampleapp)
+		3. Now, create index.html to create the code (vi index.html) (get the code from another document) - [development related file]
+		4. Now, I am going to bring another file (vi appspec.yml); this file is going to act like a brain for the automatic process (get the code from another document) - [deployment related file]
+		5. Create another directory to keep all the script file into it (mkdir scripts) - go inside the directory (cd scripts)
+		6. Now, create 3 different files (vi httpd_install.sh; vi httpd_start.sh; vi httpd_stop.sh) with the scripts (get scripts from another document)
+		7. Provide executable permission for all this files (chmod 755 *)
+9. Create a S3 bucket with public access (gir-sampleapp01)
+10. Go to codedeploy - applications - go to developer machine (under /sampleapp) path, within that put the sampleapp code (from another document) [because under sampleapp path only we got our appspec.yml and from this it is going to take the application.
+11. Confirm the application is now available on codedeploy
+12. Now, push the application to the s3 bucket - put the command (*** make sure you are changing the name of the bucket on the command) (from another document) - confirm the application has been now available inside s3 bucket like zipped file format.
+13. Now, create Deployment Group (in order to specify where the code should be executed) : Go to codedeploy service - applications - select the app - click create deployement group - provide name - attach the service role which we already created via IAM - Deployment type (in-place: as we have only one webserver now)  - select Amazon EC2 instance and provide the tag (Key: AppName, Value: SampleApp) under Environment configuration - Disable load balancer as we have 1 server at this moment
+14. Now, create Deployment (in order to specify from where the code should be pushed/captured) : Select creat deployement - under Revision type, specify that the code should be captured from the S3 bucket by specifying the Revision Location.
+15. Once the deployment progress was successful, try to check with the Webserver IP where it will be executed with the output application from the (index.html) code file.
+
+Steps for CodePipeline:
+1. Create Pipeline - pipelines - create pipeline - Provide name - allowing pipeline to create a new role automatically in IAM - Select Amazon S3 under source (as we got our code inside the s3 bucket) - select bucket name - Under Object key (get it from S3 bucket, open the object where you will be able to see the key) copy paste it - Allow Cloudwatch to monitor (it will automatically monitor if there is any new updates has been done on the code) - Skip build step (as there is only one index.html file [this can be enable if there are multiple files inside the code]) - Under Deploy, select the codedeploy - Select the Application name and Deployment group accordingly.
+	Now, Pipeline will proceed forward by checking the source and it will try to deploy if there is any updates happened on the code automatically.
+[*** This will throw an error, as there is no versioning enabled in the S3 bucket, without versioning we will not be able to keep a track on the updated versions]
+	Once after enabling the versioning, this will automatically completes the pipeline setup.
+2. Now, try to update the code from the Developer machine - open index.html and do some changes on the code (view recording/notes for reference) - come to previous step (cd ..) [deploy_dir] - now zip this file command (zip -r [filename.zip] .) [filename = this indicates the new code file, here it is sampleapp.zip] - now, try to push it inside the S3 bucket using command (from another document : don't forget to change the bucket name accordingly)
+3. Try to refresh the IP once the deploy has been done, where you can see the updated file content.
+
+
+Task:
+1. Creating Notification using SNS
+Steps:
+Create SNS topic with subscribers.
+Go to Deploy - Applications - select the app - Notify - create notification rule - provide name - Select the Event for triggers accordingly - Attach the existing SNS topic as target.
+[*** You will get an error because now codedeploy is going to communicate with SNS, so when there is a need for service to service communication, we need to attach a role; try to attach the role and check the output]
+
+Deletion:
+1. CodePipeline
+2. CodeDeploy = Application & Deployments
+3. CloudTrail
+4. Cloudwatch
+5. EC2 Instance (Developer & Prod)
+6. IAM User
+7. IAM Roles & Policies
+8. S3 Buckets & Objects
+
+
+
+
+
+
+
+

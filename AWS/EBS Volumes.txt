@@ -1,0 +1,28 @@
+ELastic Block store:
+	In Amazon Web Services (AWS), when you attach an Elastic Block Store (EBS) volume to an EC2 instance, you'll need to specify a device name for the volume. The device name is essentially the path within the instance's file system where the volume will be mounted and made accessible to the operating system.
+
+	In simple words, Think of an EBS volume as an external hard drive that you can attach to your computer in the cloud. When you attach this external hard drive to your virtual computer (EC2 instance) in AWS, you need to tell the computer where to find it. That's where the device name comes in.
+	The device name is like the label you put on the external hard drive so your computer knows which one it is. It's kind of like naming your USB drive "Backup" or "Photos." In AWS, these names follow certain patterns depending on whether you're using Linux or Windows.
+	For example, on a Linux system, the device name might look like "/dev/xvdf", while on a Windows system, it could look like "\.\PhysicalDrive1".
+	When you attach the external hard drive (EBS volume) to your virtual computer, you specify its device name. This helps the computer understand where to find the files on that external hard drive. So, when you're setting things up in AWS, you need to make sure you use the right device name to make sure everything works smoothly.
+
+Types of EBS Volumes:
+
+    General Purpose SSD (gp2): The gp2 volumes offer cost-effective storage that balances price and performance. They can be used for a broad range of workloads, like boot volumes, enterprise applications, dev/test environments, etc. The gp2 volumes come with the ability to burst to 3,000 IOPS for extended periods of time.
+
+    Provisioned IOPS SSD (io1): The io1 volumes are high-performance SSD volumes designed for I/O-intensive applications like large databases and other transactional workloads. These volumes allow provisioning of up to 64,000 IOPS per volume. This leads to consistent low latency, helping deliver fast performance.
+
+    Throughput Optimized HDD (st1): The st1 volumes offer low-cost HDD volumes ideal for frequently accessed, throughput-intensive workloads. These work well for big data, data warehouses, log processing, etc. The st1 volumes can deliver up to 500MB/s of throughput for large volumes.
+
+    Cold HDD (sc1): The sc1 volumes provide the lowest cost storage from AWS and are best suited for less frequently accessed data. These can be used to store data that is infrequently accessed and require lower storage costs like backups, DR recovery, etc. Sc1 volumes allow a maximum of 250 IOPS per volume.
+
+
+Properties of Amazon Elastic Block Store
+
+    - An EBS Volume can only be assigned to a single EC2 instance at a time.
+    - Volumes other than the root volumes can be encrypted but the root volume cannot be encrypted without using any of their party tools
+    - The root volumes are deleted by default when the EC2 instance is terminated.
+    - The size of an EBS volume can go up to 16 TiB.
+    - The copy of screenshots can be created between AWS regions so as to create volumes in different regions.
+
+

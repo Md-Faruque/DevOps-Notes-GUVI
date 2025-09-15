@@ -1,0 +1,49 @@
+What is IAM?
+	AWS Identity and Access Management (IAM) enables you to manage access to AWS services and resources securely. Using IAM, you can create and manage AWS users and groups, and use permissions to allow and deny their access to AWS resources. IAM is a feature of your AWS account offered at no additional charge.
+
+Security Engineering: IAM
+
+2 Types of users:
+root user:		owner of the account:          Akshiv rajendran
+root URL:      https://aws.amazon.com/console/
+ 
+
+IAM users:             restricted account:         user1, user2
+IAM url:      https://kloudone-dev.signin.aws.amazon.com/console
+
+
+https://725305474857.signin.aws.amazon.com/console replacing the account number in the URL with the project or the client name to identify in a better way
+
+hdfc- 
+
+[ hdfc  - Client Name
+
+Teams:
+dev
+prod
+testing ]
+
+Group, User, Policy and Roles
+
+Steps:
+Creating IAM URL according to project/client
+Creating teams/group according to project/client
+Creating user under the group
+Login as IAM user by using the link, username and password
+Changing my password
+Checked on 2 differnet services for access/permission confirmed how IAM permission works
+Creating a customised policy for s3 attached the policy to IAM user
+Confirmed the same by login into IAM user
+Creating Roles for service to service communication (EC2 to S3)
+Create Instances attach the role
+Login to linux terminal and confirm the internal communication is successful
+	(commands: Sudo user; aws s3 ls - for listing the buckets)
+
+
+Task:
+Create MFA (Multi-factor authentication) for the user and try login
+create another Instances without adding the role, now the service to service communication will be a failed one, hence configure the user (who already got the permission for s3 bucket) and try to access the bucket for (user - service - service) connection.
+
+
+
+

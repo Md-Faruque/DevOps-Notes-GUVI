@@ -1,0 +1,88 @@
+Server Engg 	- EC2 (Elastic Compute Cloud), LAMBDA, EBS (Elastic Beanstalk)
+Storage Engg 	- S3 (Simple Storage Service), EFS (Elastic File System)
+App Engg	- SNS (Simple Notification service), SQS (Simple Queueing service), Cloud Formation
+DB Engg		- RDS (Relational Database service), DynamoDB, Redshift
+Network Engg 	- VPC (Virtual Private Cloud), CF (Cloudfront), Route53
+Security Engg 	- IAM (Identity & Access mgmt)
+
+Management Services - ELB (Elastic Load Balancer), ASG (Auto-Scaling Group), CW (Cloudwatch), CT (Cloudtrail)
+
+DevOps Services - CD (Codedeploy), CP (Codepipeline)
+
+We should never be a brand related, instead we need to be a product related
+product related - Cloud computing
+brand related - AWS / Azure / GCP etc.,
+
+AWS is considered to be the Global leader for cloud computing in the Market
+This works under Pay as you Go / Pay-per-user model (nothing less, nothing more)
+
+AWS Certification Link: https://aws.amazon.com/certification/
+
+What is Virutalization?
+    	Running multiple applications by sharing one server, this helps us to utilize the resources in order to manage better Infrastructure, splitting the servers within one server for running multiple applications and this is called virtual machines.
+
+	During earlier days, we was using one server for one running one application and this is called physical server.
+
+Now, I don't want to maintain any server, I will be able to get it from cloud service providers like AWS, Azure or GCP. So, that I don't want to invest more money on my Infrastructure.
+
+EC2 Models:
+
+1. Free-tier -- 12months -- 750hrs/mnth -- Limited structure
+2. OnDemand -- unlimited -- we can get it on spot, with any number of resources
+3. Reserved -- comparitively cheaper when compared to OnDemand -- need to pay advance amount as we are booking on prior
+4. Dedicated EC2 -- Private cloud
+5. Spot EC2 -- Auction/Bidding system -- some services are avaiable for auction for certain months, mostly this kind of instances can be used for R&D, Testing purposes etc.,
+
+
+Next explain about Billing service
+
+RDP   3389   Remote Desktop protocol
+SSH  22    secure shell host
+HTTP  80
+HTTPS 443
+
+windows - GUI  (graphical user interface)
+Linux- CLI (command line interface)
+
+.pem - privacy enhanced mail
+.ppk - putty private key
+
+2/2 - started/configured
+
+Steps:
+create windows server
+create linux server
+collect the public IP, username and password for both the machines
+open windows server via remote desktop connection
+convert .pem to .ppk
+now go to linux server via putty
+terminate the instances
+
+Avarage salary for AWS: https://www.ambitionbox.com/salaries/amazon-web-services-salaries	
+			https://kinsta.com/aws-market-share/
+			https://www.epcgroup.net/top-50-cloud-computing-statistics-and-trends-for-2022/
+
+
+Interview Questions:
+
+1. What are the different types of instances
+    General purpose
+    Computer Optimized
+    Memory Optimized
+    Storage Optimized
+    Accelerated Computing
+
+2. How to connect EBS volume to multiple instances?
+We can’t be able to connect EBS volume to multiple instances.  Although, you can connect various EBS Volumes to a single instance.
+
+3. List different types of cloud services
+
+Various types of cloud services are:
+    Software as a Service (SaaS),
+    Data as a Service (DaaS)
+    Platform as a Service (PaaS)
+    Infrastructure as a Service (IaaS).
+
+Tasks:
+1. What is the difference between RSA and ED25519?
+2. Practise creating Windows and Linux OS

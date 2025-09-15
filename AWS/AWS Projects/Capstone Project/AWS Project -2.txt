@@ -1,0 +1,184 @@
+Today's Scenario:
+	We are going to create the real-time environment activity 1. Production & 2. DR (Disaster Recovery)
+
+Activites:
+1. Setting up prod env
+2. DR setup
+3. Installing the SSL certificate using ACM and making our Application secured
+4. Integrating both the env's (prod & DR)
+5. Adding new parameters for the cloudwatch service
+[Additional Tasks]
+
+==================================================================================
+
+Services involved:
+EC2
+S3
+IAM
+ELB
+Route53
+ACM
+Cloudwatch
+RDS
+
+Finaly we are going to create a website and deploy it.
+
+========================================================================================
+
+Steps:
+1. Request ACM Certifcate
+2. Create Hosted Zone on Route53 & add the nameservers on the specific Domain Managers
+3. Intergrate the Route53 and ACM for validation purpose
+4. Database creation (2) - subnet group
+5. IAM role for EC2
+6. EC2 creation (2) - with user-data
+7. Create Load Balancer (2) - Classic Load Balancer
+8. Open server on browser and provide the db informations accordingly (2)
+9. Add the wp-config file on servers (2)
+10. Application installation with credentials
+11. Login to the applications with proper username and password (2)
+12. Change the content on the application dashboard (2)
+13. Check the output via public IP (2)
+14. Now, access the application via load balancer DNS (2)
+15. Create record set for ELB and Route53 (2)
+16. Open via Route53 domain (2)
+17. Add the Certificate on load balancer
+18. sync between 2 env's using S3
+19. Creating cron job for automatic process
+20. Check the output for dr - production content
+21. Setting up Cloudwatch
+
+===============================================================================================
+
+1. The one step that is going to consume more time is getting certificate (Almost 1 to 1.30hours also), hence we are going to create the certificate 1st.
+
+2. Here you can see 2 different env, and the domain was different from one to another, but both this are same domain only, just adding some content before the domain name for differentiation, this is called Domain categorization/sub-domains.
+[*** Make sure you need to add this content only on the prefix, means before the domain name; you should not do that after the domain name]
+
+3. Now, go to ACM/certificate manager - request a certificate - request a public certificate - give the domain name (asquaretech.tk) - click on add another name to the certificate and name it as (*.asquaretech.tk) [* = all, this means we are giving sub-domains] - validation should be done via DNS (as we are allowing our traffic via Route53, and this is the service works for DNS inside AWS) - Request [Now we need to proceed with the validation, once that's done this will get created, and this is going to take almost an hour]
+
+4. Create a Hosted zone inside Route53 using our Domain name - and add the nameservers into our FreeNom (Domain Managers)
+
+5. Go to ACM for validation purpose - click on the certificate ID - On Domains there will be a button stating Create records in Route 53 - select that and create (This step is going to take a lot of time)
+
+6. To confirm this, Go to Route53, where we can see already there is a Record set got created (It may create one or more than one also, we don't want to worry about this, as this a background process)
+[*** FYI: Placing "*" before the domain is actually a pattern followed by everyone; for ex: even on FB/Google you can see the DNS name will be placed like this]
+
+7. Now, we are going to create our database - but, before creating one we need to create our subnet group [as db is a secured connection, we need to specify our DB always] - select mysql (best one for free-tier) - enable the checkbox for free-tier - uncheck autoscaling - Provide DB instance identifier, username and password (proddb - prodadm - prodadm123) - select our subnetgroup - {give AZ if required - I am leaving it for default} - select the security group - provide the same DB identifier name for DBname (to avoid confusions (proddb)) - uncheck copy tags to snpshots - Disable auto minor version upgrade - uncheck deletion proctection - create database.
+	select mysql (best one for free-tier) - enable the checkbox for free-tier - uncheck autoscaling - Provide DB instance identifier, username and password (drdb - dradm - dradm123) - select our subnetgroup - {give AZ if required - I am leaving it for default} - select the security group - provide the same DB identifier name for DBname (to avoid confusions (drdb)) - uncheck copy tags to snpshots - Disable auto minor version upgrade - uncheck deletion proctection - create database.
+
+8. Now, we are going to provide the IAM role (here the main service that needs communication with other service is EC2) [ex: ec2 needs to communicate with database, cloudwatch, s3 etc] hence I am providing here administrator access (in real-time, this is not used)
+
+9. Create 2 instances - linux - number of instances (2) - attach IAM role - add user data - storage 30GB - open security group - create. (rename both the machines [prod] [dr])
+[#!/bin/bash
+yum install httpd php-mysql -y
+amazon-linux-extras install -y php7.3
+cd /var/www/html
+echo "healthy" > healthy.html
+wget https://wordpress.org/latest.tar.gz
+tar -xzf latest.tar.gz
+cp -r wordpress/* /var/www/html/
+rm -rf wordpress
+rm -rf latest.tar.gz
+chmod -R 755 wp-content
+chown -R apache:apache wp-content
+wget https://s3.amazonaws.com/bucketforwordpresslab-donotdelete/htaccess.txt
+mv htaccess.txt .htaccess
+chkconfig httpd on
+service httpd start]
+
+10. Open both the machines - change to root user - check the application is running or not by putting the public IP on the browser, the output which we are going to get is wordpress application (check on both the machines)
+
+11. Create load balancer - clb (prodlb) - make sure you have changed the ping path of the applications (/healthy.html) - select the prod server - create.
+	Create load balancer - clb (drlb) - make sure you have changed the ping path of the applications (/healthy.html) - select the dr server - create.
+
+12. Provide the DB information's for prod and dr - database name, username, password, database host (proddb - prodadm - prodadm123 - proddb.crtwtqq2zk6a.us-east-2.rds.amazonaws.com:3306) [***Database host: give the db endpoint name with the port number, for exact communication] - we need to get the output of config file.
+	database name, username, password, database host (drdb - dradm - dradm123 - drdb.crtwtqq2zk6a.us-east-2.rds.amazonaws.com:3306) [***Database host: give the db endpoint name with the port number, for exact communication] - we need to get the output of config file.
+
+13. The output shows clearly that the relevant config.php files is not currently available, so we need to open our server one by one, first go to prod server, run this content, now go to the specific path (our wordpress application is running on top of apache, hence go to that path) - (cd /var/www/html/) - by listing we can see the wordpress application inside it - (ls -lrt) [here we can see all the files related to this, but the database file is missing, we are going to add that] - open the file (vi wp-config.php) - save this content.
+	go to dr server, run this content, now go to the specific path (our wordpress application is running on top of apache, hence go to that path) - (cd /var/www/html/) - by listing we can see the wordpress application inside it - (ls -lrt) [here we can see all the files related to this, but the database file is missing, we are going to add that] - open the file (vi wp-config.php) - save this content.
+[*** Make sure to the config file properly]
+
+14. Now go to prod application on the browser, and click the run on installations - give site title, username, password, email (prod app, prodadm, prodadm123, queenprince20@gmail.com) [give the same credentials which we gave for db, in real-time it will be different, but here we are using the same content to avoid confusions] {this will tell the password is weak, but for testing scenario we can use this one}
+	go to dr application on the browser, and click the run on installations - give site title, username, password, email (dr app, dradm, dradm123, queenprince20@gmail.com)
+
+15. Click on login on both the applications (prod & dr) - [username & password] - {prodadm & prodadm123 - dradm & dradm123} [make sure we are getting the output]
+
+16. Go inside the applications - click on posts - all posts - click (edit) under hello world! - Change the content {ex: Hello Prod!}
+	Do the same on DR applications as well.
+[Direct URL	: Server IP
+ LB URL	   	: ELB DNS
+ Route53 URL	:  
+
+17. Go to public IP on both the prod & dr machines - we can see the output now
+[Wordpress is commonly used online supportive application, hence we are using wordpress here, real-time we are going to use our own application]
+
+18. Now, try to access via ELB DNS (2) - will get the output
+
+19. Refresh the Route53
+
+20. Create record - select alias - click the prod endpoint - routing policy (simple)
+	Create another record - (make sure to provide the dr record name (dr)) - click the dr endpoint - routing policy (simple)
+
+21. Now, try to access the domain name from Route53 (prod and dr) - open browser (asquaretech.tk & dr.asquaretech.tk)
+
+22. We can see currently the protocol which is using for (http) - now in order to bring this connection as secured one - go to load balancer both (prod & dr)- listeners (it will be currently on http) - we need to edit this to https (edit) - add the ssl certificate - select ACM (recommended) - save [we can get the confirmation that the 80 port got removed and the new port 443 got added]
+
+23. Now, when we are trying to refresh the browser (error msg) - make sure to open it with (https), because by default the connection will open via (http) protocol [we can see the page has changed, this is because wordpress application will default work only by http connection, if we need to change the content of the application we need to contact developer for further development]
+
+24. We are going to create 2 different buckets [normally in real-time, our codes will be separated like this, medias will be saved on one bucket and code will be on the another one] - for prod (wordpress-media-asquaretech & wordpress-code-asquaretech) - provide public access for bucket and object.
+
+[Task:
+Where a cloud engineer can do a cost optimization? / AWS cost optimization?
+important answer that helps during your interview]
+
+25. We are going to sync in-between prod and dr and this should not be a manual process, because whenever our prod is going to go down dr need to pick up the data, this will happen only they are in sync, hence for doing this we are going to create crontab (cron means doing activities automatically) - open prod server - go to (cd wp-content) [this is the place where our app are actually running] - go inside (cd uploads) [this is the place where we are going to save our codes] - give command (crontab -l) [this will show currently there is no crontab for this app] - now we are going to create one, give command (crontab -e) [this command means, we are going to edit the cronjob] - click (i) [insert] - paste this job 
+[*/2 * * * * aws s3 sync --delete /var/www/html/wp-content/uploads s3://wordpress-code-asquaretech
+*/2 * * * * aws s3 sync --delete /var/www/html/ s3://wordpress-media-asqauretech]
+give command (crontab -l) [now you can see the job]
+
+26. Now, go to the dr machine and set up the sync connection over there also, same method, go to (cd wp-content) [this is the place where our app are actually running] - go inside (cd uploads) [this is the place where we are going to save our codes] - give command (crontab -l) [this will show currently there is no crontab for this app] - now we are going to create one, give command (crontab -e) [this command means, we are going to edit the cronjob] - click (i) [insert] - paste this job 
+[*/2 * * * *  aws s3 sync --delete  s3://wordpress-code-asquaretech/var/www/html/wp-content/uploads
+*/2 * * * *  aws s3 sync --delete  s3://wordpress-media-asqauretech/var/www/html/]
+give command (crontab -l) [now you can see the job]
+
+27. If the sync is perfect, then if we are going to refresh the dr url on the browser, we are going to get the production content (https://dr.asquaretech.tk/)
+
+28. For setting up cloudwatch, use this aws content on your prod machine(https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/monitoring-scripts-intro.html) - give command (sudo yum install -y perl-Switch perl-DateTime perl-Sys-Syslog perl-LWP-Protocol-https perl-Digest-SHA.x86_64) - download the cloudwatch (curl https://aws-cloudwatch.s3.amazonaws.com/downloads/CloudWatchMonitoringScripts-1.2.2.zip -O) - unzip the content 
+(unzip CloudWatchMonitoringScripts-1.2.2.zip && \
+rm CloudWatchMonitoringScripts-1.2.2.zip && \
+cd aws-scripts-mon), give (ls -ltr) we can view 2 perl files here, that helps the cloudwatch to pass the content to our ec2 machine.
+
+29. Give command (./mon-put-instance-data.pl --mem-util --verify --verbose) to check the memory utilization of the server
+
+30. Use this command (./mon-put-instance-data.pl --mem-used-incl-cache-buff --mem-util --mem-used --mem-avail) [this will generate a report to the cloudwatch, inorder to view the content on the cloudwatch dashboard for client purpose]
+
+31. Now, when you are trying to open the cloudwatch - metrics - you can see new metrics like (linux system) - inside that there will be 3 metrics [memory utilization, memory used, memory available]
+
+Additional Content:
+1. Here, in cloudwatch, we can see somthing called dashboards - click that - give name (memoryutilization) - select the widget (here I am selecting number) - now select the metrics for which you need to see the output.
+{If required you can change the name of the metrics also}
+
+Extra Tasks:
+1. Try using different metrics and set SNS additionally
+2. Edit the code newly and whether the sync is success between prod and dr
+
+Deletion:
+1. Cloudwatch Dashboard 
+2. EC2 Server
+3. Loadbalancer
+4. Route53 - delete the record which we created - then delete the hosted zone
+5. Database
+6. IAM roles
+7. S3 bucket
+8. ACM Certificate
+9. RDS subnet group
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,58 @@
+Introduction to Cloud:
+======================
+
+What is Cloud, & Why Cloud?
+	Let's discuss with some examples, 
+
+Example-1: 
+----------
+Consider we have an Online Shopping App; before the cloud, 
+challenges:
+Peak usage during holidays & festive times
+Less usage during the rest of the time
+Solution (before the cloud):
+ - PEAK LOAD provisioning: Buy (or) Procure infrastructure for peak load to support that load, 
+ == What would the infrastructure be doing during periods of low loads?, it would be idle during those times. 
+
+Example-2:
+----------
+Now take a startup
+Challenges:
+May becomes suddenly popular, and we need to have that kind of infrastructure to support the load, now this is sudden activity as we may not be able to handle this sudden increase
+Solution (before the cloud):
+ - Procure (or) buy infrastructure assuming that they would be successful. 
+ == But, What if they are not successful?, now all the infrastructure we bought is wasted. 
+
+Typical Challenges:
+-------------------
+ - High cost of procuring infrastructure
+ - Needs ahead of time planning (Can you guess the future?)
+ - Low infrastructure utilization (PEAK LOAD provisioning)
+ - Dedicated infrastructure maintenance team (Can a startup afford it?)
+
+Silver Lining in the Cloud
+	How about provisioning (renting resources) when you want them and releasing them back when you do not need them?, 
+   - this is also called [ON-DEMAND RESOURCE PROVISIONING]  [if we have high load on the application/ huge number of users using the application, now we'll provision or rent a lot of resources from the cloud, and once the load goes down/ or the users goes down, now we'll release the resources back to the cloud],  as we can see that the number of resources we can increases and decreases as per the requirement, and that's why this is also called [ELASTICITY]
+
+Advantages of Cloud:
+--------------------
+ - Trade "Capital expense" for "Variable expense" (instead of investing hugh amount; we are just paying rent)
+ - Benefit from massive economies of scale [each cloud providers has millions of servers, and therefor we can compare and get the best deals according to our requirement] 
+ - Stop guessing capacity
+ - Stop spending money running and maintaining data centers
+ - "Go Global" in minutes (we can easily deploy our infrastructure within a click of a button)
+
+Why AWS?
+--------
+	Is the leading Cloud Service Provider; their main competitors are Microsoft Azure and Google Cloud Platform.
+AWS Provides the most number of services (300+) and all those are related to the modern technologies;  AWS proved to be very Reliable, very Secure and Cost-effective. There are high number of large enterprises which run their applications on AWS, like Netflix, NASA, Dropbox, Airbnb etc., 
+
+Cloud Number facts:
+-------------------
+ > In 2023, AWS has over $90 billion in annual revenue
+ > AWS accounts for 31% of the market in 2024, Microsoft Azure is 2nd with 25%
+ > Pioneer and leader in the Cloud market for the 13 consecutive year
+ > Over 1 Million active users.
+
+Search for AWS free tier in google, and we will be redirected to the AWS official page, where we can check all the resources
+Reference Link: https://aws.amazon.com/free/?all-free-tier.sort-by=item.additionalFields.SortRank&all-free-tier.sort-order=asc&awsf.Free%20Tier%20Types=*all&awsf.Free%20Tier%20Categories=*all

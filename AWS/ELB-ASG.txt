@@ -1,0 +1,76 @@
+What is ELB?
+	A load balancer accepts incoming traffic from clients and routes requests to its registered targets (such as EC2 instances) in one or more Availability Zones. The load balancer also monitors the health of its registered targets and ensures that it routes traffic only to healthy targets. When the load balancer detects an unhealthy target, it stops routing traffic to that target. It then resumes routing traffic to that target when it detects that the target is healthy again. 
+
+Understanding about HTTP, HTTPS, TCP, TLS & UDP:
+-------------------------------------------------
+	Whenever 2 system talks to each other they are connecting via protocols and this communication happens over multiple layers. 
+
+1. Network Layer (Layer 3) 		IP [Internet Protocol]			(responsible for transfer bits and bytes like '0's & '1's; this also Unrelaible because the information direcly send via network, and there are chances where the datas may get lost)
+
+2. Transport Layer (Layer 4)		TCP [Transmission Control Protocol] {Highly reliable - where this checks whatever we send from 1 machine was reached to the other machine with the same size and same order} TLS [Transport Layer Security] {this is a secure form of TCP, where it make sure the datas are transferred in a secured format like encryption, as the datas are transferring via network, there are chances for hacking it, hence this comes into picture} UDP [User Datagram Protocol] {this gives high importance to performance over reliability, like if I am sending 100bytes file it is okay to receive 95bytes in the other machine, but here performance is more important, ex: video streaming, as long as it is streaming fast we are okay even some time the quality of the videos lags} (responsible to ensure that the bits and bytes where transferred properly?)
+
+3. Application Layer (Layer 7)		HTTP [Hypertext Transfer Protocol] {Stateless Request Response Cycle} HTTPS [Secure HTTP] {this use certificates inorder to get a secure communication} SMTP [Simple Mail Transfer Protocol] {used for Email Transfer} FTP [File Transfer Protocol] etc.,	(responsible to make REST API calls and Send Emails)
+
+	Most applications typically communicate at application layer
+ 		> Web apps/ REST API (HTTP/HTTPS), Email Servers (SMTP), File Transfers (FTP)
+ 		> All these application use TCP/TLS at network layer for reliability
+	However applications needing high performance direclty communicate at transport layer
+		> Gaming applications and live video straming use UDP (Sacrifice reliability for performance)
+
+	Computers use protocols to communicate
+
+Elastic Load Balancing supports the following types of load balancers:
+----------------------------------------------------------------------
+	Application Load Balancers - works according to the path
+	Network Load Balancers - works using protocol
+	Gateway Load Balancers
+	Classic Load Balancers - works in round robin system
+
+	There is a key difference in how the load balancer types are configured. With Application Load Balancers, Network Load Balancers, and Gateway Load Balancers, you register targets in target groups, and route traffic to the target groups. With Classic Load Balancers, you register instances with the load balancer. 
+
+What is Cross-zone load balancing?
+	When cross-zone load balancing is enabled, each load balancer node distributes traffic across the registered targets in all enabled Availability Zones. When cross-zone load balancing is disabled, each load balancer node distributes traffic only across the registered targets in its Availability Zone. 
+
+What is ASG?
+	AWS Auto Scaling monitors your applications and automatically adjusts capacity to maintain steady, predictable performance at the lowest possible cost. Using AWS Auto Scaling, it’s easy to setup application scaling for multiple resources across multiple services in minutes. The service provides a simple, powerful user interface that lets you build scaling plans for AWS resources.
+
+Steps for creating Classic Load Balancer (CLB):
+1. Create load balancer - CLB - open all ports.
+2. Create a ASG template (creating EC2 template) under launch configurations - provide necessary details like name, ami, instance type, existing security group, key pair - advanced details (provide the script) to create the application along with the server.
+3. Now, Create ASG using the template - switch to lauunch configuration (select the template) - select all the subnet for cross-zone AZ for high availability - attach the existing LB - Group size (desired: 2, Minimum:1, Max: 4).
+4. Now, confirm there are 2 Instances under EC2
+5. Now, open the IP address of both the machine and confirm the (Script output) is coming or not
+6. Use DNS name from ELB and confirm the same output.
+7. Now, try to delete the Instances and make sure ASG is reccreating the Instances as per the Desired capacity.
+
+	(*** Terminate the ASG, Template, Load balancer)
+
+Steps for creating Application Load Balancer (ALB):
+1. Create 2 different Instances with different script (Homeloan & Plotloan)- attach existing security group
+2. Create 2 different Target Group - select Instance - Group name (TG-1) - port (HTTP) - with path (/homeloan/index.html) (/plotloan/index.html) - Select the Instance (homeloan) (plotloan) - Click on the button (include as pending below) - create the target group
+3. Go to Load balancer - select Application LB - select all the subnets under AZ - existing security group - attach the existing target group (TG-1) - Create Load Balancer
+4. Open the Listeners and rules - come inside the HTTP - under listerner rules, click Add rule - name (homeloan) (plotloan) - add conditions - select path - (/homeloan*) (/plotloan*) - forward to target groups (TG-1) (TG-2) - under priority provide the number according to the application (60) (40) [the numbers should not be the same] - save 
+5. Now copy paste the DNS by changing the path accordingly (ALB-986333032.us-east-2.elb.amazonaws.com/homeloan) (ALB-986333032.us-east-2.elb.amazonaws.com/plotloan)
+
+	(*** Terminate the ALB, Target Group and Instances)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

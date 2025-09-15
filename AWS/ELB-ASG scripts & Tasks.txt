@@ -1,0 +1,49 @@
+#! /bin/bash
+yum install httpd -y
+service httpd start
+echo "Hello All from $(hostname) $(hostname -i)" > /var/www/html/index.html
+
+
+#! /bin/bash
+yum install httpd -y
+service httpd start
+mkdir /var/www/html/homeloan/
+echo "This is my Homeloan instance" > /var/www/html/homeloan/index.html
+
+
+#! /bin/bash
+yum install httpd -y
+service httpd start
+mkdir /var/www/html/plotloan/
+echo "This is my Plotloan instance" > /var/www/html/plotloan/index.html
+
+
+
+
+Task:
+What is EC2 health check and ELB health check, and how it works?
+Manually create instances, change the content inside to it by using vi command, and attach the instances to ELB === Try with Cloudwatch & SNS.
+Document for: What is Network LB?
+What are OSI Layers?
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

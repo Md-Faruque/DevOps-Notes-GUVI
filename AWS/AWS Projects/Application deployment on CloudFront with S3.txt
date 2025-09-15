@@ -1,0 +1,146 @@
+Application deployment with CloudFront & S3 [once done is enough, proceed with the next step as per recommended for direct S3]
+
+Follow this steps before beginning, as we are trying to bring react-app, let's try to install the same
+[Note: if already there, then start from step no: 9, make sure its already available]
+
+1. Download & Install nodeJs from google through their official site (https://nodejs.org/en/download)
+
+2. Create a folder in the windows desktop (react-app)
+
+3. Open powershell and confirm the same (node -v) (npm -v), if you are facing issues with the npm version, then give the command (Set-ExecutionPolicy RemoteSigned -Scope CurrentUser), now check for the version.
+
+4. Go inside the react directory (cd .\Desktop) - (cd .\react-app)
+
+5. Now lets install the react-app, by following this command (npm install -g create-react-app)
+
+6. Let's upgrade the npm (npm install -g npm@10.9.0) [make sure we are updating the same as per the latest version]
+
+7. Create the app now (npx create-react-app demo-app)
+
+8. now, (ls) to confirm the same
+
+9. go inside the app (cd .\demo-app)
+
+10. let's start the process (npm start) - this will open the browser where the react is running
+
+11. Give (ctrl+c) and terminate the process
+
+12. Next, let's create a production build, (npm run build)
+
+13. Once done, now open the react-app inside the desktop - where we can see demo-app, and inside that we can see all the other folders as well.
+
+(Close Powershell window)
+
+Commands Lists:
+   1 node -v
+   2 npm -v
+   3 cd .\Desktop\
+   4 cd .\react-app\
+   5 npm install -g create-react-app
+   6 npx create-react-app demo-app
+   7 npm update
+   8 ls
+   9 npm audit fix
+  10 ls
+  11 npm cache verify
+  12 npm install
+  13 npx create-react-app demo app
+  14 cd .\demo-app\
+  15 npm start
+  16 npm install web-vitals --save
+  17 npm run build
+
+Steps:
+
+1. Go to the AWS Console - S3 service - we are going to create 2 buckets for this, where the 1st one is for our website without (www) - and the another one with (www); through this way we can properly redirect the traffic vice-versa (with or without "www")
+
+[Make sure to create everything on N.Virginia, as certificate manager supports only for this location]
+
+2. select the region - provide the bucket name (kloudevops.site) - block the public access - disable encryption - leave everything default - create bucket
+
+3. create the 2nd one with (www) - select the same region as above - provide the bucket name (www.kloudevops.site) - uncheck the block public access box & acknowledge - disable encryption - leave everything default - create bucket
+
+4. let's go inside the (www) bucket and upload the files without the "static" folder, upload all the other files (like: asset-manifest, fevicon, index, logo192, logo512, manifest, robots)
+[path: react-app/demo-app/build]
+
+5. now click on the add folder, next to the add files, and here upload the "static" folder - leave everything default - upload
+
+6. close that and come back to the (www) bucket - permissions - under bucket policy, edit - add this one
+
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "PublicReadGetObject",
+            "Effect": "Allow",
+            "Principal": "*",
+            "Action": [
+                "s3:GetObject"
+            ],
+            "Resource": [
+                "arn:aws:s3:::www.kloudevops.site/*"
+            ]
+        }
+    ]
+}
+
+7. come to properties, scroll down to the last, where we can see the static website hosting - edit - enable - hosting type: host a static website - give under index document give (index.html) - save
+
+8. come to the next bucket without (www) - only "kloudevops.site", as we can see the bucket is empty, this is because we are going to redirect the request to the another bucket - come to properties  - static website hosting - edit -  enable - under hosting type, choose (Redirect request for an object) and provide the host name (www.kloudevops.site), protocol (http) [later, we will change this one] - save changes
+
+[through this step, whenever request comes to kloudevops.site, this is going to redirect to "www.kloudevops.site"]
+
+9. next, we need to setup the domain via Route53 - register the domain (kloudevops.site) [go through the Route53 for the same] [make sure to add the nameservers to the DNS providers properly] - create record - switch to wizard (for better version) - simple routing - define simple record - under record name, give (www) - value/route traffic to (Alias to S3 website endpoint) - select the region where bucket exists - and choose the bucket - "No" for Evaluate target health - Define simple record.
+
+10. for (non www) - click on Define simple record - leave it as empty under "Record Name" - value/route traffic to (Alias to S3 website endpoint) - select the region where bucket exists - and choose the bucket - "Yes" for Evaluate target health - Define simple record. (create record) [now we can see 2 different records]
+
+11. now check for the output by calling (kloudevops.site) - and we can see this redirects to (www.kloudevops.site) and showing us the output. 
+
+[Do remember, this may take a while to show us the output due to DNS propogation]
+
+12. now let's purchase a certificate to run on (https) instead of (http)
+
+13. [make sure you are doing this on N.Virginia, as this is available only on that location for free-tire account] open certificate manager - request a certificate - will go on with public certificate - next - give the complete domain name (www.kloudevops.site), and select add another name to this certificate and add another name which is (non-www) version (kloudevops.site) - under validation method let it be "DNS validation" as we are the owner here - leave other things default - and request.
+
+14. refresh the page and we can see the validation was pending [this is because we need to add these in our Route53] - click on the certificate ID and we can see domains (2) and this gives us the CNAME (and these needs to be added over there), now click on the create records in Route53 (and this is going to automatically create in Route53).
+
+15. confirm the same by coming inside Route53 - and it will take sometime to change from this "pending validation" status.
+
+16. Once we got the confirmation msg as "issued" & "success" then we can proceed with the next step [before jumping to cloudfront distribution, come to our browser output, right click and select "inspect" go to network, click on refresh (reload) - and click the 1st one domain - under headers (Response headers, we can see the server: Amazon S3) as we haven't configured anything with CF, it is connecting with S3]
+
+17. come to cf distribution - create - for origin domain [come to S3 - choose "www" bucket - properties - scroll down to the bottom where we can see the static website hosting - and there we can see the "URL" (ex: http://www.kloudevops.site.s3-website-us-east-1.amazonaws.com) - copy paste here
+
+18. next under Default cache behavior - we can see "viewer protocol policy" [usually this well be setted up by Developer] - here we are going to choose "redirect HTTP to HTTPS" because we need this to be redirected in a secure manner using our certificate (as in origin domain we are using http protocol, for secure connection we follow this)
+
+19. under (WAF) - choose (Do not enable security protection) - under settings, we can see alternate domain name (CNAME) - here we are going to provide the website URL "www.kloudevops.site" and under custom SSL certificate (check whether we are receiving our certificate) for the same - and attach - leave everything default and create the distribution
+
+20. Now, create a cf distribution for the other bucket (non-www) - create distribution - origin domain [come to S3 - choose "non-www" bucket - properties - scroll down to the bottom where we can see the static website hosting - and there we can see the "URL" (ex: http://kloudevops.online.s3-website-us-east-1.amazonaws.com) - copy paste here
+
+21. next under Default cache behavior - we can see "viewer protocol policy" [usually this well be setted up by Developer] - here we are going to choose "redirect HTTP to HTTPS" because we need this to be redirected in a secure manner using our certificate (as in origin domain we are using http protocol, for secure connection we follow this)
+
+22. under (WAF) - choose (Do not enable security protection) - under settings, we can see alternate domain name (CNAME) - here we are going to provide the website URL "kloudevops.site" and under custom SSL certificate (check whether we are receiving our certificate) for the same - and attach - leave everything default and create the distribution
+
+[wait until the deployment was completed successfully]
+
+23. come back to (non-www) s3 bucket - properties - static website hosting - edit - under protocol choose "https" - save changes.
+
+24. come back to cf distribution - choose the cf domain name [ex: difivtjtelfqv.cloudfront.net] (of www) origin - copy paste in the browser and we can see the app is running successfully. 
+
+25. now we need to get the DNS name for (kloudevops.site), hence we need to change the DNS settings and re-map it for further connection
+
+26. come to route53 - and we are going to change the existing "A" record for (kloudevops.site) & for (www.kloudevops.site) from S3 to CloudFront [this means hereafter the request will be reouted to cf domain name and cf is going to re-route that to S3 bucket]
+
+27. choose (www.kloudevops.site) - edit record - under route traffic to [change from S3 website endpoint - to - cloudfront distribution] - and cf domain name accordingly from the suggesstions - save
+
+28. do the same for the other one (kloudevops.site) - edit record - under route traffic to [change from S3 website endpoint - to - cloudfront distribution] - and cf domain name accordingly from the suggesstions - save
+
+29. make sure we got sometime before our domain name (kloudevops.site) - and now will be able to see the output at the sametime with a secured one [no more "http" that's going to be on "https"], if it is still not coming, try refreshing the page to check for the same.
+
+30. now (press f12) to open the inspect tab - refresh the browser - click on the domain that comes 1st one which is secured, and check the Response Headers there we can see (x-cache) where the request if coming via cloudfront and reaching to S3 with a secured "https" connection with our domain running on route53.
+
+Deletion Process:
+1. Disable both the (www.kloudevops.site) & (kloudevops.site) on cloudfront distribution [make sure it will take sometime]
+2. once disabled and modified, now delete the cf distribution
+3. delete the certificate manager
+4. delete route 53 records & hosted zone
+5. delete the S3 buckets

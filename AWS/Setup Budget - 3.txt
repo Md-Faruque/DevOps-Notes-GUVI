@@ -1,0 +1,15 @@
+Configure Account and Create a Budget:
+--------------------------------------
+	Come to IAM - create an alias name for the IAM users
+
+1. Click the Profile name - Choose Account - Scroll down, and we can see the AWS Regions, we can see few has been by default enabled, and there are few region that got blocked, we can enable according to the requirement
+
+2. Next to that we can see (IAM user and role access to Billing information) - let us activate this, by doing this IAM user can track the billing and monitor the services accordingly - edit - enable.
+
+3. Left hand side, scroll down the list - where we can see Preferences and settings, choose Billing preferences - under Alert preferences - edit - Set up the free tier alerts in order to get the notification, and provide the email address for which we need to receive the alerts - enable CloudWatch billing alerts also
+
+4. Now we need to Activate the PDF invoices delivery preferences, so that we can receive a clear report on pdf format
+
+5. Next, on the left hand side we under (Budgets and Planning) - choose the Budgets - and we are going to create a budget, so tat we can forecast spends and take actions when comes to cost and usage - click on (create a budget) - undr budget setup, choose (use a template) - under Templates we can see multiple options, I will choose here (Monthly cost budget) - now, we can set up the name, I am leaving this default; and provide the budget amount for which you need to receive the notification (5) [remember it will be in dollors] - provide the email address for which you need to receive notification - create budget.
+
+6. To reveiw about the usages, which we did earlier; come to cost explorer under Cost analysis; and this shows for multiple months like a comparison basis, until or unless we are going to delete things on time, we won't get charged from this area.

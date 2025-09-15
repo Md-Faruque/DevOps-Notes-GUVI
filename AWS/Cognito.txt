@@ -1,0 +1,43 @@
+Amazon Cognito:
+	Service that offers Authentication (AuthN) and Authorization (AuthZ) features.
+
+Authentication refers to the process of identifying who a person is [as an individual]
+Authorization refers to what an individual has access to.
+
+1. Cognito allows to add user registration, sign in, and access control.
+
+2. Scalable and highly available supporting millions of users
+
+3. Cost effective (all the data's can be stored within cognito, there is no need for compute, storage, db etc.)
+
+4. Supports standards based identity providers like (OAuth 2.0 [more familiar one], OIDC [Open ID Connect = this is an extension of OAuth 2.0, SAML)
+
+Core Concepts:
+User Pools = User Pools are used for authentication, this will manage a pool/collections of users with their data's.
+	To verify your user’s identity, you need to have a way for them to login using username/passwords or federated login using Identity Providers such as Amazon, Facebook, Google, or a SAML supported authentication such as Microsoft Active Directory. You can configure these Identity Providers on Cognito, and it will handle the interactions with these providers so you only have to worry about handling the Authentication tokens on your app.
+
+Identity Pools - Identity Pools are used for User Authorization. You can create unique identities for your users and federate them with your identity providers. Ex: Short-time/temporary access to AWS Resources.
+
+Steps:
+1. Create user pool - federated identity providers (select accordingly) [google & amazon] - cognito sign-in (username, email) - username requirements (preferred username)
+[a. Cognito user pool will use their own setups
+ b. Federated identity providers will use the 3rd party platforms for setups]
+
+2. leave congito defaults [if you want to customize your password, use the 2nd option] - optional MFA (authenticator apps & SMS) - forgot their password (enable self-service) through email or other options we can reset it
+
+3. sign-up can be directly by customers (enable self-registration) - account confirmation  (email, phone number) - attribute confirmation reconfirmation - required attributes & custom attributes (leave default)
+
+4. SES (simple email service) - open ses - create identity - provide your email and verify it - come to cognito and attach the email address (FROM email address) - sms (can be used for sending notification through sns service) [make sure to create an iam role and provide role name]
+
+5. federated identity provided (google & amazon) - skip for now
+
+6. provide a name for user pool (new-console20) - for user pool we need to create an endpoint by domains - use a cognito domain for better accessability - provide a name (new-console20) - choose the client (public) provide name (client-1) - allowed callback URL (for connectivity confimation internally) provide name (localhost) - review & create user pool
+
+7. select you user pool - click app integrations - come to the end to view about the client - now select client - under Hosted UI [we have options to View Hosted UI] select that will take to the sign in page for that specific client
+
+Deletion:
+8. select user pools - User pool properties - Deactivate deletion protection - delete user pool
+
+9. Delete SES & SNS created for cognito 
+
+10. Delete all roles & policies under IAM 

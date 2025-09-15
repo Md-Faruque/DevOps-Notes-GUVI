@@ -1,0 +1,121 @@
+AWS Developer Tools - Project:
+
+CI/CD - the foundation:
+	Continuous Integration (CI) and Continuous Delivery/Deployment (CD) are the backbone of modern DevOps.
+
+ > Continuous Integration is about developers merging code changes frequently (sometimes many times a day) into a shared repository. Each merge triggers automated builds and tests. This reduces integration problems and catches bugs early. Think of it as a safety net that ensures new code works well with existing code.
+
+ > Continuous Delivery/Deployment extends this pipeline further by automating the release process. Once code passes all tests, it’s packaged and deployed automatically to staging or even directly to production. The difference:
+	. Delivery → code is always ready for production but may require a manual approval step.
+	. Deployment → code goes straight to production without human intervention.
+
+AWS Developer Tools for CI/CD
+1. AWS CodeCommit:
+	This is AWS’s fully managed Git-based source control service. It works just like GitHub or GitLab, but repositories are private, scalable, and hosted inside your AWS account.
+ > Stores application source code.
+ > Provides version control and branching.
+ > Integrated with IAM for fine-grained access control.
+Generic equivalent: GitHub, Bitbucket, GitLab.
+
+2. AWS CodeBuild
+	A fully managed build service. It compiles source code, runs unit tests, and packages artifacts. You define build instructions in a buildspec.yml file.
+ > No servers to manage.
+ > Pay only for build minutes.
+ > Scales automatically with parallel builds.
+Generic equivalent: Jenkins, Maven/Gradle, CircleCI.
+
+3. AWS CodeDeploy
+	Automates code deployments to EC2, Lambda, or even on-premise servers.
+ > Handles rolling updates, blue/green deployments.
+ > Reduces downtime.
+ > Integrates with Auto Scaling groups.
+Generic equivalent: Ansible, Chef, Puppet, Spinnaker.
+
+4. AWS CodePipeline
+	The orchestrator of CI/CD. It automates the flow of code from commit → build → test → deploy.
+ > Visual drag-and-drop pipeline design.
+ > Integrates with CodeCommit, CodeBuild, CodeDeploy, and third-party tools.
+ > Supports manual approvals and custom actions.
+Generic equivalent: Jenkins pipelines, GitHub Actions, GitLab CI/CD.
+
+5. AWS CodeArtifact
+	A secure artifact repository. It stores build outputs (like .jar, .npm, .docker, .maven packages).
+ > Developers can publish and consume libraries.
+ > Works with npm, Maven, pip, NuGet.
+Generic equivalent: JFrog Artifactory, Nexus Repository.
+
+6. AWS Cloud9
+	A cloud-based IDE accessible via browser.
+ > Preconfigured with AWS SDKs and CLI.
+ > Lets developers code collaboratively.
+ > Great for demos and hands-on training.
+Generic equivalent: VS Code, IntelliJ, JetBrains IDEs, GitPod.
+
+The Real Flow of CI/CD on AWS:
+==============================
+Imagine you’re building a small web app for your company — say, an internal employee portal. The developers write code daily, new features are added, bugs get fixed, and updates need to reach the users quickly. Here’s how AWS CI/CD services play together in that flow:
+
+1. Developers write code (Cloud9 + CodeCommit)
+ > A developer opens Cloud9 (the browser-based IDE).
+ > They code a new feature and push it to CodeCommit, which is just like pushing to GitHub but hosted in AWS.
+ > CodeCommit stores all versions of the code, so if something breaks, you can roll back.
+
+Flow so far: Dev → Code → Push → CodeCommit
+
+2. Build and Test (CodeBuild + CodeArtifact)
+ > Once code is pushed, CodePipeline gets triggered automatically. It sees: “Hey, there’s new code.”
+ > Pipeline sends the code to CodeBuild.
+ > CodeBuild pulls any dependencies (like npm or Maven packages) from CodeArtifact.
+ > It then compiles the code, runs unit tests, and packages the app into an artifact (like a .zip, .jar, or container image).
+ > If tests fail, the pipeline stops, and developers get notified.
+
+Flow now: CodeCommit → CodePipeline → CodeBuild → Artifact
+
+3. Deployment (CodeDeploy)
+ > When the build succeeds, CodePipeline moves to the Deploy stage.
+ > CodeDeploy takes the artifact and pushes it to the right environment. Example:
+	. If the app runs on EC2 servers, CodeDeploy copies the new files there, restarts the app, and makes sure it’s running fine.
+	. If it’s a Lambda function, CodeDeploy replaces the old function code with the new one.
+ > For zero downtime, you can use Blue/Green deployments where traffic is shifted from old version → new version safely.
+
+Flow now: Artifact → CodeDeploy → Running App
+
+4. Pipeline Orchestration (CodePipeline)
+ > CodePipeline is the conductor of the orchestra. It connects all these stages:
+	. Source → Build → Test → Deploy
+ > Each time code changes, the whole cycle runs automatically.
+ > You can even add:
+	. Approval stages (like a manager clicking “Approve” before production).
+	. Extra test stages using more CodeBuild projects.
+
+End-to-end flow in one line:
+Developer pushes code → Pipeline triggers → Build & test → Package → Deploy → Live in production.
+
+So in the simplest words:
+CodeCommit stores your code → CodeBuild compiles it using packages from CodeArtifact → CodeDeploy ships it to servers → CodePipeline connects the dots → Cloud9 makes coding easier.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

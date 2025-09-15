@@ -1,0 +1,55 @@
+1st stage of application will be the Source (code)
+
+Cloud9 == Browser-based Integrated development environment (IDE) service to write, run and debug your code. Write code from anywhere you have Internet access.
+CodeCommit == we need to store our code in a source control/ version control repository, it is the private repository powered by the Git technologies, this helps us to find out the changes on the code, who made them and also we could also roll back changes and so on. 
+CodeBuild == compiling our code and turning that a computer knows how to read, and we can run test on the code as well to make sure it's functioning properly.
+CodeDeploy == this helps to push our code into EC2 instances or it also works with on-premises.
+
+Now to automate and orchestrate all those pieces we have CodePipeline, you can setup a pipeline that will run things from beginning to end so I write my code, I check it in and the pipeline can automatically built and deply it.  
+
+CodeStar == A unified interface to setup and work with all this: Cloud9, CodeCommit, CodeBuild, CodeDeploy & CodePipeline. We can directly setup the CodeStar project and select the application we need to build and provide few other options, so this goes off and sets up all the other things for you. In other term, this is considered to be a "RockStar" in our developer tools. 
+
+Steps:
+1. Search CodeStar - Create Project [If this the 1st time we are going to set this up, then we need to setup the IAM role, to bring the connections == click on Create service role (*** double confirm by coming inside the IAM role)]
+
+2. Select the project template (Python - AWS Lambda) - provide your project name (My Project) - project ID will be taken automatically - next - Create project. [it will take few minutes to create]
+
+3. Once the project got provisioned - click AWS CloudFormation stack - check all the events that got created
+
+4. Click on Set up AWS Cloud9 - give environment name (my-project-env) - create environment
+
+5. Come once again to CloudFormation stack - 2 new stacks has been created automatically
+
+6. Come to CodeStar - Click Projects - (you can see you project for created) - Select the project - click View applications (where we can see the "Hello World" output)
+
+7. Come to CodeStar - Projects - Click Repository [where we can see the codecommit repository was setup for us this is where you can going to store your code and we can see history as well] - click on View commits - this will show the last commit happened [further all the commits can be tracked in this place]
+
+8. Previous window - Select pipeline - [this shows the entire activity, like CodeCommit for Commiting the code, CodeBuild for Building & Testing and for Deploy here they used CloudFormation instead of CodeDeploy]
+
+9. Under Monitoring, we can see all our Lambda functions metrics are getting monitored 
+
+10. Under Issues - we can see external tracking system like Jira tool and we can intergate with Jira for track bugs, tasks and so on.
+
+11. Select IDE - we can see the environment that got created - click Open IDE - now it will take us to the Cloud9 IDE page, on the left hand side we can see our code, choose the soruce code and double click index.py (current template src code) - now let's try to edit the code 'Hello World from Akshiv' then save the code by ctrl+s, now click on the sourcecontrol button which you can see on the left hand side corner, from top 3rd button. 
+
+12. Right click on the index.py - stage changes [this is an intermediate step required before you commit your changes] - type the comment on the message box like 'Updated Hello World message' - click ctrl+enter to commit that changes - [*** if you are facing error messagae to configure your git, then make sure you are giving this command below the bash termianl
+git config --global user.name "Akshiv20"
+git config --global user.email "queenprince20@gmail.com"]
+now try to click ctrl+ enter, it will work.
+
+13. now once again come to the bash terminal and go inside your project (cd my-project/)
+
+14. now try to push your code (git push)
+
+15. Now come to CodeStar dashboard - go to pipeline where we can see the pipeline started to Build, Test & Deploy our project with the latest updates.
+
+16. Go to CloudFormation stack to confirm this, where you can the updates has been in progress.
+
+17. Once everything got updated, now come to your web browser output and try to refresh where we can see the new updated output.
+
+Deletion Process:
+1. Come to the Cloud9 IDE - click on the cloud9 icon, select Go to the Dashboard - select your environment - Delete
+2. Open CodeStar - Select Projects on the left hand side - click on the Radio button you can view on your project - Delete.
+[This will take sometime to Create as well as Delete, make sure everything got deleted before closing your console.]
+3. Delete S3 bucket
+4. Delete IAM role

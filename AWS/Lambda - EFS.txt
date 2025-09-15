@@ -1,0 +1,117 @@
+LAMBDA:
+
+In AWS, we have certain primary tools like: EC2, S3, IAM, ELB, Route53 etc., All this tools helps us to create an infrastructure.
+
+On the other hand, we do have some tools like: Code deploy, Code pipeline, Lambda, Cloud formation etc., all this tools are like enhancement/optional tools which is like additional tool that helps to develop our environment acording to the need. (This tools are mostly used by developers, hence coding should be added in order to execute this tools)
+
+LAMBDA = Serverless [It is a place to run our code] on the other words, this will be fully managed by AWS.
+In EC2, we are going to do everything manually, when to start/stop it.
+
+Today, we are going to see a static website with login credentials, example: https://www.w3schools.com/
+If we are bringing a login page into a website, which means we definetely have Database within it; because that is the space where the user credentails got saved.
+
+In real-time, we have options to upload images into our website, mostly all the applications will have this features, and if we are trying to upload our image with full-size it is going to consume more space into our database as there is a lot of customers; hence we have an option called flatten the image. [example: In whatsapp, we used to share our photo (real size: maybe 2- 3 mb), but on the other  end they will receive the content only in (kb) size]
+
+In real-time, if we are going to give our code inside our EC2 machine, this is going to run for 24*7, because this is a running server; But we are going to replace this with Lambda, this is going to keep our code and when a user is uploading an image, then this code is going to get triggered automatically. Through this we can minimize our cost, as this is going to get charged only for the certain milli-seconds till the code was running.
+
+[https://us-east-2.console.aws.amazon.com/lambda/home?region=us-east-2#/begin]
+
+We got 1million request free in lambda or 4,00,000 GB-seconds of compute per month are free.
+
+According to the number of request, Lambda will automatically increase it's configuration.
+
+Steps:
+1. Create a function [we can create our function in 4 different ways 1. Author from scratch = Creating a function using our own code; 2. Use a blueprint = using aws default code to run our function; 3. Container image = If we have any function that needs to run using ECS/ Docker container then we can use this option; 4. Browser serverless app repository = This is like general code available in a public repository by using this we can create a function]
+2. We are using our own code (Author from scratch) - give a name (myfunc) - select the runtime (python 3.8) - then we need to provide permission here as we are running the code in order to delete multiple services (hence we need to use IAM service) - create a role - select Lambda - set permissions for (cloudwatch full access, ec2 full access, VPC full access) - give name for the role (mylambda).
+3. Now attach the IAM role in the Lambda - create a function
+4. Do a small change in the code under lambda function as below;
+import json
+
+def lambda_handler(event, context):
+    # TODO implement
+    return "Hello Lambda"
+
+click on Deploy - once the changes got deployed - click on test - now, it is asking us to create a name for the test event (mytest) - create. [Here, deploy means store my code on the Lambda; and then test the code by giving the name]
+5. Now click on test again in order to confirm the output of the python code.
+6.  Now try to execute the cleanitall code, erase everything under the lambda_function (existing code) - paste our code inside it.
+[As, I am having server instances related to other sessions, I am removing the EC2 and EBS volume code from this existing code]
+7. In order to confirm the output, whether it is working or not, I am trying to create an empty CLB for testing purpose.
+8. Now Deploy the code, before running the Lambda code, we need to do some changes under configuration, as there is certain limitation into it (the memory allocation will be 128MB, and the code should complete within 3sec)
+9. Click on configuration - edit - change the timeout to 15mins (maximum time limit is 15mins) - as we are trying to do multiple activity on all regions there maybe not possible the code will get completed within default time (3secs), hence changing the time limit to max.
+10. Now click on test (it started to execute the code)
+11. Try to refresh you CLB, once after the code execution got completed; automatically the load balancer got deleted.
+12. In real-time, Lambda is working by triggering; we cannot do the test manually all the time; now we are going to trigger the process for automation as this will be done by using Cloudwatch, that is the reason we have provided permission for CW while creating the role.
+13. Go to cloudwatch - select logs - log group - there will be automatically logs collected for lambda function. Once you open that, this will show the number of the times the logs was executed and all the related informations.
+14. We are going to bring trigger - select events - rules - create rule - schedule - cron expression [Task: Learn about this cron expression using https://crontab.guru/]
+(cron is nothing other than that a time-based scheduler)
+15. Copy paste the time, date, month, properly when the trigger needs to be done (ex: 30 18 * 1-4 0) - add target - select the lambda function - configure details [through this we will be able to trigger the activity automatically], this is not only for Lambda, this can be used for multiple process. 
+{*** Events & Rules are highly asked interview questions}
+
+Interview Question:
+1. If I got a Lambda function on my console, Will I be charged for this?
+	No, Until on unless the Lambda is triggered, there won't be any charges applied.
+
+Links:
+https://www.simform.com/serverless-examples-aws-lambda-use-cases/
+https://aws.amazon.com/lambda/resources/customer-case-studies/
+https://www.contino.io/insights/aws-lambda-use-cases
+
+https://crontab.guru/
+
+Tasks:
+1. Learn about Cron expression.
+
+Deletion Steps:
+1. Lambda function
+2. CloudWatch - Logs - Delete
+3. IAM role for Lambda
+
+
+EFS - Elastic File system
+This is working under the same S3 storage class
+This works only in the Linux Env
+We are using this to share the volume for multiple instances.
+This is working under NFS (Network File Sharing) protocol; where I am going to create a volume under EFS and going to attach to all the instanes. [If a file got created under this volume, it is visible under all the instances; If they are going to delete the file, it is going to get deleted in all the machines], this is called shared volume.
+Upto 25,000 files can be created for free under this shared volume.
+
+Steps:
+1. Create 2 instances - attach default SG (make sure adding NFS type, if we are using the customized one) - attach key pair - launch instances
+2. Create File system - customize - give a name (myefs) - disable back-up - lifecycle management (7days since last access) - performance mode [general purpose: adjust with normal speed; max i/o: provides with full speed access] - throughput mode [bursting: adjust according to the files and network; provisioned: customizing our transfer speed according to our requirement] - disable the encryption - next - under mount targets, delete the default security group and attach to the SG which we created for the server (myefs) on all the AZ's - skip the policy - review and create.
+3. Now, we are going to connect to the server, select the instance - click on connect - ec2 instance connect - connect (this will directly connect us to the terminal) [***this option will work only for Amazon Linux, and not for any other OS] - Open the 2nd instance via same pattern.
+4. Switch to root user on both the instances (sudo su - root)
+5. Create 2 different directory on both the machines seperately (server1: mkdir test) (server2: mkdir new)
+6. Now we are going to attach both the servers - go to efs - select the file system - click on attach - (copy the command - using nfs client; paste on both the servers  by changing only the directory name on the end) [example: sudo mount -t nfs4 -o nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport fs-be75a5c5.efs.us-east-2.amazonaws.com:/ test] [sudo mount -t nfs4 -o nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport fs-be75a5c5.efs.us-east-2.amazonaws.com:/ new]
+7. Confirm this by this (df -h) file system command [where you can see under each directory the efs path has been connected]
+8. Go inside the directory on both the servers (cd test) (cd new)
+9. Confirm on both the server that there is no file present at this moment by giving (ls -ltr)
+10. Now, create a new file under 1 machine (touch hi), check the same availability on both the machine, it will be presented on both the machines now.
+11. Try the same on another machine (echo "hello world" > akshiv.txt) - check using (ls -ltr) - switch to the next machine and check for the same file using (cat akshiv.txt)
+
+Interview Questions:
+1. Under which scenario, we are using this EFS?
+	We are using this basically for backup High-availability purpose; [example: jenkins high availability aws]
+
+Deletion Process:
+1. Delete the EC2 server
+2. EFS
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

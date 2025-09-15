@@ -1,0 +1,77 @@
+Storage Engineering: S3
+
+This acts same like Google Drive - Storage and Retrieval
+
+What is S3?
+	Simple storage service, it is designed for unlimited, unstructured manner of storing , processing and retrieval of data.
+	It is a storage on the Internet
+	This can be accessed anywhere and anytime, from anywhere on the web
+	It also act as a version control system by having the feature called versioning
+	It is a Global service
+
+What is Version?
+	Versioning in Amazon S3 is a means of keeping multiple variants of an object in the same bucket. You can use the S3 Versioning feature to preserve, retrieve, and restore every version of every object stored in your buckets. With versioning you can recover more easily from application failures. After versioning is enabled for a bucket, if Amazon S3 receives multiple write requests for the same object simultaneously, it stores all of those objects.
+Versioning-enabled buckets can help you recover objects from accidental deletion or overwrite.
+
+Versioning:
+Maintaining the complete version of the Entire Application
+
+Facebook
+v1
+v2
+v3
+v4
+R1  ---->  2011
+v5
+v6
+v7
+R2 ---->  2015
+v8
+v9
+v10
+R3 ----> 2020   - This helps us to rollback if there is a need
+
+Why S3?
+
+1Instance = upto 20 EBS
+1 EBS = Max upto 16TB of data
+
+Storage class (Lifecycle manager) - will work automatically on the background and it will delete the content if it is unused for certain time - It avoids paying cost on unused objects; which no other services have.
+
+
+Functions of S3:
+
+It is a storage unit
+Collections of objects
+It is a single level container, can contain multiple folders, or objects can be placed directly
+Upload and download can be easier
+Name of the bucket should be globally unique
+Allows max 100 buckets under one account / cannot create more than 20buckets under one region (increase via support center)
+Upto 5TB can by used under single Object
+
+Limitations:
+- except.exe
+- we cannot do any kind of instalations
+- free-tier upto 5GB object I can store in my single account
+
+
+Task:
+What are all the other Global services available in AWS?
+What is Storage class? Difference between all the classes?
+What is ACL? and it's purpose
+What is mean by Multipart Upload in S3?
+[Reference Link: https://docs.aws.amazon.com/AmazonS3/latest/userguide/mpuoverview.html]
+
+
+Object lock:
+If I enabled the object lock, I cannot over-write the content. I cannot disable again. (If you want to enable object lock, you need to enable versioning by default - Interview question)
+
+Steps:
+1. Create a bucket (with unique name) with allowing public access - Enable version
+2. Upload an sample file inside the object - provide permission for public access
+3. Try to check the content on the browser
+4. Update the document and upload it once again into the same object
+5. Confirm the updated document got uploaded or not by checking into the browser
+6. Select object - open file - click version - to check the previous version of the file.
+
+{we can create private bucket & public bucket = where public can accessed via Internet & pvt cannot directly accessed via Internet}

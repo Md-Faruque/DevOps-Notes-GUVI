@@ -1,0 +1,133 @@
+VPC - Network Engg
+
+What is key concept for Network Engg?
+	IP Address, what is IP Address? == (IP --> Internet Protocol Address, This is the Address to reach the server), It is a combination of numbers, automatically/ manually assigned for the server, 
+
+[172.120.1.100
+ 10.0.0.22
+ 18.25.258.23]   Is this all IP Address?
+
+CIDR block calculation link: https://www.ipaddressguide.com/cidr
+
+1st Rule:
+1. Even for a number sake, we cannot cross beyond 255; this should falls only under this category (0-255)
+2. CIDR ==> Classless Inter-Domain Routing, It is a set/collections of IP Addresses. In an organisation, we are not going to configure one to one IP's to the machines, instead we are going to purchase a set of IP Addresses and assign it to the servers.
+[If there is a group of IP's required, then the organisation will fix an range for them;
+ ex: 10.0.0.0 -- 10.0.0.255 ==> now there are 256 hosts, 
+We always used to communicate using 'from' and 'to' for setting the ranges; but that won't be understandable by machines, hence we are using CIDR for setting up this range for the machines; 10.0.0.0/24, this is as equals to same 'from' and 'to' setup]
+For Understanding this Concept better, go through this Link: https://www.ipaddressguide.com/cidr
+Use this link for IP Address to CIDR calculation or CIDR to IP Address.
+Under which concept this CIDR blocks are configured? What is the max number and minimum number?
+This max number which we can use is (/32), why? Each and Every IP will have 4 count
+10.0.0.0
+  8.8.8.8 = 32 
+These are called bytes, (if you are giving (/32), you will be assigined with 1 single host; (/31) ==> 2; (/30) ==> 4; (/29) ==> 8; (/28) ==> ???; try to reduce the number and check the number hosts getting allocated.
+How this algorithm is getting calculated?
+Ex: Max number => 32
+32-30 = 2 ----- 2 to the power of 2; so 32-30 = 4
+32-28 = 4 ----- 2 to the power of 4; so 32-28 = 16
+
+Now, what we will get if we are going to give 10.0.0.0/23???
+Total number of host = 512; but what happens to the range? 
+The starting range will be 10.0.0.0, and the ending range will be 10.0.1.255; as we cannot cross beyond 255, now this is going to move the range before hand.
+
+If we are going to give the next IP Address as 10.0.0.0/22???
+Total number of host = 1024; what about the range?
+The starting range will be 10.0.0.0, and the ending range will be 10.0.3.255; because the previous range also can go upto 255 range.
+
+If my last 2 ranges are going to reach it's limit like 10.0.255.0 - 10.0.255.255, then how many host are involved inside them and what will be CIDR block which we are using for this?
+easy way to identify this one for reaching out 1 last digit entirely we are using (10.0.0.255 = 8.8.8 (reached the end point) ==> so it is 24); same way now we are going to reach both the last 2 digits like (10.0.255.255 = 8.8 (reached the end point) ==> so it is 16).
+10.0.0.0 = 32 (we occupied only one machine)
+10.0.0.255 = 24 (we occupied the last range) = number of host 256
+10.0.255.255 = 16 (we occupied the last 2 range) = number of host 65,536 [another simple way like 256*256 = 65,536]
+10.255.255.255 = 8 (we occupied the last 3 range) = number of host 16,777,216 [in real-time, we are not going to use this range, as there won't be reequirement for this]
+
+Till now we have used the IP Address assigned by DHCP automatically, by real-time we are going to use our own IP Address, hence we need to know how this calculations are working out.
+
+Why I need Private IP's? Why can't I use the Public one?
+	Cloud is actually a shared environment, as we can't compromise on our security, we are trying to create our own private setup within this specified IP range's. This kind of Private connection is called Dedicated Host, mostly Banking/Healthcare domain's will be choosing this kinds of setup for more secured connection.
+
+In our real-time we used to have 2 different kinds of server 1. will be having our Application (we will call that as Application Engg server); 2. will be having our DB (this will be called as Database Engg server). which one needs to be more protected one? Definitely it is the DB one, as it is going to hold all our customer credentials; and the App server needs to run on our public, because there are chances where even non-customer can access our website/application.
+[ex: HDFC home page, this will be accessed by our non-customers also, but the login page will be accessed only by our customers hence we need to maintain that very protected one]
+
+Task:
+What is the Difference between Two-tier Architecture and Three- tier Architecture?
+Two-tier Architecture:
+	When we hold a webserver or appserver and a DB server for hosting our application (static or dynamic application)
+
+Three-tier Architecture: 
+	Where there is a need for both webserver as well as appserver and a DB server for our application (this application has both static and dynamic content for an application)
+
+VPC: (Virtual Private Cloud) - means extra security and extra privacy - This is a chargable service.
+The Entire network will be considered to be the VPC, inside VPC, we may separate our network for public and private connection this is called (subnet).
+
+1. Under services - networking and content delivery - select vpc - create vpc - give name (myvpc) - ipv4 cidr block (10.0.0.0/16) - tenancy (default) [default means = giving one single portion under the hardware; dedicated = giving the entire hardware] - create VPC
+
+Task:
+What is the difference between IPv4 and IPv6?
+
+2. Create Public Subnet - give name (pubsub) - attach to our specific vpc which we created earlier - select the AZ (availability zone) [*** make sure to choose different AZ fo both the different subnets (us-east-2a) - set the IP address accordingly (10.0.1.0/24) - Add another subnet - give name as (pvtsub) - give a differeent AZ (us-east-2b) - set the IP address (10.0.2.0/24) - create subnet.
+
+3. In order to bring a connection, we need to provide internet connection within the vpc - create internet gatway - give name as (myigw) - now it will be in detached mode, inroder to bring the internet connection attach the vpc - actions - attach to vpc (select out vpc).
+
+4. Now, we need to attach our IGW, to our subnet by setting up routing table; we need to create dedicated route table for public or private - create route table - give name (pub-rt) - attach to our specific vpc (myvpc) - create another route table for private - give name (pvt-rt) - attach to the vpc.
+
+5. Next step is to do subnet association - open the (pub-rt) - select subnet associations - edit subnet association - select public subnet (pubsub) - save; Same for (pvt-rt) - select private subnet (pvtsub) - save.
+
+6. Till now we don't have internet connection to the subnets, hence we are going to provide the internet connection now [***we are going to provide internet only to the public, and private should not have open internet connection, the connection should flow only via public] - select the (pub-rt) - routes - edit routes - add routes - (0.0.0.0/0) [*** this is called open IP, anyone can get access to the application] - select the (myigw) under the targets - save.
+
+[1st difference, Internet will flow directly only to the public and not to the private]
+
+7. Next step, creating Security Group; [we are doing this to bring the secured connection to the server] - select SG - create SG - give name (pub-sg) - copy paste the same on description - set for our vpc (myvpc) - Inside the inboud rules - Add rule (give only RDP, HTTP, HTTPS & SSH) [*** for time being I am giving All TCP, avoid this] - give open CIDR as this is our public machine (0.0.0.0/0) - [we don't want to do any changes inside outbound rules, as people who came already only going to exit from that route, hence that can be anything] - save
+
+8. Now, we are going to edit the SG for private - select SG - create SG - give name (pvt-sg) - copy paste the same on description - set our vpc (vpc) - inside the inbound rules - Add rule (give All TCP) [in real-time, mostly according to our DB, we will choose our ports, as we don't have anything now, we are choosing open port] - and give the Public machine SG ID to the source - save.
+
+[2nd difference, Giving particular port number access for public, via public the ports will be accessed to private]
+
+9. Create 2 different Instances for public and private - select windows OS - select our vpc (myvpc) - for public instance select public subnet (pubsub) - Auto-assign public IP (Enable) - select public SG - create an instance.
+
+10. Now, create a private instance - select windows OS - select our vpc (myvpc) - now select private subnet (pvtsub) - Make sure to (disable) Auto-assign public IP [as we don't require a public IP for connecting to the private machine] - Select private SG - create the instance.
+
+[3rd difference, Provide only the specific subnet, SG for Public and Private]
+
+11. Now, Login to public machine and make sure the Internet connection is working fine or not; And try to login to private machine [*** we will face an issue, because we gave access to private to come only via public machine using SG, as we have not done that, this is going to throw us an error]; try to login from inside the public machine and there will be an successful connection now.
+
+12. Now, we need to create NAT Gateway for getting connection from public subnet - Create Nat Gateway - give name (mynat) - select public subnet (pubsub) [as we are getting connection from public subnet] - allocate elastic IP [*** as we know, public IP's are dynamic and if it is going to change then the connection won't be an constant one, hence we are trying to fix the static IP and the other name is called EIP] - create NAT gateway.
+
+13. Now, go to pvt-rt - select routes - edit routing table - give (0.0.0.0/0) open IP and select the target as nat gateway - save.
+
+14. Confirm, the connection for private machine got successful.
+
+Task:
+Execute the same connection for Linux machine.
+
+15. Deletion Process:
+    EC2 Instance
+    NAT Gateway
+    Elastic IP
+    VPC Deletion
+    Pvt Sg, then Pub Sg
+    
+[*** Make sure you are not deleting the default one]
+
+[***FYI:
+The 1st and the last IP (x.x.x.0 & x.x.x.255 = one is for Network Address and the another one is for Network Broadcast Address; we cannot assign this IP for any machines)
+Next 3 Ip's (x.x.x.1 = will be allocated for AWS default gatteway; x.x.x.2 & x.x.x.3 = will be allocated for AWS to map the AWS DNS Ip's to the VNet space)
+So, according to our situation
+10.0.1.0 = Network Address
+10.0.1.255 = Network Broadcast Address
+10.0.1.1 = AWS default gateway
+10.0.1.2
+10.0.1.3 = Map the DNS Ip's to VNet space]
+
+
+
+
+
+
+
+
+
+
+
+	
