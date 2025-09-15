@@ -1,0 +1,18 @@
+1. Enterprise-Grade DevSecOps CI/CD Pipeline in Action
+2. GitOps in Action: Integrating ArgoCD and Jenkins
+3. Full-Spectrum CI/CD: A Corporate Pipeline Blueprint
+4. GitHub Actions Deep Dive: Automate, Build, Deploy
+5. The Enterprise DevOps Pipeline Playbook
+6. Mastering CI/CD with GitLab: A Hands-on Workshop
+7. ArgoCD Unleashed: GitOps for Modern Deployment
+8. End-to-End DevOps with Azure: Code to Cloud
+9. Kubernetes Unlocked: Deploy, Scale, Manage
+10. CI/CD for Microservices: Scaling 10 Apps in Real-Time
+11. Building a Real-Time 3-Tier DevOps Architecture
+
+Links: https://www.devopsshack.com/s/store/courses/Webinar
+
+12. Advanced DevSecOps on Azure: Real-Time Projects & Live Demo		===	https://www.youtube.com/watch?v=pIkHQRfnb0U&ab_channel=VisualpathPro
+13. Securing Kubernetes with DevSecOps: Best Practices in Action	===	https://www.youtube.com/watch?v=FzoQcUCVvuM&ab_channel=PlatformEngineering
+14. Intro to DevSecOps: Securing Web Applications from Day One		===	https://www.youtube.com/watch?v=F5KJVuii0Yw&ab_channel=freeCodeCamp.org
+15. DevOps, SRE & DevSecOps Explained: Foundations for Modern Engineering	===	https://www.youtube.com/watch?v=WJACs-4e9y0&ab_channel=AiOpsSchool
