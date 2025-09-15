@@ -1,0 +1,156 @@
+Prometheus:
+    - DevOps Monitoring Tool
+
+There are different types of Monitoring like
+1. Infra/Server Monitoring
+2. Network
+3. Application
+4. Database
+etc.,
+
+Prometheus mainly concentrates on Infrastructure Monitoring - ec2/server monitoring - metrics - capture (freeze/image/photo)
+
+Under server, there is a lot of metrics like (cpu - memory usage - latency - network - packets inputs ets.,)
+Why we are doing this kinds of monitoring? what is the purpose?
+	In order to know the health of the server, as application is the primary goal of a company we need to concentrate on the hardware part where our application actually runs.
+
+By default, we got a service within AWS itself for monitoring this server, that is called cloudwatch; then why do we required prometheus, a 3rd party tool?
+	By default, you can do only basic kinds of server monitoring via cloudwatch (max upto 21 metrics) - but by using prometheus, we can be able to monitor 100+ metrics at a same time.
+And this is not an enterprise product, this is open-source product.
+This is working under pull mechanism, as it is fetching the data from the server.
+
+For prometheus, we are going to create a dedicated server, this means only for prometheus data's it is going to work.
+
+1. Search in google for (prometheus.io) - this will directly take us to the official page 
+[here you can see an information like "from metrics to insight" = insight means assuming our future according to the data's we are fetching up from the metrics]
+2. click on download - copy the link from the latest version for linux os (https://github.com/prometheus/prometheus/releases/download/v2.43.0/prometheus-2.43.0.linux-amd64.tar.gz)
+3. Launch a linux server on ec2 - 30gb - open all ports.
+4. open putty - change into root user (sudo su -)
+5. get prometheus into the server by using wget command (wget https://github.com/prometheus/prometheus/releases/download/v2.43.0/prometheus-2.43.0.linux-amd64.tar.gz)
+6. list and confirm it (ll) - unzip the content (tar -xvzf prometheus-2.43.0.linux-amd64.tar.gz)
+7. now go inside the file (cd prometheus-2.43.0.linux-amd64)
+8. list the content (ll) - where u can see multiple files, here the heart file is considered to be the (prometheus.yml)
+9. we always know when we are working on a specific tool we need to work on the specific binary, hence copy the prometheus files into the specific binaries (cp prometheus /usr/local/bin/) (cp promtool /usr/local/bin/)
+10. just check for the prometheus version, before using in the real-time (prometheus --version)
+11. now, we need to start the prometheus, (./prometheus --config.file=prometheus.yml) - now check the output from the browser using machine public ip with the port (1.1.1.1:9090) [prometheus default port number is: 9090]
+12. now, once after this we can be able to view that the metrics already started for this specific servers - in the dashboard click "status" - "targets" - to view the all the metrics for this server, change the url as (1.1.1.1:9090/metrics) - where you will be able to see all the contents related to this server.
+13. we do have option to look in graph - go back to prometheus dashboard - search for "cpu" for example - execute - click on graph [this will show the output on diagrammatic representation]
+14. we can even reduce the time, and the picture representation - everything works on this dashboard.
+15. if we need to view for some multiple metrics, then just below the dashboard we can see something like "add panel", by clicking on that we will be able to see output for multiple metrics.
+16. now, we are going to show how to bring information's from our ec2 machines by installing "node exporter".
+
+[prometheus, working under TSDB - Time series Database
+for ex: normally if we are going to calculate the temperature for everyday it will be like this
+
+sunday 12PM - 36C
+monday 12PM - 34C
+tuesday 12PM - 36C
+wednesday 12PM - 32C
+
+Normally if we are going to see this content on a graph, it is really hard for us to capture the data entirely; but here we are using TSDB, means we are going to calculate like this
+
+sunday 12PM -36C [it will take this as the primary data], -2, +0, -4
+here you can see, instead of collecting data's it is collecting values, by doing like this it will be easy for us to maintain the metrics and it will show us a better graphical representation]
+
+17. create another linux machine - 30gb - open all ports
+18. Open putty - change to root user (sudo su -)
+19. go to google prometheus download page - right side you can see node_exporter, click on that one - copy the link for linux machine (https://github.com/prometheus/node_exporter/releases/download/v1.5.0/node_exporter-1.5.0.linux-amd64.tar.gz)
+20. now run this inside the machine using wget (wget https://github.com/prometheus/node_exporter/releases/download/v1.5.0/node_exporter-1.5.0.linux-amd64.tar.gz) - list to confirm that (ll) 
+21. unzip the content (tar -xvzf node_exporter-1.5.0.linux-amd64.tar.gz) - again list to confirm the same (ll)
+22. go inside the node_exporter to view the files inside it (cd node_exporter-1.5.0.linux-amd64) - now list to see all the contents (ll)
+23. we need to run the node_exporter now on the background (./node_exporter &)
+24. check the same by giving the ip with the default port on the browser (1.1.1.1:9100)
+25. click the metrics, where we can see all the metrics of that server will be collected by the node_exporter
+26. go to the prometheus machine - and go inside the (vi prometheus.yml) for collecting the information's from the node_exporter machine
+27. (vi prometheus.yml) - under the line of scrape_configs: - copy everything and paste another job for the node machine
+{{{ex:
+# my global config
+global:
+  scrape_interval: 15s # Set the scrape interval to every 15 seconds. Default is every 1 minute.
+  evaluation_interval: 15s # Evaluate rules every 15 seconds. The default is every 1 minute.
+  # scrape_timeout is set to the global default (10s).
+
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          # - alertmanager:9093
+
+# Load rules once and periodically evaluate them according to the global 'evaluation_interval'.
+rule_files:
+  # - "first_rules.yml"
+  # - "second_rules.yml"
+
+# A scrape configuration containing exactly one endpoint to scrape:
+# Here it's Prometheus itself.
+scrape_configs:
+  # The job name is added as a label `job=<job_name>` to any timeseries scraped from this config.
+  - job_name: "prometheus"
+
+    # metrics_path defaults to '/metrics'
+    # scheme defaults to 'http'.
+
+    static_configs:
+      - targets: ["localhost:9090"]
+
+  # The job name is added as a label `job=<job_name>` to any timeseries scraped from this config.
+  - job_name: "node"
+
+    # metrics_path defaults to '/metrics'
+    # scheme defaults to 'http'.
+
+    static_configs:
+      - targets: ["18.219.161.248:9100"]
+
+}}}
+[as you can see I have added/edited the 2nd job name as "node" mentioning that i am creating this one for my node machine; and the targets - instead of localhost we need to mention our node machine public ip with the node_exporter default port number]
+28. make sure to restart the prometheus server to make it work - (ps -ef | grep prometheus) - kill the prometheus config  process (kill -9 [process id]) [sample: ./prometheus --config.file=prometheus.yml] {for more info: there are 2 numbers you can see, the process ID actually comes 2nd, we need to kill that one} - once again came inside the prometheus - start the process once again in backfround mode (./prometheus --config.file=prometheus.yml &) [make sure once after killed, you are on the right path, usually it will bring you back to your default path - become root user (sudo su -) - (cd prometheus-2.37.0-rc.1.linux-amd64/)]
+29. go to the prometheus dashboard - status - targets - now we can see the node is connected to the prometheus in "up" status. [additionally we can see the last scrape and the scape duration will get collected for every 15secs]
+30. now when you are trying to fetch the information for any metrics, this will show metrics for 2 servers.
+[the drawback of prometheus is the graphs won't be saved for a long time usage and everytime I need to search manually, and the graphs would not be more clear also, hence we are going to use grafana]
+
+Grafana = Visualization
+1. Search in google for grafana download (https://grafana.com/grafana/download) - make sure we are choosing (OSS) [open-source] under edition.
+2. copy the link for linux version (wget https://dl.grafana.com/enterprise/release/grafana-enterprise-9.4.7.linux-amd64.tar.gz) - go to prometheus server and install it, as it is considered to be the dedicated server [***make sure you are doing this on the root path]
+3. now, unzip the content (tar -zxvf grafana-enterprise-9.4.7.linux-amd64.tar.gz) - list to confirm it (ll)
+4. go inside the grafana path (cd grafana-9.4.7/) - list it (ll)
+5. go to bin path to start this (cd bin/) - list it (ll)
+6. now we need to start the grafana-server in the background (./grafana-server &)
+7. open the prometheus server ip on the browser with the grafana port number (1.1.1.1:3000)
+8. it will redirect us to the grafana login page - by default the username and password is (admin - admin) - immediately this will ask us to reset the password, you can give your own password now (admin123) once done it will take us to the grafana dashboard
+9. now we need to bring the premetheus data into grafana, for that, on the left hand side of the grafana dashboard we can see settings icon (configurations) - under that select data source [means from which data source we are going to do the setup - add data source [as grafana and prometheus are very common used tool, on top we can see prometheus] - select it
+10. give the prometheus url (http://localhost:9090/) and click save & test [we need to get data source is updated & data source is working] if we are getting this message then the connection is working fine.
+11. In grafana we have different dashboards for everything - to know that go to graphana download page - on top there will be products - click that we can see dashboards - select that one - as we are using node_exporter now, select that one and click on the (copy ID on the clipboard) [1860 - By default this is the number]
+12. to apply this dashboard - come to graphana page where we logged in - left hand side we can see a (four square) symbol - click on that one - select import - give the ID which we copied on the another page - load - under prometheus, select the (prometheus data source) - click import.
+
+Tasks:
+1. How to setup alert and notification using grafana?
+	[Hint: Left hand side there is a bell symbol] - make sure we need to enable smtp for this connection. Google got the answer for how to enable smtp connection for grafana.
+
+2 options:
+1. If you are going to install Grafana on the same server, then once grafana started to run, come back to the prometheus path and start the prometheus as they need to run to communicate with Grafana
+2. Bring Grafana on a different machine, and try to add the prometheus ip address over there, so this brings connection always as expected.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
