@@ -1,0 +1,260 @@
+Shell Scripting:
+
+Why Linux?
+	Open Source, customization for our OS can be done according to our requirement, highly secure as it is CLI, and runs faster when compare to windows
+
+What is Linux?
+	Linux is a Unix clone, written from scartch by Linus Torvalds, it is an open souce and community developed OS, which can be handled by multiple users at the same time.
+
+What is Kernal?
+	Another computer Program that allocate the system resources and coordinate all the details of the computer's internals. Basically, it is the heart of the OS, it interacts with the Hardware and most of the tasks like memory management, task scheduling and file management has done by the kernal; now users communicate with the OS through a small program called the Shell, which we shall be elaborating upon later.
+
+List of Commands:
+cd
+pwd
+ls
+cp
+mv
+rm
+echo
+cat
+less
+grep
+mkdir
+touch
+chmod
+man + help
+
+Difference between CLI & GUI:
+CLI = Command Line Interface / GUI = Graphical User Interface
+Text Representation / Visual Representation
+Difficult for beginners / Easy to use
+Os is Faster / Comparitively slow
+Control & Customization for OS is possible / Customization is not possible
+Automation is possible / everything is manual
+uses less memory / higher memory due to visual
+
+Shellscript Basics:
+	The shell is a Command Line Interpreter. It translates commands entered by the user and converts them into the language that is understood by the kernel. This use the standard syntax for all the commands.
+	The basic concept of a shell script is a list of commands, which are listed in the order of execution. A good shell script will have comments, preceded by (#)sign, this describes the steps. [it is not mandatory to use the "#" sign, but it is a good practise, if someone else going to go through the script that makes easy for them to understand the script easily]
+
+Types of Shell
+1. Classic/Bourne 
+Sub-types:
+Bourne shell = .sh
+Korn shell
+Bourne-Again shell (Bash)
+POSIX shell
+
+2. C shell 
+Sub-types:
+C shell
+TENEX/TOPS C shell
+Z shell
+
+Scenario 1:
+
+create a file (vi example1.sh)
+
+#!/bin/sh
+
+#Author : Akshiv
+#Example script
+
+echo "What is your Name?"
+read PERSON
+echo "Hello, $PERSON"
+
+1. The 1st line of the shell starts with (#!/bin/sh) = this is often referred to as a “hash-bang”, “she-bang” or “sha-bang”; we are trying to execute this command (./example1.sh) -- we got the permission denied error msg, as we are tyring to execute a file that got only read permission; hence we need to change the permission for this file using (chmod 777 example1.sh) - now try to execute the command once again (./example1.sh) == as you can see it is going to ask for the name, once your provided the name, we got the output as informed.
+
+What is Variable?
+	A variable is a character string to which we assign a value. The value assigned could be a number, text, filename, device or any other type of data. [in other-words, variable is a pointer to the actual data]
+
+Kinds of Variable inside a shell:
+1. Local Variable: It is a variable that is present within the current instance of the shell. It is not available to programs that are started by the shell. 
+2. Environment Varibale: It is available to any child process of the shell, some programs need environmant variables in order to function correctly.
+3. Shell Variable: It can be comapred/considered to be the global variable that is set by the shell and is required by the shell in order to function correctly. Some of this variables are environment variables whereas others are local variables. It is also considered to be the special variable.
+
+Scenario 2:
+
+Create a file (vi variable.sh)
+
+#!/bin/sh
+
+#variable_name=variable_value
+
+NAME="A-Square Technologies"
+echo $NAME
+
+This is called scaler variables, that means it can hold one value at a time; now it is going to give the permission (chmod 777 variable.sh) - and execute it (./variable.sh) -- as we can see the output now.
+
+Scenario 3:
+readonly variable
+
+#!/bin/sh
+
+#variable_name=variable_value
+
+NAME="A-Square Technologies"
+readonly NAME
+NAME="Akshiv"
+
+Basically, this is going to throw an error, saying that variable name is readonly variable, so I cannot change the value of the variable once I put readonly in front of it, provide the permission (chmod 777 variable.sh) - and execute it (./variable.sh).
+
+Scenario 4:
+unsetting/deleting variable
+
+#!/bin/sh
+
+#variable_name=variable_value
+
+NAME="A-Square Technologies"
+unset NAME
+echo $NAME
+
+This directs the shell to remove the variable from the list of variable that it tracks; give the premission (chmod 777 variable.sh) - and execute it (./variable.sh), u can see the output got unlisted
+
+Task
+Scenario 5:
+special variables
+
+#!/bin/sh
+
+echo "File Name: $0"
+echo "First Parameter: $1"
+echo "Second Parameter: $2"
+echo "Quoted Values: $@"
+echo "Quoted Values: $*"
+echo "No of Parameters: $#"
+
+These variables are reserved for specific functions and hence they are called special variables, they usually proceeded by "$" signs; give the premission (chmod 777 variable.sh) - and execute it (./variable.sh).
+
+Operators:
+There are multiple operators inside the shell, some are like Arithemetic, Relational, Boolean, String, File Test etc.,
+
+Arithemetic:
+This includes actvities like addition, subtraction, multiplication, division, modulus, assignment, equality and non-equality etc.,
+
+Relational:
+Bourne shell supports these relational operators, that are specific to the numeric values; now these operators do not work for string values unless their values is numeric, This includes equal, not-equal, greater than, lesser than, greater than = to, or less than = to.
+
+Boolean:
+Here we got only 3, such as the logical negotiation, logical or and logical &
+
+String:
+This are equals, not equals, check if operand is 0, not 0, string is empty
+
+File Test:
+we have a few opeartors that can be used to test various properties that has been associated to the unix file.
+
+Shell loops:
+	This is considered to be the very powerful programming tools that enables you to execute a set of commands repeatedly. Some of the loops are like (The While Loop, The For Loop, The Until Loop, Nested Loops, Loop Control etc.,)
+
+The For Loop:
+  This one operates on the list of items, it repeats a set of commands for every item in the list.
+
+create a file (vi for.sh)
+
+#!/bin/sh
+
+for var in 0 1 2 3 4 5 6 7
+do
+echo $var
+done
+
+now, give the permission (chmod 777 for.sh) - and execute it (./for.sh), u can see the output got listed.
+
+The While Loop:
+  This enables to executes set of commands repeatedly until some condition occurs
+
+create a file (vi while.sh)
+
+#!/bin/bash
+
+x=1
+while [ $x -le 5 ]
+do
+  echo "Welcome $x times"
+  x=$(( $x + 1 ))
+done
+
+now, give the permission (chmod 777 while.sh) - and execute it (./while.sh), u can see the output for 5 times as per instructed.
+
+The Until Loop:
+  We need to execute a set of commands until a condition is true, that is where we use this loop
+
+create a file (vi until.sh)
+
+#!/bin/sh
+
+a=0
+
+until [ ! $a -lt 10 ]
+do
+   echo $a
+   a=`expr $a + 1`
+done
+
+here, until is not less than 0, it is going to keep on printing the a and incrementing the value, now, give the permission (chmod 777 until.sh) - and execute it (./until.sh)
+
+Nested Loops:
+   All the concepts supports nesting concepts; where you can put one loop inside another similar or different loop. This can go upto unlimited number of times based on what you required. Let's use the nesting by bring while loop
+
+create a file (vi nloop.sh)
+
+#!/bin/bash
+# A shell script to print each number five times.
+for (( i = 1; i <= 5; i++ ))      ### Outer for loop ###
+do
+
+    for (( j = 1 ; j <= 5; j++ )) ### Inner for loop ###
+    do
+          echo -n "$i "
+    done
+
+  echo "" #### print the new line ###
+done 
+
+now, give the permission (chmod 777 nloop.sh) - and execute it (./nloop.sh)
+
+Infinite Loop:
+   This stands for the loop going on and on
+
+create a file (vi infi.sh)
+
+#!/bin/bash
+while :
+do
+	echo "Press [CTRL+C] to stop.."
+	sleep 1
+done
+
+now, give the permission (chmod 777 infi.sh) - and execute it (./infi.sh), as you can see it is keep on running until we are stopping from our end.
+
+Tasks:
+What are shell functions?
+
+*** Create Chess Board Using Nested For loop in UNIX SHELL SCRIPT
+
+for (( i = 1; i <= 9; i++ )) ### Outer for loop ###
+do
+   for (( j = 1 ; j <= 9; j++ )) ### Inner for loop ###
+   do
+        tot=`expr $i + $j`
+        tmp=`expr $tot % 2`
+        if [ $tmp -eq 0 ]; then
+            echo -e -n "\033[47m "
+        else
+            echo -e -n "\033[40m "
+        fi
+  done
+ echo -e -n "\033[40m" #### set back background colour to black
+ echo "" #### print the new line ###
+done
+
+
+
+
+
+
+
