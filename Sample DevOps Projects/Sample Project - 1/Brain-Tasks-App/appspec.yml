@@ -1,4 +1,4 @@
-# Optional: Use only if deploying to AWS EKS
+# Optional: Use only if deploying to CodeDeploy
 version: 0.0
 Resources:
   - myApp:
@@ -7,4 +7,5 @@ Resources:
         Name: brain-tasks-app
         ClusterName: <EKS_CLUSTER_NAME>
         Namespace: default
+
         FileExistsBehavior: OVERWRITE
