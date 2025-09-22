@@ -1,0 +1,29 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      - echo Logging in to Amazon ECR...
+      - aws --version
+      - ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+      - REGION=$(aws configure get region)
+      - REPO_NAME=brain-tasks-app
+      - IMAGE_URI=$ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$REPO_NAME:latest
+      - aws ecr get-login-password --region $REGION | docker login --username AWS --password-stdin $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com
+  build:
+    commands:
+      - echo Build started on `date`
+      - docker build -t $IMAGE_URI .
+  post_build:
+    commands:
+      - echo Build completed on `date`
+      - docker push $IMAGE_URI
+      - echo "Writing Kubernetes manifests..."
+      - sed -i "s|<AWS_ACCOUNT_ID>.dkr.ecr.<AWS_REGION>.amazonaws.com/brain-tasks-app:latest|$IMAGE_URI|" k8s/deployment.yaml
+      - kubectl apply -f k8s/deployment.yaml
+      - kubectl apply -f k8s/service.yaml
+
+artifacts:
+  files:
+    - k8s/*.yaml
+    - buildspec.yml

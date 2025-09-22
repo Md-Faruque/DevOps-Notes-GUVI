@@ -1,0 +1,33 @@
+pipeline {
+    agent any
+    environment {
+        DOCKER_IMAGE = "<dockerhub-username>/trend-app:latest"
+        KUBECONFIG = "/home/ec2-user/.kube/config"
+    }
+    stages {
+        stage('Checkout') {
+            steps {
+                git 'https://github.com/<your-username>/Trend.git'
+            }
+        }
+        stage('Build Docker Image') {
+            steps {
+                sh 'docker build -t $DOCKER_IMAGE .'
+            }
+        }
+        stage('Push to DockerHub') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
+                    sh 'echo $PASS | docker login -u $USER --password-stdin'
+                    sh 'docker push $DOCKER_IMAGE'
+                }
+            }
+        }
+        stage('Deploy to EKS') {
+            steps {
+                sh 'kubectl apply -f k8s/deployment.yaml'
+                sh 'kubectl apply -f k8s/service.yaml'
+            }
+        }
+    }
+}

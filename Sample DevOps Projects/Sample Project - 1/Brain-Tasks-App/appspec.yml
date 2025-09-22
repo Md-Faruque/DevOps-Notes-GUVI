@@ -1,0 +1,10 @@
+# Optional: Use only if deploying to AWS EKS
+version: 0.0
+Resources:
+  - myApp:
+      Type: AWS::EKS::Application
+      Properties:
+        Name: brain-tasks-app
+        ClusterName: <EKS_CLUSTER_NAME>
+        Namespace: default
+        FileExistsBehavior: OVERWRITE
