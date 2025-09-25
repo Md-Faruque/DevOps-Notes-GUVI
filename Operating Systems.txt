@@ -1,0 +1,142 @@
+OS = Operating System:
+======================
+Simple Explanation:
+ > OS = software that controls hardware and provides environment for apps.
+ > Works like: User → Application → OS → Hardware.
+ > Components: Kernel, Shell, File system, Drivers, User interface.
+
+Example:
+When you press a key, OS takes the keyboard input → tells CPU → displays on screen.
+
+Brief Explanation:
+	An Operating System (OS) is the main software that allows hardware and applications to work together. Without an OS, your computer would be useless — you’d have to directly talk to hardware in binary. The OS gives you an interface, manages resources, and makes sure multiple applications can run at the same time without crashing.
+
+Simple Analogy: Think of an OS as a stack of layers. Each layer has a job and talks to the next layer by a small set of rules (interfaces). Those rules are what let the whole system behave predictably and safely.
+
+1) Firmware / Bootloader (power → control)
+------------------------------------------
+ . What it is: Tiny programs stored on the motherboard (BIOS/UEFI) and the bootloader (e.g., GRUB).
+ . Job: Power-on self-test (POST), find a boot device, load the kernel into memory and transfer control to it.
+ . How it talks: The firmware hands control to the bootloader binary. The bootloader loads the kernel image and an initial RAM filesystem (initramfs) into memory and jumps to the kernel’s start address.
+
+2) Kernel (the heart / brain)
+-----------------------------
+ . What it is: The core program that runs in kernel mode (a privileged CPU mode). Example kernels: Linux kernel, Windows NT kernel, XNU (macOS).
+
+Main responsibilities:
+ > Process scheduler: Decides which program runs when (shares CPU).
+ > Memory manager & virtual memory: Gives each process its own address space and handles page faults.
+ > File system support & Virtual File System (VFS): Presents a common file API to applications regardless of the disk format.
+ > Device drivers: Control disks, network cards, keyboard, etc.
+ > Network stack: TCP/IP, UDP handling inside kernel.
+ > Inter-process communication (IPC): Pipes, sockets, signals, shared memory.
+
+How it talks: The kernel exposes a small, controlled interface to user programs via system calls (open, read, write, fork, execve, socket, etc.). Hardware talks to the kernel via interrupts and DMA; kernel talks to hardware via drivers.
+
+3) Kernel modules / drivers
+---------------------------
+ . What they are: Loadable pieces of kernel code (e.g., a driver for your Wi-Fi card).
+ . Job: Implement device-specific behavior while using the kernel’s general framework (e.g., block device driver for disks).
+ . How they talk: They register callbacks and handlers with the kernel (interrupt handler, read/write hooks). You can add/remove them at runtime (lsmod / modprobe on Linux).
+
+4) System libraries (C library, e.g., glibc)
+--------------------------------------------
+ . What they are: Libraries that provide helpers for user programs (string ops, file IO wrapper functions).
+ . Job: Provide convenient functions (fopen, printf). Many of those functions are thin wrappers that turn into a system call.
+ . How they talk: A function like fopen() often calls the open() system call under the hood. The library hides syscall details and provides a stable programmer API.
+
+5) System services / daemons (user space background processes)
+--------------------------------------------------------------
+ . What they are: Programs started by init/systemd that provide system-level functions (network manager, DB, logging).
+ . Job: Keep system services running, respond to requests, manage state.
+ . How they talk: They use system calls and IPC (sockets, D-Bus, unix domain sockets) to communicate with other processes and the kernel.
+
+6) Shell / GUI (user interface)
+-------------------------------
+ . What it is: Command shell (bash, PowerShell) or graphical desktop environment (GNOME, Windows Explorer).
+ . Job: Let users launch commands, view files, and interact with applications.
+ . How it talks: Shell runs user commands (which call system libraries → system calls). GUI toolkits call libraries and system services (display server, window manager).
+
+7) Applications (user programs)
+-------------------------------
+ . What they are: Your browser, editor, scripts, services.
+ . How they talk: Applications call library functions, which use syscalls to ask the kernel to do real work (schedule, read disk, send network packets).
+
+Tasks of an OS:
+===============
+ > Process management: Runs multiple programs at once.
+ > Memory management: Allocated RAM fairly
+ > File management: Stores and Organize data
+ > Device management: Connects hardware like Keyboard, Mouse, Printers
+ > Security and access control: Control User Permissions.
+
+Different OSs (UNIX, Linux, Windows, MacOS)
+===========================================
+ > UNIX: Old, stable, foundation of many modern OSs; developed in 1970s, used in enterprises.
+ > Linux: Open-source UNIX-like OS, used in servers, DevOps world.
+ > Windows: User-friendly, GUI-based, popular in enterprises.
+ > MacOS: Built on UNIX, polished for Apple hardware.
+
+Comparison example:
+ . Linux is like a toolbox (flexible, customizable).
+ . Windows is like a ready-made product (easy to use).
+ . MacOS is like a premium package (smooth but limited to Apple).
+
+What is Kernel:
+---------------
+ . Kernel = brain of OS.
+ . Manages CPU, memory, devices. Without the kernel, OS cannot function.
+ . Types: Monolithic kernel (Linux), Microkernel (Minimal features, other services outside), Hybrid: Mix (Windows, MacOS).
+
+How an OS is constructed:
+	An OS is built in layers. At the heart is the Kernel, which directly talks to hardware. Around it are system libraries and drivers that let applications communicate with the kernel. On top is the shell or GUI, where the user interacts.
+
+Layers:
+ . Hardware (CPU, memory, disk).
+ . Kernel (controls hardware).
+ . System libraries & drivers.
+ . User interface (CLI or GUI).
+
+Example:
+When you open a file:
+ . Application requests file → Library call → Kernel → Disk hardware.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
