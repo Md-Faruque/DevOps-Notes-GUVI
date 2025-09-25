@@ -1,0 +1,123 @@
+41  pwd
+   42  whoami
+   43  ls
+   44  mkdir d1
+   45  ls
+   46  mkdir d2 d3
+   47  ls
+   48  mkdir songs{k,t,h}
+   49  ls
+   50  mkdir .d4
+   51  ls
+   52  l.
+   53  mkdir -p data/doc/content
+   54  tree data/
+   55  mkdir -p  days/{mon,tue,wed}
+   56  tree days/
+   57  mkdir -p musics/{hindi/{m1,m2},english/{m1,m2}}
+   58  tree musics/
+   59  ls
+   60  cd musics/
+   61  pwd
+   62  ls
+   63  cd hindi/
+   64  pwd
+   65  ls
+   66  cd m1
+   67  pwd
+   68  cd ..
+   69  pwd
+   70  cd ../..
+   71  pwd
+   72  cd musics/hindi/m1
+   73  pwd
+   74  touch f{1..10}.txt
+   75  ls
+   76  pwd
+   77  cd ~
+   78  pwd
+   79  cd musics/hindi/m2
+   80  cd /
+   81  pwd
+   82  ls
+   83  cd -
+   84  pwd
+   85  cd -
+   86  cd ~
+   87  pwd
+   88  ls
+   89  cp *.txt /var
+   90  ls 
+   91  ls /var
+   92  pwd
+   93  ls
+   94  tree  musics/
+   95  cp musics/ /var
+   96  cp -r musics/ /var
+   97  ls /var/
+   98  pwd
+   99  tree /var/musics/
+  100  pwd
+  101  cp -r /var/musics/ /tmp/
+  102  history 
+  103  ls
+  104  l.
+  105  ls
+  106  l.
+  107  mv .f100.txt  f101.txt
+  108  l.
+  109  ls
+  110  mv test1.txt .test1.txt
+  111  ls
+  112  l.
+  113  ls
+  114  mv *.txt /opt
+  115  ls
+  116  ls /opt
+  117  ls
+  118  mv musics/ /opt
+  119  ls
+  120  ls /opt/
+  121  cd /opt
+  122  ls
+  123  pwd
+  124  ls
+  125  rm f1000.txt 
+  126  rm -f f1000.txt 
+  127  mkdir d1
+  128  ls
+  129  rm -f d1
+  130  rm -fd d1
+  131  ls
+  132  rm -fd musics/
+  133  rm -fdr musics/
+  134  ls
+  135  ls /var
+  136  ls /var/log
+  137  cd ~
+  138  pwd
+  139  ls
+  140  ls -l
+  141  ll
+  142  ls -i
+  143  ls -a
+  144  ls
+  145  ls -a
+  146  ls -r
+  147  ls -Z
+  148  ls -l
+  149  ls -ld days
+  150  ls -l
+  151  ls -l f1
+  152  ls -ld songsh
+  153  df -h
+  154  ls -la
+  155  ls -ld .ssh
+  156  ls -Z
+  157  groupadd sales
+  158  groupadd jio
+  159  gpasswd jio 
+  160  getent group jio 
+  161  vim /etc/group
+  162  getent gshadow jio
+  163  vim /etc/gshadow

@@ -1,0 +1,117 @@
+file permission:
+
+0 - No perm
+1 - No perm
+2 - write only
+3 - write only
+4 - Read only
+5 - Read only
+6 - Read and write
+7 - Read and write
+
+
+Directory permission:
+
+0 - No perm
+1 - execute
+2 - write only
+3 - write and execute
+4 - read only
+5 - read  and execute
+6 - read and write
+7 - read, write and execute
+
+symbolic:
+r - read
+w - write
+x - execute
+
+Numeric
+r - 4
+w - 2
+x - 1
+
+022 - default value of root user
+002 - default value of normal user
+666 - maximum permission of file
+
+default permission for file in 644
+
+666
+022 - 
+-----
+644
+
+default permission for directory is 755
+
+777
+022 - 
+------
+755
+
+default permission for normal user is 664
+
+666
+002 - 
+-----
+664
+
+default permission for normal user in directory is 775
+
+777
+002 - 
+-----
+775
+
+the permission mentioned in the umask will not be availble for the user, for example for root user it is 022, hence we cannot give the same permission for file under root user.
+
+umask table for file
+
+0 - full perm
+1 - read and write permission
+2 - read only
+3 - read only
+4 - write only
+5 - write only
+6 - No perm
+7 - No perm
+
+umask table for directory
+
+0 - full perm
+1 - read and write permission
+2 - read and execute
+3 - read only
+4 - write and execute
+5 - write only
+6 - execute only
+7 - No perm
+
+
+we can change the umask value permanently and temporarily
+
+for temporary, use this command
+umask 020
+
+for permanent, use this command
+(for changing anything permanently, we need to edit the configuration file)
+vim /etc/bashrc
+scroll down - we can see the umask value 
+go to insert mode
+and change it to 022 (according to the need)
+esc:wq
+
+and restart
+exec bash
+
+now check umask value by giving command
+umask
+
+
+and when we are restarting the machine this will be changed because this one is only for default purpose
+
+
+*** by default for file we got permission for 644, but if there is a need to change the permission for 100 files with 646 permission then we can change the value of umask and we will be able to create one ***
+
+
+and only root user can change the umask value permanently, normal user can change the value only temporarily.

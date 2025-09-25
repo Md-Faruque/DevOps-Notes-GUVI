@@ -1,0 +1,80 @@
+ 208  grep bin  /etc/passwd
+  209  grep -w bin  /etc/passwd
+  210  grep -w bin /etc/passwd | cat > bin.txt
+  211  ls
+  212  cat bin.txt 
+  213  grep -w ^bin /etc/passwd
+  214  grep -w bash$ /etc/passwd
+  215  grep -wo bin /etc/passwd
+  216  grep -wn bin /etc/passwd
+  217  grep -wc bin /etc/passwd
+  218  grep -wc sbin /etc/passwd
+  219  grep -wn sbin /etc/passwd
+  220  grep B2 tom1  /etc/passwd
+  221  grep -B2 tom1  /etc/passwd
+  222  vim /etc/passwd
+  223  grep -B3 tom1  /etc/passwd
+  224  grep -A3 tom1  /etc/passwd
+  225  grep -C3 tom1  /etc/passwd
+  226  history 
+  227  ls /etc
+  228  ls /etc/sysconfig/network-scripts/ifcfg-ens33 
+  229  cat /etc/sysconfig/network-scripts/ifcfg-ens33 
+  230  grep IPV6INI /etc/sysconfig/network-scripts/ifcfg-ens33 
+  231  ls
+  232  cd data/
+  233  ls
+  234  cd ..
+  235  rm -rdf data
+  236  ls
+  237  mkdir data
+  238  ls
+  239  touch data/f{1..100}.txt
+  240  ls
+  241  ls data/
+  242  tar -cvf /var/data.tar data
+  243  ls /var/
+  244  ls
+  245  tar -tf /var//data.tar 
+  246  ls
+  247  cat data/f99.txt 
+  248  cat >> data/f99.txt 
+  249  tar -uf /var/data.tar  data/f99.txt 
+  250  tar -tf /var//data.tar 
+  251  tar -f /var/data.tar --delete data/f100.txt
+  252  tar -tf /var//data.tar 
+  253  tar -tf /var/data.tar  data/f95.txt .txt
+  254  tar -tf /var/data.tar  data/f95.txt 
+  255  tar -tf /var/data.tar 
+  256  tar -f /var/data.tar  --delete data/f95.txt
+  257  tar -tf /var/data.tar 
+  258  ls
+  259  rm -rdf data/
+  260  ls
+  261  tar -xf  /var/data.tar 
+  262  ls
+  263  ls data/
+  264  cat data/f99.txt 
+  265  tar -xf /var/data.tar -C /opt
+  266  ls /opt/
+  267  ls /opt/data/
+  268  cd /var
+  269  ls
+  270  du -h data.tar 
+  271  gzip data.tar 
+  272  ls
+  273  du -h data.tar.gz 
+  274  gunzip data.tar.gz 
+  275  ls
+  276  bizp2 data.tar 
+  277  bzip2 data.tar 
+  278  ls
+  279  du - h data.tar.bz2 
+  280  du -h data.tar.bz2 
+  281  bunzip2  data.tar.bz2 
+  282  ls
+  283  xz data.tar 
+  284  ls
+  285  du -h data.tar.xz 
+  286  unzx data.tar.xz 
+  287  unxz data.tar.xz 

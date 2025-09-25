@@ -1,0 +1,55 @@
+/ - root 
+boot - it contains the bootable files of Linux are stored in this directory, If there is any files got crashed/ deleted we won't be able to get the Linux machine again. (this holds the critical files)
+etc - this contains all configuration files.
+lib32 / lib64 - libraries and binaries, if we need to install any applications we need some pre-requisites files and plugins and this will be available under this.
+media - this directory is normally used to mount, we won't be directly use any Removable storage devices directly in linuz hence we need to mount everything and we will use this directory for that.
+opt - this directory will store all the 3rd party applications
+root - home directory of root user
+sbin - stands for superbinaries, this will holds all the commands which only root user can use.
+sys - this directory contains the system details
+usr - this contain documentation
+bin - it is opposite to sbin, this will holds commands of the normal user.
+dev - this will contains all the details about device like drives, cd etc.,
+home - this holds the detials of all users
+mnt - this dedicated directory contains informations about mounting points
+proc - this holds the process details
+run - it is volatile directory means we won't be able to get the details after restarting the system like 
+srv - this will contains the informtions about service information
+tmp - temporary files
+var - 
+
+
+
+vim has 3 modes
+1. insert mode - for insertting the content
+2. command mode - for editing the file
+3. colon mode - for save and quit
+
+for shortcuts we need to come to command mode
+shift + i  - will help us to come to the 1st letter of the line
+shift + a - this will come to the last letter of the line
+press o - will insert line below the cursor
+shift + o - will insert line above the cursor
+j - this will come line by line
+k - will go up line by line
+x - will cut character by character
+u - we can undo the changes
+if we want to cut multiple character - press the number + x (for ex: if i want to delete 3 character press 3+x)
+dw - for deleting the word
+3+dw - will delete 3 words
+dd - for deleting the entire line
+2+dd - this will delete the 2 lines
+for moving the cursor to current page 1st character - shift + h
+for the ending character - shift + g
+yw - will copy the word
+for pasting - press p by keeping the cursor on the specific place
+2+yw - for copying 2 words
+yy - will copy the entire line
+2+yy - will copy the 2 entire lines
+shift+~ - for changing the case of the letter from upper to lower and lower to upper character
+:set nu - will help us to add the numbers for the lines
+:set nonu - will help us to remove the numbers in the line
+:/(specify the word) - this will highlight the word 
+:6 - this will take us to the 6th line (for go through the specific lines)
+
+
