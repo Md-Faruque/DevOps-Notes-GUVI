@@ -1,0 +1,56 @@
+Linux Filesystem Hierarchy Standard (FHS)
+	This standard describes directory structure, explains where files and directories should be located and what it should contain. Latest version released in the year of 2015 (3.0) and its maintained by Free Standards Group. 
+	To know about the System's FHS, enter the command (man hier)
+
+1. / (Root)
+	> Every single file and directory start from the root directory
+	> The only root user has the right to write under this directory
+
+2. /bin
+	> Containes binary executables
+	> Commands used by all the users of the system are located here (eg: ls, ping, grep, cp etc.,)
+
+3. /boot
+	> Kernel initrd, vmlinux, grub files are located here (eg: initrd.img-2.6.32-24-generic, vmlinuz-2.6.32-24-generic)
+
+4. /dev
+	> These include terminal devices, usb, or any device attached to the system
+
+5. /etc
+	> Contains configuration files required by all programs
+	> This also contains startup ad shutdown shell scripts used to start/stop individual programs
+
+6. /home
+	> Home directories for all users to store their personal files
+
+7. /lib
+	> Libraries essential for the binaries in /bin/ and /sbin/
+
+8. /opt
+	> Optional application software packages
+	> Contains add-on applications from individual vendors
+	> Add-on applications should be installed under either /opt/ or /opt/sub-directory.
+
+9. /sbin
+	> The commands located under this directory are used typically by system administrators, for system maintenance purposes. (eg: iptables, reboot, fdisk, ifconfig etc.,)
+
+10. /srv
+	> srv stands for service
+	> Site-specific data served by this system, such as data and scripts for web servers, data offered by FTP servers, and repositories for version control systems.
+
+11. /tmp
+	>Directory that contains temporary files created by system and users
+	> Files under this directory are deleted when the system is rebooted
+
+12. /usr
+	> Secondary hierarchy for read-only user data; contains the majority of (multi-)user utilities and applications
+	> Contains binaries, libraries, documentation, and source-code for second level programs.
+
+
+
+
+
+
+
+
+

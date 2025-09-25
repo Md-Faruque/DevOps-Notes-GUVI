@@ -1,0 +1,134 @@
+Linux Session: (CLI) - Command Line Interface
+Here, we are going to cover only the Basic Linux commands, not the admin part.
+What are the different flavors for linux? (Task)
+
+Pre-requisites:
+1. Create a Linux EC2 machine for trying the commands
+
+Steps:
+1. In order to know the user details - id (username) [ex: id root]
+2. To know which user has logged in - whoami
+
+Windows, default user id: Admin [full access]
+Unix, default user id: root [full access]	
+
+now we need to switch the user as root user, by giving command su (switch user) - root
+sudo - previledged access [sudo su - root]
+
+To go back to the ec2-user; use command [exit or logout]
+
+Give [clear] command to bring a fresh page
+
+3. We are going to create a directory [folder] now, (mkdir test) mkdir = make directory
+4. To know about the path of the current directory give (pwd) = present working directory
+5. To know about the content inside the direcctory (ls) = list
+6. Go inside the directory which we created now, give (cd test) = change directory
+
+Give pwd to know the entire path
+
+Create a folder and 2 files inside this directory
+
+7. To create an empty file (touch [filename]) example: touch file1
+8. Now, give [ls -l] = long list; it will show the files and folders name with the permission
+9. For going back to the parent directory (cd /root/) or (cd ..) [for going 2 steps back, give (cd ../..) 
+10. To remove an empty directory (rmdir [directoryname]) example: rmdir dir2
+
+11. Files can be created using 3 different ways (vi, touch, cat >)
+	[vi (filename)] example: vi sample
+	type some content and save it
+vi = editor [we can create a file with content] = this method used to create a new file or edit the existing one
+touch [used to create an empty file]
+cat > [helps us to type the content on the same terminal]; once you provide the content click Enter and Ctrl+d
+
+12. In order to open the file only for read-only purpose [cat (filename)]
+13. Use [less (filename)] command to show only the limited lines - this command specifically used to view the log files.
+14. If you move to the end of the file then press shift+g
+15. In order to search a specific word/line inside the file, type (?(specific word/line)), this helps us to search in reverse order (n = previous word; N = Next word)
+16. If you want to come out from this, then press (q) = quit
+17. [tail (filename)] - this will display the last 10lines of the filename - If I need last 20 lines, then I can specify the line number [tail -20 (filename)]
+18. Copy act like copy/paste the content from one file to another [cp (src filename) (dest filename)]
+19. Moving/Renaming will act like cut/paste the file from one to another [mv (src filename) (dest filename)]
+20. To remove a file (rm [filename]); this command will ask for a confirmation. If you don't to get that msg, then use (rm -f [filename]) -f = forcefully
+21. To remove a non-empty directory (rm -rf [directoryname]) rm = remove, -r = recurseively, f = forecefully
+
+Tasks:
+22. To Copy a directory use (cp -r [srcdir] [destdir])
+23. To Move a directory use (mv [srcdir] [destdir])
+
+
+*** VI Editor
+24. Once you open vi, it will be in command mode; to enter the content inside the file press (i), then it will change to insert mode; once the content was done press (esc:wq) esc = command mode, : = prompt w = save, q = quit... (esc:wq!) !=forcefully; (esc:q) = quit without saving
+shift+g = end of the line
+:15 = this will take us to the specific line
+: set number = this will bring numbers to the line
+: set nonumber = this will remove the line numbers
+:%s/a/abc/g = this will act like replace all (g=global)
+dd = delete the entire line
+If i need to delete a set of lines = specify with the number of lines (example: 5d enter)
+x = single character will be deleted
+If I want to delete set of characters = Specify with the number (example: 3x)
+ggdG = to clear the entire file
+
+
+Listing
+25. ls = will list only the filenames
+26. ls -l = long list with permissions, users, groups , time, date, and filename
+27. ls -lrt = reverse order
+28. ls -lrta = this shows the files which includes hidden files as well.
+
+
+Permissions and ownerships
+29. There are 3 users in a file = owner, group and others
+Each person will have 3 permissions = read, write and execute
+read = 4
+write = 2
+execute = 1
+When a file started with (d), it means a directory
+30. chmod 777 (filename) - changing permissions to the file
+31. chmod -R 777 (filename) - changing permissions to the directory
+
+Task:
+32. chown (user-id) (filename) - changing ownership of the file owner
+34. chown -R (user-id) (dirname) - changing ownership of the directory owner
+35. chgrp (group-id) (filename) - changing ownership for the group
+36. chgrp (group-id) (dirname) - changing ownership for the directory group
+(https://www.cyberciti.biz/faq/how-to-use-chmod-and-chown-command/)
+
+
+CPU, Memory, Process Listing
+37. free -m [-m = megabyte; -g = gigabyte; -k = kilobytes]
+38. sar = overall CPU utilization
+39. ps -ef = this will list all the running processes in the background of the server
+40. ps -ef | grep ec2-user = this ( | = pipe symbol) will help us to combine 2 different command; grep used to search for the words (ec2-user) and provide the output
+41. top = this shows the processes in an order.
+
+
+File System, and Disk Utilization
+42. df -h = this will show the file system size
+43. du -sh (filename) = will show the output of the file size
+44. du -sh * = this will show the complete file size
+
+
+File Compression
+zip
+gzip
+tar
+
+45. gzip (filename) = same way this command zipped the file, and the output ends with .gz
+46. gunzip (gzip filename) = for extracting the file
+
+Tasks: 
+47. zip -r (provide a name ending with .zip) (filename) . = this will compress the file and provide the output in a zipped format
+48. unzip (zipped filename) = this will extract the file
+
+49. history = will list all the commands
+
+50. https://linuxize.com (Official website for all the Linux commands)
+
+Practice link: https://www.webminal.org
+
+
+
+
+
+ 
