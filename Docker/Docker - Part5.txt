@@ -1,0 +1,367 @@
+Multistage Dockerfile:
+======================
+	A multistage Dockerfile is a special way of writing a Dockerfile that allows you to use multiple “stages” (or layers) in the same file.
+Each stage can have its own base image, tools, and purpose, but in the end, only the final stage becomes part of the actual Docker image that runs.
+
+A multistage Dockerfile is a Dockerfile that contains multiple sections (stages), where each stage does a different job.
+Think of it like:
+ > Stage 1 → Build the app (using heavy tools)
+ > Stage 2 → Run the app (using small, clean image)
+
+You build in one stage and run in another.
+
+Why?
+Because you only want the final output (like a compiled file) inside your production image — not the heavy build tools.
+
+So the final container becomes lighter, faster, cleaner, and more secure.
+
+Why is Multistage Dockerfile Used?
+----------------------------------
+Because without it, your final Docker image becomes:
+ > Too large
+ > Slow to deploy
+ > Insecure
+ > Full of unnecessary tools
+
+Example:
+If you use Maven or npm inside the same image, it brings tons of weight.
+
+Multistage build lets you throw away the bulky build environment and keep only the final executable output.
+
+Advantages of Multistage Dockerfile
+-----------------------------------
+1. Much Smaller Image Size
+ > Build tools (Maven, npm, compilers) are not in the final image.
+Final image holds only the app, nothing else. 
+
+2. Faster Deployment
+ > Smaller images pull faster and start faster.
+
+3. Cleaner Dockerfile
+ > You keep build + runtime logic in one file, but separated neatly.
+
+4. Re-usable Cache
+ > Each stage is cached → faster rebuilds during development.
+
+Simple Real-Time Use Case Scenarios
+-----------------------------------
+Scenario 1: Java Microservices
+ > Stage 1 → Use Maven image to build .jar
+ > Stage 2 → Copy .jar into a small OpenJDK runtime
+This reduces image from 1.2 GB → 200 MB.
+
+Scenario 2: Node.js App
+ > Stage 1 → Install npm packages
+ > Stage 2 → Only copy final built folder (dist) to a smaller Node runtime image
+This removes dev dependencies.
+
+Scenario 3: Python App
+ > Stage 1 → Build virtualenv + compile native modules
+ > Stage 2 → Copy only the final venv + app source into slim python image
+Smaller, cleaner deployments.
+
+Hands-On - 1:
+=============
+Pre-requisites:
+1. Make sure to create an EC2 machine (ubuntu 22.04) - 30GiB - Open SG
+2. Install docker:
+sudo su -
+apt-get update
+apt-get install docker.io -y
+
+We’ll create a tiny Node.js app and build it using multistage.
+
+1. Create the App folder
+mkdir demo-multistage
+cd demo-multistage
+
+2. Create (app.js)
+console.log("Hello from Multistage Dockerfile!");
+
+Explanation
+-----------
+ . console.log(...)
+Prints text to the terminal.
+Similar to print() in Python or System.out.println() in Java.
+
+ . "Hello from Multistage Dockerfile!"
+This is the message that will show when the app runs.
+
+That's it.
+This file is the main application that Docker will run.
+
+3. Create (package.json)
+
+{
+  "name": "demo",
+  "version": "1.0.0",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  }
+}
+
+Explanation
+-----------
+"name": "demo"
+ . Name of the project.
+ . Used for identification only.
+
+"version": "1.0.0"
+ . Version of the project.
+ . No technical effect here, just metadata.
+
+"main": "app.js"
+ . Entry file for the application.
+ . Tells Node.js that the first file to execute is app.js.
+
+"scripts": { "start": "node app.js" }
+ . Defines custom commands.
+ . "start" is a script name.
+ . "node app.js" is the command that runs when you type: (npm start)
+
+4. Create a file named (Dockerfile)
+
+# ---- Stage 1: Build Stage ----
+FROM node:18 as builder
+
+WORKDIR /app
+
+COPY package*.json ./
+RUN npm install
+
+COPY . .
+
+# ---- Stage 2: Runtime Stage ----
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Copy only necessary files from builder stage
+COPY --from=builder /app .
+
+CMD ["npm", "start"]
+
+Explanation:
+------------
+FROM node:18 as builder
+ . Uses the Node.js version 18 image.
+ . This image contains Node runtime + npm + build tools.
+ . The as builder part gives this stage a name (“builder”) so we can refer to it later.
+
+WORKDIR /app
+ . Sets the working directory inside the container.
+ . All commands after this run inside /app.
+
+COPY package*.json ./
+ . Copies package.json and package-lock.json (if exists) into the container.
+ . Using package*.json is a shorthand that matches both files.
+
+RUN npm install
+ . Installs all Node.js dependencies.
+ . Creates a node_modules folder inside the container.
+
+COPY . .
+ . Copies all files from your project folder into the container’s /app directory.
+ . Includes app.js, and any other files.
+
+FROM node:18-alpine
+ . Starts a new stage that uses a lightweight Node.js Alpine Linux image.
+ . Much smaller than the builder image.
+This stage is the final output — the real production container.
+
+WORKDIR /app
+ . Again sets working directory in this stage.
+
+COPY --from=builder /app .
+ . Copies files from the first stage (builder) into this second stage.
+ . Important: It only copies the final app (like app.js, node_modules, etc.)
+ . No build tools, no cache, no unnecessary files.
+This is the heart of multistage builds.
+
+CMD ["npm", "start"]
+ . This is the command Docker executes when the container starts.
+
+5. Build the Image
+docker build -t demo-multi .
+docker images [to confirm the same]
+
+6. Run the Container
+docker run --rm demo-multi
+
+This command tells Docker:
+ > Run a container from the image demo-multi.
+ > --rm = “After the container stops, delete it immediately.”
+So basically:
+Run → Finish → Auto-delete → No trace left.
+
+You'll see:
+Hello from Multistage Dockerfile!
+
+What does --rm mean? (Simple words)
+-----------------------------------
+--rm = remove the container automatically after it exits.
+
+Why?
+Because sometimes you run short-lived apps that finish in 1–2 seconds.
+
+Example:
+ > printing a message
+ > running a quick script
+ > testing something small
+
+These containers don’t need to stay on your system.
+--rm keeps your system clean — no leftover stopped containers.
+
+So Why Is the Container Not Showing in docker ps?
+Because:
+ > the app runs
+ > prints
+ > exits
+ > Docker deletes the container immediately (because of --rm)
+
+And docker ps only shows running containers.
+There is nothing running → so nothing to show.
+Even docker ps -a won’t show it because it got deleted.
+
+What Actually Happened?
+-----------------------
+Stage 1
+ > Used heavy Node image
+ > Installed dependencies
+ > Prepared the project
+
+Stage 2
+ > Used small Alpine image (very lightweight)
+ > Copied only the final ready-to-run app
+ > No npm cache, no development tools, no junk
+ > Final image is tiny
+
+
+Hands-on: 2
+===========
+We’ll create a tiny Node.js web server that responds with text when opened in the browser.
+
+1. Create a folder:
+mkdir simple-web
+cd simple-web
+
+2. Create a file (app.js)
+
+const http = require("http");
+
+const server = http.createServer((req, res) => {
+  res.writeHead(200, { "Content-Type": "text/plain" });
+  res.end("Hello! This is a Multistage Dockerfile Web App.\n");
+});
+
+server.listen(3000, () => {
+  console.log("Server is running on port 3000...");
+});
+
+What this does
+--------------
+ > Creates a web server
+ > Runs continuously on port 3000
+ > Responds with text every time someone opens the browser
+This guarantees the container won’t exit immediately.
+
+3. Create (package.json)
+
+{
+  "name": "simple-web",
+  "version": "1.0.0",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  }
+}
+
+
+4. Create a Multistage (Dockerfile):
+
+# Stage 1: Build (install dependencies)
+FROM node:18 AS builder
+WORKDIR /app
+COPY package*.json ./
+RUN npm install
+COPY . .
+
+# Stage 2: Runtime (lightweight image)
+FROM node:18-alpine
+WORKDIR /app
+COPY --from=builder /app .
+EXPOSE 3000
+CMD ["npm", "start"]
+
+What this Dockerfile does (simple words)
+----------------------------------------
+ > Stage 1 installs dependencies using full Node image
+ > Stage 2 copies the app into a tiny Node Alpine image
+ > EXPOSE 3000 tells Docker the app listens on port 3000
+ > CMD ["npm", "start"] keeps the app running permanently
+
+5. Build the Docker image:
+docker build -t simple-web .
+
+6. Run the Container:
+docker run -d -p 3000:3000 --name webdemo simple-web
+
+Breakdown:
+----------
+-d → run in background (container continues running)
+-p 3000:3000 → map your machine’s port 3000 to container’s port 3000
+--name webdemo → give it a name
+
+7. Check if container is running:
+docker ps
+
+8. Open the same in the Browser:
+http://<public-ip>:3000
+
+You will see:
+Hello! This is a Multistage Dockerfile Web App.
+
+9. View logs:
+docker logs webdemo
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
