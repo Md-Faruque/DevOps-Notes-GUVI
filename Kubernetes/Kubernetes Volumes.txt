@@ -1,0 +1,368 @@
+Kubernetes Volumes:
+===================
+A Volume = external storage that your pod can mount and use.
+
+Kubernetes has different types of volumes:
+ . emptyDir (temporary, wiped when pod dies → NOT persistent)
+ . hostPath (saved on node’s disk)
+ . PersistentVolume (PV) (real persistent storage)
+etc.
+
+For truly persistent data → we use PersistentVolume + PersistentVolumeClaim.
+
+What is Persistent Data in Kubernetes?
+--------------------------------------
+Kubernetes by default does NOT keep your data if a pod dies.
+A pod is temporary. If it restarts → your data disappears.
+
+Persistent Data means:
+ . Data that stays safe even if pod dies, reschedules, or node crashes.
+ . Stored outside the pod lifecycle.
+ . Controlled using Volumes, PV, and PVC.
+
+If your app stores user uploads, databases, logs, etc. → you must use persistent storage.
+
+PV vs PVC:
+----------
+🔸 PV – PersistentVolume
+ . This is the actual storage.
+ . Like a hard disk / network disk created in the cluster.
+ . Can be backed by EBS (AWS), GCE-PD (GCP), NFS, Ceph, etc.
+ . Created by admin or dynamically by StorageClass.
+
+A PV is NOT the actual cloud storage itself.
+A PV is Kubernetes’ representation (an object) that points to some actual storage.
+
+Think of it like this:
+ . AWS EBS disk = the real storage
+ . GCP Persistent Disk = the real storage
+ . Azure Disk = the real storage
+ . NFS server / Ceph / Gluster / LocalPath = real storage
+
+PV is just a Kubernetes wrapper that exposes that storage to the cluster.
+
+Blunt truth:
+PV is not the disk. PV is the Kubernetes object that connects your pod to the disk.
+
+Key point:
+PV is the real storage resource.
+
+🔸 PVC – PersistentVolumeClaim
+ . This is the request for storage made by the user or pod.
+ . Pod does NOT talk directly to PV.
+ . Pod → asks PVC → PVC matches a PV → bind → done.
+
+Key point:
+PVC is a demand; PV is a supply.
+
+Actual Flow:
+Pod → uses PVC
+PVC → binds to PV
+PV → points to actual disk
+
+Pod NEVER talks to PV directly.
+PVC never talks about pods.
+
+Diagram:
+--------
+
+                ┌──────────────────────────┐
+                │   Actual Storage Layer   │
+                │  (AWS EBS / GCP PD /     │
+                │   Azure Disk / NFS etc.) │
+                └─────────────┬────────────┘
+                              │
+                              ▼
+                     ┌────────────────┐
+                     │ PV (Supply)    │
+                     │ Kubernetes obj  │
+                     │ that points to  │
+                     │ real storage    │
+                     └───────┬────────┘
+                             │ Bound To
+                             ▼
+                     ┌────────────────┐
+                     │ PVC (Demand)   │
+                     │ "I need 5Gi"   │
+                     │ "RWO access"   │
+                     └───────┬────────┘
+                             │ Used By
+                             ▼
+                    ┌──────────────────┐
+                    │ Pod / Deployment │
+                    │ mounts the PVC   │
+                    │ via a Volume     │
+                    └──────────────────┘
+
+
+Steps:
+------
+1. Create a directory
+mkdir volume
+cd volume
+
+2. Create a YAML files
+
+pv.yaml
+-------
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: demo-pv
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /data/pv1
+
+pvc.yaml
+--------
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: demo-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+
+3. now, apply the files:
+kubectl apply -f pv.yaml
+kubectl apply -f pvc.yaml
+
+4. Confirm the same:
+kubectl get pv
+kubectl get pvc
+
+5. now let us bind the Pod:
+
+pod.yaml
+--------
+apiVersion: v1
+kind: Pod
+metadata:
+  name: volume-test-pod
+spec:
+  containers:
+  - name: app
+    image: :1.25.4
+    imagePullPolicy: IfNotPresent
+    volumeMounts:
+    - name: demo-storage
+      mountPath: /usr/share/nginx/html
+  volumes:
+  - name: demo-storage
+    persistentVolumeClaim:
+      claimName: demo-pvc
+
+6. Apply the same: kubectl apply -f pod.yaml & confirm the same: kubectl get pods
+
+7. Exec into the pod: kubectl exec -it volume-test-pod -- bash
+
+8. create a file: echo "hello world" > /usr/share/nginx/html/test.html & exit from the container
+
+9. Delete pod: kubectl delete pod volume-test-pod
+
+10. Recreate the same pod → file still exists.
+That proves persistence.
+
+[*** 
+a. pod.yaml: kubectl apply -f pod.yaml
+
+b. check the pod is running: kubectl get pod volume-test-pod
+
+c. execute into the new pod: kubectl exec -it volume-test-pod -- bash
+
+d. Go to the mound path (same as before): cd /usr/share/nginx/html
+
+e. list files: (ls -l)
+
+f. we can see the file which we created earlier (test.html) - cat the file and we can see the context here.
+
+Deletion Steps:
+---------------
+1. Delete all the resources:
+kubectl delete pod volume-test-pod
+kubectl delete pvc demo-pvc
+kubectl delete pv demo-pv
+
+2. Remove the folder: (rm -rf volume)
+
+YAML files explanation:
+-----------------------
+1. (pv.yaml)
+
+apiVersion: v1
+What it is: Kubernetes API version for core objects.
+Why mention: Tells Kubernetes how to interpret this file.
+
+kind: PersistentVolume
+What it is: The object type — here, a PV.
+Why mention: Declares this YAML creates a PV resource.
+
+metadata:
+What it is: Standard place for metadata about the object.
+
+name: demo-pv
+What it is: Human-readable unique name inside the cluster.
+Why mention: Used when binding or troubleshooting.
+
+spec:
+What it is: The actual configuration of the PV.
+
+capacity:
+What it is: Declares the size the PV provides.
+
+storage: 1Gi
+What it is: Amount of storage this PV offers (1 gigabyte).
+Why mention: PVCs request a size; the PV must have at least that much.
+
+accessModes:
+What it is: Rules for how the volume can be mounted by nodes/pods.
+
+- ReadWriteOnce
+What it is: Only one node can mount it read-write at a time.
+Why mention: Access mode must satisfy PVC’s request.
+
+persistentVolumeReclaimPolicy: Retain
+What it is: What to do with the actual storage when PVC is deleted. Retain means don’t delete the data automatically.
+Why mention: Important for data safety — avoids accidental deletion.
+
+hostPath:
+What it is: The actual backend storage type for this PV (node local path).
+Why mention: Indicates where the data lives. In clusters you won’t use hostPath for production — it’s for demos/Minikube.
+
+path: /data/pv1
+What it is: The folder on the node that holds the data.
+Why mention: Shows physical location of data for this PV.
+
+2. (pvc.yaml)
+
+apiVersion: v1
+Same: core API version.
+
+kind: PersistentVolumeClaim
+Declares this object is a PVC (a storage request).
+
+metadata: / name: demo-pvc
+PVC name; pods refer to this name.
+
+spec:
+Contains the request details.
+
+accessModes:
+Request the mount mode the pod needs.
+
+- ReadWriteOnce
+PVC requests RWO (must match a PV that supports RWO).
+
+resources:
+Resource requests (storage is treated like a resource).
+
+requests:
+Nested block declaring requested amounts.
+
+storage: 1Gi
+PVC asks for 1Gi. Kubernetes will bind a PV with >= 1Gi.
+
+storageClassName: ""
+What it is: The name of StorageClass to use for dynamic provisioning.
+Why "" here: An empty string means “use no StorageClass” — it forces binding only to statically created PVs.
+Why mention: If you leave storageClassName empty, dynamic provisioning (automatic cloud disk creation) won’t run. For demo with a static PV we set it empty.
+
+3. (pod.yaml)
+
+apiVersion: v1
+Core API.
+
+kind: Pod
+Declares we are creating a Pod object.
+
+metadata: / name: volume-test-pod
+Pod’s name; used for commands and logs.
+
+spec:
+Pod configuration details (containers, volumes, etc.).
+
+containers:
+List of containers in the pod (a pod can have multiple).
+
+- name: app
+The container’s name inside the pod. Important for kubectl exec -c app.
+
+image: nginx
+The container image to run. nginx provides an HTTP server and a filesystem path we will mount.
+
+volumeMounts:
+Tells the container which volumes to mount and where inside the container filesystem.
+
+- name: demo-storage
+Must match a volumes entry in the pod spec — this is the link between the container and the declared volume.
+
+mountPath: /usr/share/nginx/html
+Path inside the container where the PV content appears. For nginx this folder is served by the webserver.
+
+volumes:
+Declares volumes available to the pod (can be hostPath, PVC, configMap, secret, etc.).
+
+- name: demo-storage
+The volume name referenced by volumeMounts. Names must match.
+
+persistentVolumeClaim:
+This volume comes from a PVC (not hostPath). This tells Kubernetes: mount the PVC’s bound PV here.
+
+claimName: demo-pvc
+The exact PVC this pod wants to use. Kubernetes will mount the PV bound to demo-pvc.
+
+[***
+IMPORTANT THNINGS TO REMEMBER:
+
+1. Binding chain: Pod → PVC (claimName) → PV → actual disk. Repeat this.
+
+2. Names must match: volumeMounts.name === volumes.name, and volumes.persistentVolumeClaim.claimName must match the PVC resource name.
+
+3. AccessMode compatibility: PVC asks for an access mode (RWO/RWX). PV must offer a compatible mode.
+
+4. Storage size: PVC requests some size; the PV must have equal or greater capacity.
+
+5. StorageClass: If PVC specifies a storageClassName that exists and supports dynamic provisioning, Kubernetes will create a PV automatically (cloud disks). If you set storageClassName: "" you force static binding to pre-created PVs.
+
+6. ReclaimPolicy: Retain keeps the disk after PVC deletion. Delete removes the disk (cloud) — warn participants about Delete in production.
+
+7. hostPath is local: In the PV I used hostPath — it ties storage to a specific node. That’s fine for demos but NOT for real HA workloads. Explain cloud-backed PVs vs node-local PVs.
+
+8. Pod recreation: When pod is deleted and recreated (with same PVC), it mounts the same PV — data persists. If PVC is deleted and PV’s ReclaimPolicy is Delete, data can be lost.
+***]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,228 @@
+Kubernetes Autoscaling Concepts:
+================================
+
+Reference Link: https://www.apptio.com/topics/kubernetes/autoscaling/
+
+1. Horizontal Pod Autoscaling (HPA)
+-----------------------------------
+HPA adds more pods or removes pods automatically based on load.
+
+Think of it like adding more workers when a shop gets crowded.
+
+Triggers / Metrics
+ . CPU usage
+ . Memory usage
+ . Custom metrics (ex: number of requests, queue length)
+
+How it works
+ > Kubernetes watches the load on your running pods.
+ > If load is high → it creates extra pods.
+ > If load is low → it deletes extra pods.
+ > Your application stays smooth without manual action.
+
+Related Terms
+ . Pods – small units that run your app
+ . Deployment – manages pods
+ . Metrics Server – provides CPU/Memory data
+ . Target Utilization – the limit you set (ex: scale at 80% CPU)
+
+Real-Time Example:
+You run an online ticket booking site.
+Morning: low traffic → only 2 pods running.
+Evening: people rush to buy tickets → CPU jumps → HPA scales to 10 pods.
+Night: again low → back to 2 pods.
+
+You don’t touch anything. Kubernetes handles it.
+
+Advantages
+ . Works instantly
+ . Avoids overloading the app
+ . Saves cost (scale down when not needed)
+
+Use Case Scenarios
+ > E-commerce sale days
+ > Movie ticket bookings
+ > API services with sudden spikes
+ > Payment systems
+
+2. Vertical Pod Autoscaling (VPA)
+---------------------------------
+VPA changes the CPU and memory of existing pods.
+
+Instead of adding more pods, it gives more power (resources) to each pod.
+
+Think of it like upgrading someone’s computer so they work faster.
+
+How it works
+ > Kubernetes watches how much CPU/memory your pod actually needs.
+ > If the pod is struggling → VPA increases CPU/memory.
+ > If it is over-allocated → VPA reduces CPU/memory.
+ > It recreates the pod with new values.
+
+Related Terms
+ . Resource Requests – minimum CPU/memory a pod needs
+ . Resource Limits – maximum allowed
+ . VPA Recommender – decides what values to use
+ . Pod Eviction – pod restarts to apply changes
+
+Real-Time Example
+You run a machine-learning service that needs more CPU sometimes.
+One pod can handle more load if you just give it more power.
+Instead of creating 5 pods, VPA simply increases CPU from 0.5 vCPU → 2 vCPU.
+
+Does VPA Restart Pods?
+Yes.
+Increasing CPU/memory for an existing pod requires a restart, because resource requests and limits cannot be changed on a running container.
+
+So Kubernetes must:
+1. Evict the pod (gracefully stop it)
+2. Create a new pod with updated resource values
+There is no magic here — running containers cannot hot-swap CPU/memory allocations.
+
+So why doesn’t this cause downtime?
+Because deployments/replicasets maintain multiple pods, so VPA restarts them one by one.
+
+If you run only 1 pod, you will have downtime.
+That’s on your architecture, not Kubernetes.
+
+What Does VPA Actually Do? (Internal Logic)
+VPA has three main components:
+
+(A) VPA Recommender
+ . Observes CPU/memory usage of pods continuously
+ . Learns usage patterns over time
+ . Calculates recommended values:
+	target CPU
+	target memory
+ . Writes them into VPA object’s status.recommendation
+This is the brain of VPA.
+
+(B) VPA Updater
+ . Watches if current pods mismatch the recommended resources
+ . Decides if pods must be restarted (evicted)
+ . Evicts pods gradually, respecting PodDisruptionBudgets
+This is the decision-maker that triggers restarts.
+
+(C) VPA Admission Controller
+ . When a new pod is created (or recreated after eviction)
+ . It injects the recommended CPU/memory into the pod spec
+This is the enforcer that sets the final values.
+
+🎯 So the Flow Is:
+ > Recommender → learns → calculates resource needs
+ > Updater → checks mismatch → evicts pod
+ > Admission controller → recreates pod with correct resources
+Pod dies → pod comes back → workload continues.
+This is exactly what happens.
+
+VPA Modes (Important to Understand)
+VPA has 3 modes:
+1️⃣ Off
+ . Only gives recommendations
+ . Does NOT change anything
+ . Good for learning correct values before enabling autoscaling
+
+2️⃣ Auto (default)
+ . Recommends AND updates pods (full autoscaling)
+ . Evicts pods to apply new resources
+
+3️⃣ Initial
+ . Applies recommendations only when the pod is first created
+ . No auto-evictions
+ . Good for apps that cannot tolerate restarts
+
+4️⃣ Recreate
+ . Evicts ALL pods immediately and recreates
+ . Used rarely
+
+Advantages
+ . Good when your application is not easily scalable horizontally
+ . Helps set the correct resource values
+ . Avoids manually adjusting CPU/memory
+ . Saves money by preventing over-allocation
+
+Use Case Scenarios
+ > ML/AI workloads
+ > Batch processing
+ > Heavy background jobs
+ > Databases running inside containers (not ideal, but some companies do)
+
+3. Cluster Autoscaling (CA)
+---------------------------
+Cluster Autoscaler adds more worker nodes or removes empty nodes.
+
+Nodes = actual machines (VMs) running your pods.
+
+How it works
+ . Your pods need more space but the cluster is full.
+ . Kubernetes asks the cloud provider:
+“Give me one more node.”
+ . New node comes → pods get scheduled.
+ . When nodes are empty → Kubernetes removes them to save cost.
+
+Related Terms
+ > Nodes – machines/servers
+ > Node Pool – group of similar nodes
+ > Unschedulable Pods – pods waiting for space
+ > Cloud Provider Integration – AWS, GCP, Azure
+
+Real-Time Example
+A company runs 10 microservices.
+During month-end billing, load increases → HPA adds pods → cluster is full.
+Cluster Autoscaler notices this and adds 2 more nodes.
+After billing completes → load drops → empty nodes get removed.
+
+Advantages
+ . Cost control (no need to always keep big clusters running)
+ . Supports sudden growth
+ . Works with HPA to provide both pod-level and node-level scaling
+ . Ideal for cloud environments
+
+Use Case Scenarios
+1. Growing SaaS products
+2. Seasonal workloads (travel sites, tax season)
+3. Large microservices architecture
+4. Any team that wants auto-scaling without babysitting nodes
+
+When to Use What? (Brutally Direct Answer)
+| Scaling Type           | Use When                                                     | Not Good For                           |
+| ---------------------- | ------------------------------------------------------------ | -------------------------------------- |
+| **HPA**                | Traffic spike, API load increases                            | Workloads that can’t run multiple pods |
+| **VPA**                | Pods need more CPU/memory but app doesn't scale horizontally | Real-time apps that restart often      |
+| **Cluster Autoscaler** | Pods need more space than nodes can provide                  | On-prem clusters without automation    |
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

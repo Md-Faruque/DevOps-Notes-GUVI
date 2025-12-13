@@ -1,0 +1,473 @@
+Kubernetes Important Terms:
+===========================
+
+1. Node:
+A Node is the actual machine (VM or physical server) where Kubernetes schedules and runs your pods.
+Your application containers, system agents, networking components — everything runs on nodes.
+
+Example
+-------
+In a 3-node cluster:
+ . Node 1 runs frontend pods
+ . Node 2 runs backend pods
+ . Node 3 runs database pods
+You never “write YAML for nodes” — Kubernetes discovers them automatically.
+
+Useful kubectl commands:
+------------------------
+kubectl get nodes                      # list all nodes
+kubectl get node <node-name>           # show single node summary
+kubectl describe node <node-name>      # detailed node info & events
+kubectl get nodes -o wide              # wider output (IP, OS, etc)
+kubectl get nodes -o yaml              # full YAML of node object
+kubectl top nodes                      # CPU/Memory usage (requires metrics-server)
+kubectl cordon <node-name>             # mark node unschedulable
+kubectl uncordon <node-name>           # mark schedulable again
+kubectl drain <node-name>              # evict pods for maintenance (careful)
+kubectl delete node <node-name>        # remove node object (rare)
+
+
+2. Pod:
+the smallest deployable unit in Kubernetes — one or more containers that always run together and share networking/storage.
+
+Useful kubectl commands:
+------------------------
+kubectl get pods                          # list pods in current namespace
+kubectl get pods -A                       # list all pods across namespaces
+kubectl get pod <pod-name>                # details summary
+kubectl describe pod <pod-name>           # events, conditions, mounts
+kubectl logs <pod-name>                   # logs for single-container pod
+kubectl logs -c <container> <pod-name>    # logs for specific container
+kubectl logs -f <pod-name>                # follow logs
+kubectl exec -it <pod-name> -- /bin/sh    # open shell in a container
+kubectl apply -f pod.yaml                  # create/update pod from file
+kubectl delete pod <pod-name>             # delete pod
+kubectl port-forward pod/<pod-name> 8080:80 # forward local port to pod
+
+YAML example:
+-------------
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: simple-pod
+spec:
+  containers:
+  - name: web
+    image: nginx:stable
+    ports:
+    - containerPort: 80
+
+
+Line-by-line:
+-------------
+ . apiVersion: v1 — API version.
+ . kind: Pod — object type is Pod.
+ . metadata: — identity data.
+ . name: simple-pod — pod name.
+ . spec: — describes desired state.
+ . containers: — list of containers inside the pod.
+ . - name: web — container name (local to pod).
+ . image: nginx:stable — container image to run.
+ . ports: — ports this container uses.
+ . - containerPort: 80 — port inside the container.
+
+3. Service:
+Services give your pods a stable network endpoint.
+Pods come and go, but the Service IP stays the same.
+
+Used when:
+ . Frontend needs to reach backend
+ . External users need to reach your app
+ . Internal apps need to communicate
+
+Useful kubectl commands:
+------------------------
+kubectl get svc                          # list services in namespace
+kubectl get svc -A                       # all namespaces
+kubectl describe svc <svc-name>          # endpoints, labels, events
+kubectl proxy                            # start proxy to access cluster API / services
+kubectl port-forward svc/<svc-name> 8080:80  # forward local port to service
+kubectl apply -f service.yaml            # create/update service
+kubectl delete svc <svc-name>            # delete service
+kubectl expose deploy/<deployment> --type=NodePort --port=80 --target-port=80
+kubectl get endpoints <svc-name>         # which pod IPs back the service
+
+YAML example: (ClusterIP)
+-------------
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-svc
+spec:
+  selector:
+    app: nginx
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+  type: ClusterIP
+
+Line-by-line:
+-------------
+ . apiVersion: v1 — core API.
+ . kind: Service — resource type.
+ . metadata.name: web-svc — service name.
+ . spec: — service spec.
+ . selector: — selects pods whose labels match app: nginx. Service routes traffic to those pods.
+ . ports: — mapping configuration.
+	protocol: TCP — network protocol.
+	port: 80 — port the service exposes inside cluster (ClusterIP).
+	targetPort: 80 — port on the backend pod to send traffic to. Can be a number or named port.
+ . type: ClusterIP — internal-only service (default). Other types: NodePort, LoadBalancer, ExternalName.
+
+4. Ingress:
+a rule that routes external HTTP(S) requests into Services inside the cluster (can do host/path-based routing, TLS, etc.).
+Ingress exposes your services to the outside world over HTTP/HTTPS with host/path routing.
+
+Used when:
+ . You want https://api.mycompany.com
+ . You want /login to go to one service and /report to another
+ . You need TLS termination
+
+Useful kubectl commands:
+------------------------
+kubectl get ingress                   # list ingress resources
+kubectl describe ingress <ing-name>   # show rules and events
+kubectl apply -f ingress.yaml         # create/update ingress
+kubectl delete ingress <ing-name>     # delete ingress
+kubectl get svc -n ingress-nginx      # inspect ingress controller service (namespace depends on controller)
+kubectl logs -n ingress-nginx <pod>   # check controller logs
+
+YAML example:
+-------------
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: simple-ingress
+spec:
+  rules:
+  - host: example.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: web-svc
+            port:
+              number: 80
+
+Line-by-line:
+-------------
+ . apiVersion: networking.k8s.io/v1 — modern Ingress API (v1).
+ . kind: Ingress — resource type.
+ . metadata.name: simple-ingress — ingress name.
+ . spec.rules: — list of rules for routing HTTP traffic.
+ . - host: example.com — request hostname this rule covers. If omitted, rule may match any host.
+ . http: — HTTP-specific routing.
+ . paths: — list of path rules for the host.
+ . - path: / — request path to match.
+ . pathType: Prefix — match semantics; Prefix matches path prefix.
+ . backend.service.name: web-svc — service to which traffic is forwarded.
+ . backend.service.port.number: 80 — port on that service.
+Note: An Ingress object is just config — you still need an Ingress Controller (nginx-ingress, Traefik, etc.) to implement it.
+
+5. ConfigMap:
+stores non-sensitive key/value configuration data (plain text) that pods can read (env vars or mounted files)
+
+Useful kubectl commands:
+------------------------
+kubectl get configmap
+kubectl describe configmap <name>
+kubectl create configmap app-config --from-literal=APP_MODE=production --from-literal=API_URL=http://backend-svc
+kubectl create configmap app-config --from-file=./config/   # from files
+kubectl apply -f configmap.yaml
+kubectl delete configmap app-config
+kubectl get configmap -o yaml
+
+YAML example:
+-------------
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+data:
+  APP_MODE: "production"
+  API_URL: "http://backend-svc"
+
+Line-by-line:
+-------------
+ . apiVersion: v1 — core API.
+ . kind: ConfigMap — resource type.
+ . metadata.name: app-config — name of the configmap.
+ . data: — key/value pairs stored as strings.
+	APP_MODE: "production" — one config key.
+	API_URL: "http://backend-svc" — another key.	
+	Consumption: pods can consume as environment variables or mounted files via envFrom/env or volumeMounts.
+
+6. Secret:
+Stores sensitive data (passwords/keys). Values are base64-encoded in data and treated with stricter RBAC.
+Stores sensitive configuration such as:
+ . DB passwords
+ . API tokens
+ . TLS certificates
+Pods can mount these values as env variables or files.
+
+Useful kubectl commands:
+------------------------
+kubectl get secret
+kubectl describe secret <name>                  # shows keys, NOT values
+kubectl get secret <name> -o yaml               # full object (values base64)
+kubectl create secret generic db-secret --from-literal=username=admin --from-literal=password=secret
+kubectl create secret generic db-secret --from-file=./cert.pem
+kubectl create secret tls tls-secret --cert=cert.pem --key=key.pem
+kubectl apply -f secret.yaml
+kubectl delete secret db-secret
+# to see decoded value (locally):
+kubectl get secret db-secret -o jsonpath="{.data.username}" | base64 --decode
+
+YAML example:
+-------------
+
+apiVersion: v1
+kind: Secret
+metadata:
+  name: db-secret
+type: Opaque
+data:
+  username: YWRtaW4=   # "admin"
+  password: c2VjcmV0   # "secret"
+
+Line-by-line:
+-------------
+ . apiVersion: v1 — core API.
+ . kind: Secret — resource type.
+ . metadata.name: db-secret — name.
+ . type: Opaque — generic secret type; other types exist (kubernetes.io/tls etc.).
+ . data: — key/value pairs where values are base64-encoded.
+	username: YWRtaW4= — base64 of admin.
+	password: c2VjcmV0 — base64 of secret.
+	Best practice: create secrets with kubectl create secret rather than hand-encoding to avoid mistakes.
+
+7. Volume:
+Provides storage to pods.
+Used when:
+ . You need to store logs
+ . You need shared temporary space
+ . You need permanent storage (with PVC)
+
+Useful kubectl commands:
+------------------------
+kubectl get pv                 # list PersistentVolumes
+kubectl get pvc                # list PersistentVolumeClaims in namespace
+kubectl describe pvc <name>
+kubectl apply -f pvc.yaml
+kubectl delete pvc <name>
+kubectl get pod <pod-name> -o yaml  # inspect volume mounts in pod spec
+kubectl cp localfile <pod-name>:/path/in/pod  # copy files to/from pod
+
+YAML example:
+-------------
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-with-vol
+spec:
+  containers:
+  - name: app
+    image: busybox
+    command: ["sh", "-c", "sleep 3600"]
+    volumeMounts:
+    - name: data
+      mountPath: /data
+  volumes:
+  - name: data
+    emptyDir: {}
+
+Line-by-line:
+-------------
+ . apiVersion: v1 — core API.
+ . kind: Pod — pod resource.
+ . metadata.name: pod-with-vol — pod name.
+ . spec.containers: — list of containers.
+	name: app, image: busybox — container details.
+	command: ["sh","-c","sleep 3600"] — run a sleep to keep container alive.
+	volumeMounts: — where volumes are attached inside the container.
+	 > name: data — reference to a volume defined in spec.volumes.
+	 > mountPath: /data — path inside container.
+ . volumes: — list of volumes accessible to containers in pod.
+	name: data — volume name.
+	emptyDir: {} — ephemeral directory on the node for this pod. Removed when pod terminates.
+	For persistent storage use PersistentVolume (PV) + PersistentVolumeClaim (PVC) and mount the PVC in volumeMounts.
+
+8. Deployment:
+The most common Kubernetes object.
+Use a Deployment when you need:
+ . Auto restarts
+ . Rolling updates
+ . Rollbacks
+ . Multiple replicas
+This is how 99% of web apps/API backends are deployed.
+
+Useful kubectl commands:
+------------------------
+kubectl get deploy                     # list deployments
+kubectl describe deploy <name>         # events & rollout info
+kubectl apply -f deployment.yaml       # create/update deployment
+kubectl delete deploy <name>
+kubectl rollout status deploy/<name>   # check rollout progress
+kubectl rollout history deploy/<name>  # see revisions
+kubectl rollout undo deploy/<name>     # rollback to previous
+kubectl scale deploy/<name> --replicas=5
+kubectl set image deploy/<name> <container>=<image>:<tag>   # update image
+kubectl get rs                          # list replicasets created by deployments
+kubectl get pods -l app=web             # list pods of deployment by label
+
+YAML example:
+-------------
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deploy
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:stable
+        ports:
+        - containerPort: 80
+
+Line-by-line:
+-------------
+ . apiVersion: apps/v1 — apps API group for Deployments.
+ . kind: Deployment — resource type.
+ . metadata.name: nginx-deploy — deployment name.
+ . spec.replicas: 2 — desired number of pod replicas.
+ . spec.selector.matchLabels: — label selector the deployment uses to manage pods (must match template labels).
+ . spec.template: — pod template that will be used to create pods.
+	metadata.labels.app: nginx — label assigned to pods; must match selector.
+	spec.containers: — container specs inside pod.
+	 > name: nginx, image: nginx:stable — container image.
+	 > ports: with containerPort: 80 — internal container port.
+	Deployment behavior: creates/updates a ReplicaSet that manages pods — handles rolling updates and rollbacks.
+
+9. ReplicaSet:
+Ensures a specific number of pod replicas are always running.
+You normally don’t create this manually — Deployment does it.
+Ensures a fixed number of pod replicas run; typically managed by Deployment.
+
+Useful kubectl commands:
+------------------------
+kubectl get rs
+kubectl describe rs <rs-name>
+kubectl apply -f replicaset.yaml
+kubectl delete rs <rs-name>
+kubectl scale rs/<name> --replicas=5
+kubectl get pods -l app=web   # see pods created by RS
+
+YAML example:
+-------------
+
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: nginx-rs
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:stable
+
+Line-by-line:
+-------------
+ . apiVersion: apps/v1 — apps API.
+ . kind: ReplicaSet — resource type.
+ . metadata.name: nginx-rs — name.
+ . spec.replicas: 3 — desired pod count.
+ . spec.selector.matchLabels: — identifies pods controlled by this ReplicaSet.
+ . spec.template: — pod template (same structure as Deployment template).
+Note: You usually manage ReplicaSets indirectly through Deployments.
+
+10. DaemonSet:
+Runs one pod on every node in your cluster.
+Used for:
+ . Log collectors (Fluentd, Filebeat)
+ . Metrics collectors (Node exporter)
+ . Network agents (CNI plugins)
+
+Useful kubectl commands:
+------------------------
+kubectl get daemonset
+kubectl describe daemonset <name>
+kubectl apply -f daemonset.yaml
+kubectl delete daemonset <name>
+kubectl get pods -l app=log-agent   # list ds pods
+kubectl rollout status daemonset/<name>
+
+YAML example:
+-------------
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: log-agent
+spec:
+  selector:
+    matchLabels:
+      app: log-agent
+  template:
+    metadata:
+      labels:
+        app: log-agent
+    spec:
+      containers:
+      - name: agent
+        image: fluentd:latest
+
+Line-by-line:
+-------------
+ . apiVersion: apps/v1 — API group.
+ . kind: DaemonSet — resource type.
+ . metadata.name: log-agent — name of daemonset.
+ . spec.selector.matchLabels: — label selector matching the template labels.
+ . spec.template: — pod template to run on nodes.
+	metadata.labels.app: log-agent — label applied to pods.
+	spec.containers: — container spec for per-node agent.
+	Use case: log/metrics agents, CNI addons — installs one instance per node.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,503 @@
+Kubernetes Services:
+====================
+A Service is basically a stable network identity for your Pods.
+
+Pods die, restart, and get recreated with new IPs → your application would break if you depended on Pod IPs.
+
+A Service fixes this by giving:
+
+✔ A constant name
+✔ A constant virtual IP (ClusterIP)
+✔ A load-balancer for traffic between pods
+
+Think of a Service as a Wi-Fi router inside your cluster → it stays the same even if devices (pods) change.
+
+Types of Services:
+------------------
+There are only 4 types that actually matter:
+
+1️⃣ ClusterIP (default)
+ . Internal-only access
+ . No external traffic
+ . Used by backend → database, frontend → backend communication
+
+Real-time use-case:
+Backend talks to Redis, MySQL, or internal microservices.
+
+YAML file:
+----------
+Use-case:
+
+Frontend → Backend (internal communication)
+
+a. frontend-pod.yaml
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: frontend
+  labels:
+    app: frontend
+spec:
+  containers:
+  - name: frontend
+    image: nginx:1.25.4
+    imagePullPolicy: IfNotPresent
+    ports:
+    - containerPort: 80
+
+b. backend-pod.yaml
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: backend
+  labels:
+    app: backend
+spec:
+  containers:
+  - name: backend
+    image: nginx:1.25.4
+    imagePullPolicy: IfNotPresent
+
+
+c. frontend-service.yaml
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-service
+spec:
+  selector:
+    app: frontend
+  ports:
+  - port: 80
+    targetPort: 80
+  type: ClusterIP
+
+d. backend-service.yaml
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-service
+spec:
+  selector:
+    app: backend
+  ports:
+  - port: 80
+    targetPort: 80
+  type: ClusterIP
+
+Line-by-line:
+-------------
+ . apiVersion: v1 → Service uses v1 API
+ . kind: Service → You're creating a Service object
+ . metadata.name → Name used inside cluster
+ . spec.selector → Match pods having label app: backend
+ . ports.port → Port exposed internally
+ . ports.targetPort → Pod’s actual container port
+ . type: ClusterIP → Internal-only access
+
+2️⃣ NodePort
+ . Opens a port on every node's IP
+ . Users can access app via NodeIP:NodePort
+ . Ugly in production, but good for local testing
+
+Real-time use-case:
+Quick demo, POC, or bare-metal cluster access.
+
+YAML file:
+----------
+Use-case:
+
+Local access without external LB
+
+a. service.yaml
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: app-nodeport
+spec:
+  selector:
+    app: backend
+  ports:
+  - port: 80
+    targetPort: 80
+    nodePort: 30080
+  type: NodePort
+
+Key lines:
+ . nodePort: 30080 → opens this port on every node
+ . Access: http://<NodeIP>:30080
+
+3️⃣ LoadBalancer
+ . Creates a cloud provider load balancer (AWS ELB, GCP LB, Azure LB)
+ . Used when you want public internet access
+
+Real-time use-case:
+Expose a website, API, frontend app to public users.
+
+YAML file:
+----------
+Use-case:
+
+Publicly expose application on cloud
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: app-lb
+spec:
+  selector:
+    app: backend
+  ports:
+  - port: 80
+    targetPort: 80
+  type: LoadBalancer
+
+What happens in the background?
+ . Cloud provider creates external LB
+ . LB forwards traffic to ClusterIP → Pod
+
+4️⃣ ExternalName
+ . Maps a service name to an external DNS record
+ . No real traffic routing — just DNS alias
+
+Real-time use-case:
+Inside cluster: mysql.prod → prod-db.company.com
+
+Ingress:
+========
+A Service LoadBalancer exposes ONE app.
+
+But companies host multiple apps, like:
+ . app1.company.com
+ . app2.company.com
+ . app3.company.com
+
+If you create a LoadBalancer for each → expensive, stupid approach.
+
+Ingress fixes this:
+
+✔ One public IP
+✔ Route based on hostname/path
+✔ Centralized HTTPS
+✔ API gateway-lite
+
+Ingress Example 1 — Host-based routing
+--------------------------------------
+Use-case:
+ . api.company.com → backend service
+ . web.company.com → frontend service
+
+ingress.yaml:
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: simple-ingress
+spec:
+  rules:
+  - host: api.company.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: backend-service
+            port:
+              number: 80
+  - host: web.company.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: frontend-service
+            port:
+              number: 80
+
+Breakdown:
+----------
+ . rules → What hosts to match
+ . host: → domain name
+ . backend.service.name → service to forward to
+
+Ingress Example 2 — Path-based routing
+--------------------------------------
+/api → backend  
+/web → frontend
+
+ingress.yaml:
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: path-routing
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /api
+        pathType: Prefix
+        backend:
+          service:
+            name: backend-service
+            port:
+              number: 80
+      - path: /web
+        pathType: Prefix
+        backend:
+          service:
+            name: frontend-service
+            port:
+              number: 80
+
+Ingress Example 3 — TLS (HTTPS)
+-------------------------------
+Use-case: Secure application traffic online.
+
+ingress.yaml:
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: tls-ingress
+spec:
+  tls:
+  - hosts:
+    - app.company.com
+    secretName: tls-secret
+  rules:
+  - host: app.company.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: backend-service
+            port:
+              number: 80
+
+What’s happening:
+ . Ingress uses certificate stored in tls-secret
+ . HTTPS enabled automatically
+
+Kubernetes Network Policies (Simple Explanation)
+================================================
+Think of NetworkPolicy as a firewall for Pods.
+
+By default:
+EVERY POD CAN TALK TO EVERY POD → extremely insecure.
+
+NetworkPolicy lets you say:
+ . Who CAN talk to me
+ . Who CANNOT talk to me
+ . Which ports are allowed
+
+Example NetworkPolicy 1 — Allow traffic only from frontend → backend
+--------------------------------------------------------------------
+np.yaml
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-frontend
+spec:
+  podSelector:
+    matchLabels:
+      app: backend
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: frontend
+    ports:
+    - protocol: TCP
+      port: 80
+
+Breakdown:
+ . podSelector selects backend pods
+ . Only pods labeled frontend can reach backend
+ . Only on port 80
+
+This is real security.
+
+Example NetworkPolicy 2 — Deny all traffic to a pod
+---------------------------------------------------
+np.yaml
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: deny-all
+spec:
+  podSelector:
+    matchLabels:
+      app: secret-app
+  ingress: []
+
+This isolates the pod completely.
+
+Example NetworkPolicy 3 — Allow only namespace-based communication
+------------------------------------------------------------------
+np.yaml
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-monitoring
+spec:
+  podSelector:
+    matchLabels:
+      app: backend
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          purpose: monitoring
+
+Use-case:
+Only pods from "monitoring" namespace (like Prometheus) can scrape metrics.
+
+Kubernetes Service = Stable networking + load balancing
+ClusterIP = internal
+NodePort = external via Node IP
+LoadBalancer = cloud LB
+Ingress = smart routing + TLS
+NetworkPolicy = firewall for pods
+
+Use these together to form a real microservices networking architecture.
+
+Steps:
+======
+1. Pull the docker image before anything (docker pull nginx:1.25.4)
+2. confirm the nodes are running, mostly when running the nodes in docker desktop there are chances that your node might not be properly scheduled - to check the same run the following commands
+
+ > Check node list & status
+kubectl get nodes -o wide
+
+ > Check node details (conditions, taints, allocatable resources)
+kubectl describe node <node-name>
+
+make sure that the nodes are running
+
+Issue I faced:
+Nodes was not scheduled properly, as it is showing schedule disabled - to fix the issue I tried running the command
+
+kubectl uncordon desktop-control-plane
+
+Expected output:
+node/desktop-control-plane uncordoned
+
+Verify:
+kubectl get nodes
+
+Now STATUS should be Ready (not SchedulingDisabled).
+
+3. now proceed with creating a working directory for YAML files
+
+mkdir k8s-demo
+cd k8s-demo
+
+4. Place your YAML files
+
+frontend-pod.yaml
+backend-pod.yaml
+frontend-service.yaml
+backend-service.yaml
+nodeport.yaml
+path-routing-ingress.yaml
+networkpolicy.yaml		# example 1
+
+5. Apply each YAML file
+
+kubectl apply -f frontend-pod.yaml
+kubectl apply -f backend-pod.yaml
+kubectl apply -f frontend-service.yaml
+kubectl apply -f backend-service.yaml
+kubectl apply -f nodeport.yaml
+kubectl apply -f path-routing-ingress.yaml
+kubectl apply -f networkpolicy.yaml
+
+(or) apply folder-level
+
+kubectl apply -f .
+
+6. now, to verify each resource was created successfully
+a. Check Pod: kubectl get pods
+
+Expected:
+backend     Running
+
+b. Detailed logs: kubectl logs backend
+
+c. now, check Service: kubectl get svc
+
+Expected:
+For ClusterIP: backend-service   ClusterIP   10.x.x.x   80/TCP
+For NodePort: app-nodeport      NodePort    10.x.x.x   80:30080/TCP
+
+[***
+For LoadBalancer (not supported on Docker Desktop):
+
+It will stay in pending because cloud LB is not available.
+
+Important:
+Docker Desktop cannot create LoadBalancers.
+Use NodePort or Ingress.
+***]
+
+d. Check Ingress: kubectl get ingress
+
+Output: path-routing   <none>   *                 80      27m
+
+[*** This means Ingress is present but it is not working, to make it work we need to install Ingress Controller]
+
+e. Install NGINX Ingress Controller
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/cloud/deploy.yaml
+
+Wait for a 2mins atleast
+
+f. Check controller: kubectl get pods -n ingress-nginx
+
+Expected Output: 
+ingress-nginx-controller   Running
+
+Delete option:
+--------------
+1. Delete the entire ingress-nginx controller
+kubectl delete -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/cloud/deploy.yaml
+kubectl delete namespace ingress-nginx --force --grace-period=0
+
+2. Delete all the demo workloads:
+kubectl delete ingress --all
+kubectl delete svc --all
+kubectl delete pods --all
+kubectl delete deployment --all
+kubectl delete networkpolicy --all
+kubectl delete configmap --all
+kubectl delete secret --all
+
+3. Finally delete the folder where we have all the YAML files (rm -rf k8s-demo)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
