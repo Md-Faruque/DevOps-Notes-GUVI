@@ -1,0 +1,442 @@
+HOw to connect two
+
+Create 2 instance one master one child open all traffic port 0.0.0.0/0
+install master on 1 machine
+type hostname to check the hostname of server
+enter hostname under /etc/hosts
+enter hostname under /etc/salt/minion
+reboot the server
+
+install minion on second machine
+enter hostname of 1 st server under /etc/salt/minion
+
+sudo salt --version
+
+salt-key -d  -- to delete a accepted minion
+
+sudo salt '*' test.ping
+
+sudo salt '*' sys.list_functions salt-key
+
+# sudo salt-key -f myminion -- run on master
+
+
+sudo salt-call --local key.finger  -  run on minion
+
+sudo salt '*' sys.list_functions test
+
+	sudo salt '*' status.diskusage
+	
+	salt '*' cmd.run 'ls -l /etc'
+	
+		sudo salt '*' status.meminfo  -- monitoring minion status
+
+		salt '*' test.echo 'foo: bar' -- to print echo
+		
+		salt '*' pkg.install cowsay
+		
+		salt '*' network.interfaces
+
+sudo salt '*' test.fib 3
+salt '*' cmd.run 'df -h'
+==============================================================================
+	Grains
+	sudo salt 'test' grains.items
+	
+sudo salt 'test*' grains.item os
+
+sudo salt 'test' grains.item osfinger
+
+sudo salt --grain 'os_family:Debian' test.ping
+
+
+
+		cmd.run ------------                     Gives detailed info complete information
+sudo salt '*' cmd.run_all 'echo HELLO'
+raw data
+# sudo salt --out=raw '*' cmd.run_all 'echo HELLO'
+YAML
+sudo salt --out=yaml '*' cmd.run_all 'echo HELLO'		Indentations
+
+sudo salt '*' cmd.run_all 'mkdir /tmp/shravan'
+
+
+Start with /srv/salt/top.sls.
+======================================================================================================================================
+	COMPOUND MATCHING			Compound matchers allow very granular(small) minion targeting using any of Salt's matchers.
+	
+	https://docs.saltstack.com/en/latest/topics/targeting/compound.html
+	
+salt -C 'L@testprod,testcat or test* ' test.ping
+
+sudo salt -C 'testdev123 and not G@os:ubuntu' test.ping
+
+salt -C 'testdev123 and G@os:ubuntu or E@test1.*' test.ping
+
+========================================================================================================================
+
+
+				PCRE matching requires an extra command-line option: -E or --pcre.
+salt -E '.*' test.ping
+sudo salt -E 'shravanth' test.ping
+
+					salt -E '^a' test.ping	-- 		Starting with centos
+
+
+sudo salt 'minion1' pkg.list_pkgs
+
+				matches beginning of the line
+	
+$ salt -E '.*t' test.ping
+centos-rack1:
+    True
+		
+	
+	
+							$ matches end of the line
+	 
+$ 						salt -E '.*web1$' test.ping
+centos-rack1:
+    True
+
+========================================================================================================================
+
+==========================================================================================================================================
+			
+			Adding user to minion
+sudo salt '*' user.add larry			cat /etc/passwd/
+sudo salt '*' user.info larry
+
+==========================================================================================================================================
+	Package remove and addition
+	salt '*' pkg.install vim
+sudo salt '*' pkg.install htop
+sudo salt '*' pkg.list_pkgs
+==========================================================================================================================================
+salt 'webmaster' state.sls vim cmd.run_all			Run on RED HAT
+
+cd /srv/salt/			SLS
+
+mkdir -p pkg/nginx
+cd pkg
+cd nginx
+vi pkg/nginx/init.sls
+					Descriptive type of id--first line is id
+install the nginx package:
+  pkg.installed:
+    - name: nginx
+
+salt '*' state.apply pkg.nginx 
+
+sate is little bit more intellegent
+===========================================================
+
+					root@ip-172-31-82-145:/srv/salt/pkg/apache/# cat websrvr.sls   -- plain apache installation
+					
+					cd /srv/salt/
+					
+'install webserver':
+  pkg.installed:
+    - name: apache2
+  service.running:
+    - name: apache2
+    - enable: True
+	
+	salt '*' state.sls websrvr
+	
+=======================================================================================	
+salt '*' state.sls websrvr (sls examples)
+vi websrvr.sls              (we will get error below since we dont have require function)
+							(sudo salt '*' pkg.remove apache2)
+********************
+'start webserver':
+  service.running:
+    - name: apache2
+    - enable: True
+'install webserver':
+  pkg.installed:
+    - name: apache2
+###################	
+	****Require*****
+'start webserver':
+  service.running:
+    - name: apache2
+    - enable: True
+    - require:
+      - pkg: 'install webserver'
+'install webserver':
+  pkg.installed:
+    - name: apache2
+	************************
+
+===(ubuntu)
+cd /srv/salt/
+mkdir -p pkg/apache
+vi pkg/apache/init.sls
+
+					root@ip-172-31-82-145:/srv/salt/pkg/apache/# cat init.sls   -- plain apache installation
+'install webserver':
+  pkg.installed:
+    - name: apache2
+  service.running:
+    - name: apache2
+    - enable: True
+
+	salt '*' state.apply pkg.apache
+	
+	-------sudo salt '*' pkg.remove apache2
+	
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+	install apache
+	
+	salt '*' pkg.install vim  - ubuntu
+	
+sudo salt '*' cmd.run_all 'yum install httpd -y'   -- Red hat
+sudo salt 'shravanth' cmd.run_all 'service httpd start'  --Red hat
+
+	sudo salt '*' service.status httpd
+	
+====================================================================================================================
+	
+		Cleans local yum metadata
+
+salt '*' pkg.clean_metadata  -- Redhat
+
+salt '*' pkg.download httpd  -- Redhat
+
+salt '*' state.highstate
+
+sudo salt '*' sys.list_state_functions pkg
+
+====================================================================================================================		
+		/etc/passwd
+		
+		
+	############### RUN SALT WITH VERBOSE : ############
+
+	hadoop@ip-172-31-86-187:/srv/salt$ sudo salt --verbose 'test' test.sleep 2
+		
+		
+====================================================================================================================		
+Set this to look for sls file under /etc/salt/master------------Execure in redhat-------------
+
+file_roots:
+  base:
+    - /srv/salt
+	
+	Create top.sls
+	
+vi /srv/salt/top.sls
+								# Apply SLS files from the directory root for the 'base' environment
+									# All minions with a minion_id 
+										# Apply the state file named 'cron.sls'
+base:
+  '*':
+    - cron
+	
+
+vi /srv/salt/cron.sls
+
+crontabs:
+  pkg.installed
+crond:
+  service.running
+  
+  
+salt '*' state.highstate
+
+salt-call state.highstate
+====================================================================================================================
+		Set this to look for sls file under /etc/salt/master------------Execure in ubuntu-------------
+
+file_roots:
+  base:
+    - /srv/salt
+	
+	Create top.sls
+	
+vi /srv/salt/top.sls
+								# Apply SLS files from the directory root for the 'base' environment
+									# All minions with a minion_id 
+										# Apply the state file named 'cron.sls'
+base:
+  '*':
+    - websrvr
+	
+
+vi /srv/salt/websrvr.sls
+
+'install webserver':
+  pkg.installed:
+    - name: apache2
+  service.running:
+    - name: apache2
+    - enable: True
+  
+  
+salt '*' state.highstate
+
+===========================================================================================
+
+root@ip-172-31-95-208:/srv/salt# cat top.sls
+base:
+  'tes*':
+    - websrvr
+  'ama*':
+    - cron
+	
+=========================================================================
+
+salt-call state.highstate
+		================================================================================
+						Try in UBUNTU  to check the user id and group id are added
+						
+				Next, the require statement under service was changed to watch, and is now watching 3 states instead of just one. 
+				The watch statement does the same thing as require, 
+				making sure that the other states run before running the state with a watch, but it adds an extra component.
+						
+						 The watch statement will run the state's watcher function for any changes to the watched states. 
+						 So if the package was updated, the config file changed, or the user uid modified, 
+						 then the service state's watcher will be run.
+		
+		root@ip-172-31-0-102:/srv/salt# cat websrvr.sls
+apache2:
+  pkg.installed: []
+  service.running:
+    - watch:
+      - pkg: apache2
+      - user: apache2
+  user.present:
+    - uid: 87
+    - gid: 87
+    - home: /var/www/html
+    - shell: /bin/nologin
+    - require:
+      - group: apache2
+  group.present:
+    - gid: 87
+    - require:
+      - pkg: apache2
+
+	  
+-=====================================================================================================
+					Try in UBUNTU  to check the user id and group id are added  and passing using PCRE commands
+					
+root@ip-172-31-0-102:/srv/salt# cat websrvr2.sls
+apache2:
+  pkg.installed: []
+    {% if grains['os'] == 'ubuntu'%}
+    - name: httpd
+    {% endif %}
+  service.running:
+    {% if grains['os'] == 'ubuntu'%}
+    - name: httpd
+    {% endif %}
+    - watch:
+      - pkg: apache2
+      - user: apache2
+  user.present:
+    - uid: 87
+    - gid: 87
+    - home: /var/www/html
+    - shell: /bin/nologin
+    - require:
+      - group: apache2
+  group.present:
+    - gid: 87
+    - require:
+      - pkg: apache2
+	  
+===============================================================================================================
+=========================================================================================================
+
+
+root@ip-172-31-31-190:/srv/salt# cat websrvr.sls
+'install webserver':
+  pkg.installed:
+    - name: apache2
+  service.running:
+    - name: apache2
+    - enable: True
+Turn Off KeepAlive:
+  file.replace:
+    - name: /etc/apache2/ports.conf
+    - pattern: 'Listen 80'
+    - repl: 'Listen 8080'
+    - show_changes: True
+	
+:/srv/salt# sudo salt '*' state.sls websrvr		
+				sudo salt '*' pkg.remove apache2
+				
+				
+		
+					
+===============================================================================================================
+	Turn up logging
+Salt can be quite chatty when you change the logging setting to debug:
+
+key value pair -> remember to have a space
+Servers:	
+    -   name: Server1
+        owner:  john
+
+				XML
+		<servers>
+			<server>
+				<name>Server1</name>
+			</server>
+		</servers>
+		
+				Jason
+		
+		{
+			Servers:[
+				{
+				name: Server1
+				}
+			]
+		}
+		
+				YAML
+			KEy: VALUE (FRUIT: aPPLE)
+			
+		aRRAY/LIST
+fRUITS:
+  -   ORANGE
+  -   APPLE
+VEGETABLES
+  -   CARROT
+			
+		dICTIONARY (should have equal no of blank spaces)
+			bANANA:
+				CALORIES: 105
+			GRAPES:
+				CALORIES: 62
+		 
+=======================================================================================
+Your salt-master keys on minion seems to be invalid (may be due to master ip or name update) Steps for troubleshoot:-
+
+From minion check if master is reachable (simple ping test )
+
+Delete the old master keys present on minion (/etc/salt/pki/minion/minion_master.pub)
+
+Again try from master to ping minion new valid keys will be auto populated
+============================================================================================
+'install webserver':
+  pkg.installed:
+    - name: apache2
+  service.running:
+    - name: apache2
+    - enable: True
+
+salt 'secondminion' state.sls hello
+
+sudo salt '*' pkg.remove apache2
+======================================================================================
+multi master
+master:
+  - ip-172-31-30-218.eu-west-2.compute.internal
+  - ip-172-31-18-28.eu-west-2.compute.internal
+  
+/etc/salt/pki/minion/ remove the key

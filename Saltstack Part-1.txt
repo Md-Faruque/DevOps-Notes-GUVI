@@ -1,0 +1,130 @@
+Saltstack - CM Tool
+
+[***What is CM, How did you used that in your project?]
+
+We do have multiple CM tools like Ansible, Chef, Puppet, Saltstack, etc., 
+
+What is Configuration Management?
+	This tools helps to manage our servers for project betterment.
+
+In real-time, whatever the application we are using; we do need a server for that. Companies used to maintain multiple servers, and managing all the server manually may consume our time, effort so much; to avoid that we are using Configuration Management tools.
+
+Before this tools, we need to login to each and every server and execute the task manually; once after DevOps came into picture, we got options to handle all the servers automatically. (For ex: Even to create a user, we need to do that task again and again; this got avoided when we got CM tools - For login into 1 server it may take 1min means; if we need to perform the same task on 100 servers this consumes almost 100mins [close to 2hours] for completing a simple task like this) {this may consume lots of our time/ chances for errors / wastage of resources}
+
+CM will always work like Master-Slave setup, Through this setup we don't want to manage all our servers individually, instead we can manage only master server via taking control on slaves machines.
+
+This will works via Adhoc commands / .yaml scripting
+Adhoc commands - One operation / activity at a time
+.yaml scripting - Multiple operations / activity at one time.
+
+This will do parallel execution, which means whatever the task we are executing it will run on all the servers on the same time; there won't be any wait time for the next server for completing the activity. By doing like this we can save our time, effort, resources and human errors.
+
+Difference Between Ansible and Saltstack
+[***Under which condition/aspect you chose this tools?]
+
+Ansible works under Push Mechanism --- Saltstack works under Push/Pull Mechanism (via pull mechanism we can gather informations about our slaves machines)
+
+Ansible works as Agentless (we will create an inventory file to add all the slaves machines Private IP) --- Saltstack will do Agentless as well as Agent-based (via agent based only we can use Pull Mechanism here) [Agent-based is opp to Agentless; where we are going to add the master machine IP to all the slaves machine {as a one-time effort we need to do this}]
+
+Ansible will call Master-Slave as (Control Node - Managed Node) --- Saltstack will call it as (Master - Minions)
+
+Link: https://medium.com/successivetech/chef-vs-puppet-vs-ansible-vs-saltstack-a-complete-comparison-9af8f1790c0d
+
+[Interesting Fact: Why Slaves machines called as Minions; because minions will not work on it's own and one minion will not command another minion; there will always look for the Master to order them]
+
+Once we enables the Master-Slave setup for Saltstack under Agent-based, an Eventbus is created where we are getting ZeroMQ (we will get 2 different ports like 4505 & 4506) this helps us to connect via Push and Pull Mechanism. These port numbers are default one, where we do have option to change the port number {if required, mostly this won't happen}
+Under Agentless, we will get SSH 22 port for Push Mechanism process.
+
+[***What is the communication protocol for Agent-based and Agentless Process?]
+
+[*** What is the biggest drawback on CM tool?]
+
+	What if my Master machine goes down?
+		For Over-coming this scenario, we are using High-Availability mode, where we will have another Master machine as a backup machine, Once the Primary Master goes down, the second Master will immediatly comes for the rescue. [We will setup this while briging CM tool into the picture] {Generally, we will call this as Active-Passive Mechanism}
+
+[*** What is multi-master setup?]
+
+We have 2 different method for doing Saltstack installation
+1. Bootstrap Method
+2. Repository Method
+
+This is not an entirely open-source tool {we can use this for learning & Testing for free --- but for entire setup configuration we need to go on with the paid version}
+
+Saltstack works under Cross-Platform OS setup, means we can configure the Master-Slave with multiple OS Platforms also. {but, we can never bring windows as our Master machine, it can be only slaves machine}
+
+Steps:
+1. Create an Ubuntu machine (20.04) - number of instances (2) - rename 1 server as (Master)
+
+2. Create a Redhat server - number of instances (1)
+
+3. Create a Windows server (2016 Base) - number of instances (1)
+
+4. Open the Master machine - using pagent
+
+5. Now, go as root user (sudo su - ) we are going to do installation using bootstrap by using the saltstack link (curl -L https://raw.githubusercontent.com/saltstack/salt-bootstrap/stable/bootstrap-salt.sh -o install_salt.sh)
+
+6. Now, we need to run the file (sudo sh install_salt.sh -P -M) [-P = install with all the necessary dependency packages; -M = we are installing Master in this machine]
+
+7. Once after the file got executed, we can confirm that by using various commands, like (ps -ef | grep master; sudo service salt-master status; netstat -nltp) [netstat = command will show you the background protocol running on the server]
+
+8. Now, login to the minion machine (ubuntu) - switch as root user (sudo su -) same steps install the saltstack using link (curl -L https://raw.githubusercontent.com/saltstack/salt-bootstrap/stable/bootstrap-salt.sh -o install_salt.sh) - execute it without -M, as it is minion machine (sudo sh install_salt.sh -P) - check the status (ps -ef | grep minion)
+
+9. We need to bring the Agent-based setup hence we need to login inside the minion configuration path to add the ip address - (sudo vi /etc/salt/minion) - un comment the line #master: salt (master: give master machine private ip) - [inroder to know the IP, give command hostname on master machine {ex: ip-172-31-37-95}] - save and quit the editor
+
+10. Now, restart your minion service for successful implementation - (sudo service salt-minion restart).
+
+11. We need to authenticate the same on Master machine for security reasons - go to master machine (sudo salt-key) - you can see the request came from the child server [by default it will be under unaccepted keys, we need to manually accept the request] - give command (sudo salt-key -a [give the entire ip address came from the child server, ex: ip-172-31-38-52.ap-south-1.compute.internal]) [-a = accept], give yes (y) for the warning msg]
+
+12. Give the same command (sudo salt-key), now the keys will be under accepted.
+
+13. Now, go to Redhat machine, and open it via pagent (username: ec2-user) then switch as root user (sudo su -) we are going to bring the salt installation using repository method, open this link on the browser (curl -fsSL https://github.com/saltstack/salt-install-guide/releases/latest/download/salt.repo | sudo tee /etc/yum.repos.d/salt.repo)
+
+14. Clear the cache files, as per recommended (sudo dnf clean expire-cache)
+
+15. We are going to install only minion inside the machine, hence run the command as per required (sudo yum install salt-minion -y) - restart once the installation got completed (sudo systemctl restart salt-minion)
+
+16. Now, provide the master Ip to the minion machine, as per previous steps (sudo vi /etc/salt/minion) - give the master machine IP on the minion machine (ex: ip-172-31-38-52) - you can also give nick name for the same machine if required, so that everytime you are calling the machine you don't want to provide with the entire hostname, instead you can call with the nick name (id: testdev)
+
+master: 172.31.47.218
+id: testdev
+
+17. Restart the minion once again (sudo systemctl restart salt-minion)
+
+18. Now, go to your Master machine and you can find the minion under unaccepted keys - accept it using the following command (sudo salt-key -a testdev) - give yes (y) for the warning message.
+
+19. Give (sudo salt-key), where you can find 2 minions attached to this Master machine.
+
+20. Try to ping the Minions from Master machine by giving this command (sudo salt '*' test.ping) [* = global symbol, this will reach to all the accepted servers; test.ping = will be called as functions; there are multiple functions running in the salt]
+
+21. We are going to connect to the Windows server now, Open windows machine using RDC - copy the .exe file from the salt official page [https://docs.saltproject.io/salt/install-guide/en/latest/topics/install-by-operating-system/windows.html#windows-downloads] - (https://packages.broadcom.com/artifactory/saltproject-generic/windows/3006.9/Salt-Minion-3006.9-Py3-AMD64-Setup.exe) - when we are doing for the 1st time, it will ask us to add this link into safety one, add the link and once again try to copy paste the link download and install it.
+{Download any browser, as the Internet Explorer doesn't support anymore}
+
+22. Provide the Master Private IP and give the nick name under hostname (ex: testwindows)
+
+23. Once done, restart the windows - go to run (win+r) - search for (services.msc) - and look for salt-minion and restart the service
+
+24. Come to Master machine to accept the windows minion - (sudo salt-key) - give the command (sudo salt-key -a testwindows) - give yes (y) under the warning message.
+
+25. Now, try to ping the child servers, (sudo salt '*' test.ping), will get response from all the servers; for pinging specific server instead of giving ('*') give (server name; ex: 'testdev'), so that the specific server will pinged accordingly.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

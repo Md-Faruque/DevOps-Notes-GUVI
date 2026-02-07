@@ -1,0 +1,210 @@
+Part 2 - Adhoc Commmands / .yaml scripts
+
+What is Adhoc Commands?
+	If I need to execute one task at a time, then we are going to use Adhoc commands.
+
+What is .yaml script execution?
+	When I need to perform multiple activities in one shot, then using .yaml script is the best option. (.yaml = Ain't markup language)
+
+Adhoc Commands:
+	We can seperate the Adhoc commands into 3 parts (ex: sudo salt 'testdev' test.ping)
+Part 1:
+sudo salt (calling the salt) - This one is fixed, which is never going to change.
+
+Part 2:
+'testdev' = minion key name
+'*' = globe symbol, this will call all the minions under the Master
+
+Part 3: 
+test.ping = (calling the function, which need to be performed, here it is ping)
+
+1. In order to know all the functions under the minion, we can use the command (sudo salt 'testdev' sys.list_functions), this command will list all the functions under the specific minion.
+
+2. Let's try to install a package using the commands, for this we can request command from salt itself (sudo salt 'testdev' sys.list_functions pkg), this commands helps us to list all the activity done by a specific function.
+
+3. Now, we are trying to install an package (GIT) inside the minion, by running the command (sudo salt 'testdev' pkg.install git), GIT got installed on the machine.
+
+4. To confirm that, go to the child server, and type (git --version), this will show the version.
+
+5. What if I need to remove an existing package from the minion? Search for all the functions (sudo salt 'testdev' sys.list_functions pkg) - select pkg.remove; Give the entire command (sudo salt 'testdev' pkg.remove git); confirm the same on your child server (if needed)
+
+6. We, do have an option to run direct linux command using the Salt, (ex: sudo salt 'testdev' cmd.run 'mkdir -p /tmp/folder1'); now go to your child server and check for the folder (ls -lrth /tmp) - now you will be able to see the folder1 directory inside it.
+
+7. If you want to see the output directly under the master machine also, we need to give the same command under the master machine (sudo salt 'testdev' cmd.run 'ls -lrth /tmp'); now we will be able to see the output under the master machine directly.
+
+8. We do have option to use multiple linux commands under the same Adhoc command (ex: sudo salt 'testdev' cmd.run 'mkdir -p /tmp/folder2;ls -lrth /tmp'), now this will show that there is a directory created and listed at the same time.
+
+9. If you want to check the File system of the Machine, then try (sudo salt 'testdev' cmd.run 'df -h')
+
+Till now, we saw Agentbased (means we are adding the Master machine IP to the slaves machine; this works for Push Mechanism); Now we are going to see about the Pull Mechanism (Where, we are gathering our Slaves machines Static informations); This method is called as (G for G = Grains for Gatherings); Where salt is providing us seperate commands for Gathering those informations using Grains Adhoc commands.
+This can be listed out by using (sudo salt 'testdev' grains.items), through this command we will be able to see all the informations about the slaves machines static content.
+If incase, we need to only a specific content like OS on our slaves machine (ex: sudo salt 'testdev' grains.item os), this gives the output acordingly.  
+
+Targetting:
+     This is considered to be the most important concept in the CM tools.
+In real-time, it is really hard to remember all the machine names; in that case we can proceed even with the small details by using the (PCRE = Perl Compatible Regular Expressions /CM = Compound Matchers);  Use this link for more informations about CM (https://docs.saltproject.io/en/latest/topics/targeting/compound.html)
+
+1. Using this command, we will be able to callout specific servers and do the operations (ex: salt -C 'L@testprod,testcat,testdev' test.ping) [C= Compund Matchers; L= List of Minions)
+By Targetting, we can pass all the functions, as well as we will be able to use Linux commands also like earlier (ex: salt -C 'L@testprod,testcat,testdev' cmd.run 'df -h')
+
+We can do Targetting by passing conditions like (and, or, if etc.,) [and = when both the conditions are true; or = either one of the them is true]
+(ex: sudo salt -C 'testdev and G@os:RedHat' test.ping) [G = Gather {1st this will gather the static informations about the slaves machines and accordingly this will exectue the task}]
+
+When compare to CM, PCRE seems easier;
+
+We will execute the PCRE by using (-E)
+This method used to pass the function, when we know very little about the name of the server (ex: testdev [if we know, only 't' just by giving that letter this will execute on all the machines that has letter 't' into it)
+Command: 
+1. salt -E '.*test' test.ping
+2. salt -E '.*ev' test.ping
+3. salt -E '.*st' test.ping
+(This shows very clearly, that this method helps us to maintain the communication even with less informations we have)
+
+In real-time, it will be very useful to identify the server easily
+(r12devwebche
+ cent12testapphyd
+ u12proddbbang)
+
+.yaml Scripts:
+     In Ansbile, we used to call this as Playbooks
+     In Salt, we will call this as sls files = means salt state files 
+
+We are writing this files, specifying what kind of activity needs to be performed on my slaves machine in the .yaml format.
+
+This syntax wil work in the key=value format
+where we will include, 
+id declaration	--->	this will have the description of the content for better understanding
+state		--->	type of activity we are going to perform (ex: like installing the pkg, starting the service etc.,)
+function	--->	this contains the command that is going to perform the activity under the state.
+
+In order to create a sls file, we need to create a base path (mkdir -p /srv/salt) [*** by default, we will not have this base path, we need to create one], now go inside the base path (cd /srv/salt)
+Now, we are going to create a sls file (vi websrvr.sls)
+
+'this is my sls file for apache package':
+  pkg.installed:
+    - name: httpd
+  service.running:
+    - name: httpd
+    - enable: True
+
+Now, execute the command (sudo salt 'testdev' state.sls websrvr).
+
+Even if you are trying to re-run the same code, this won't get executed once again because this gets executed by the state of the machine, once it's installed this won't do the same activity again and again.
+
+[*** This will execute function by function]
+
+============================================================================================ 
+
+what will happen if I run this code on the same websrvr.sls?
+
+'start webserver':
+  service.running:
+    - name: httpd
+    - enable: True
+'install webserver':
+  pkg.installed:
+    - name: httpd
+
+My 1st function will get failed and my 2nd function will get executed, as it is working under compiler, this will read line by line and try to execute the content {*** Before proceeding with this task, remove the previous package that already exists (sudo salt 'testdev' pkg.remove httpd)
+
+What if, we are re-running the same content once again happens?
+	According to this scenario, as we already have the package this will get started now; and the 2nd function won't do any kind of changes as it is already in presented state.
+
+[***FYI: 90% our Developer will provide the .sls files for us; but as an DevOps engineer, we need to understand the working mechanism of the content, so that all the minor errors can be fixed by us on our own]
+
+===========================================================================================
+
+Now, we are trying to execute another .sls file using grains 
+
+apache2:
+  pkg.installed: []
+    {% if grains['os'] == 'ubuntu'%}
+    - name: httpd
+    {% endif %}
+  service.running:
+    {% if grains['os'] == 'ubuntu'%}
+    - name: httpd
+    {% endif %}
+    - watch:
+      - pkg: apache2
+      - user: apache2
+  user.present:
+    - uid: 87
+    - gid: 87
+    - home: /var/www/html
+    - shell: /bin/nologin
+    - require:
+      - group: apache2
+  group.present:
+    - gid: 87
+    - require:
+      - pkg: apache2
+
+Here, we are trying to install the package by using if condition, open websrvr.sls - edit this file and save - execute the file (sudo salt '*' state.sls websrvr) [eventhough, I mentioned '*', the condition will apply only for ubuntu machines as I have mentioned grains] - to confirm that go to child server, give command (cat /etc/passwd) [by default user informations will be updated on {/etc/passwd} path on Linux]
+
+=========================================================================================
+
+If incase, I need to change the content on the existing file, that also possible [for example: cat /etc/apache2/ports.conf]; inside our child server, we do have a file like this {double check to confirm it} - copy the file and edit and save on the websrvr.sls
+
+Turn Off KeepAlive:
+  file.replace:
+    - name: /etc/apache2/ports.conf
+    - pattern: 'Listen 80'
+    - repl: 'Listen 8080'
+    - show_changes: True
+
+Now, execute the file (sudo salt '*' state.sls websrvr) - This will clearly show the output {double confirm by going inside the child server}
+
+=============================================================================================
+
+Task:
+How to Setup the Multi-Master Setup?
+	Create another machine, with all the Master command installation for salt; then go to the child server path (sudo vi /etc/salt/minion) - add the second master machine IP, with the proper indentation format
+
+master: 
+   - 13.59.216.199
+   - 13.59.216.200
+id: testprod
+
+save it.
+
+restart the machine for the update (sudo systemctl restart salt-minion)
+
+now come back to the 2nd master machine and give  (sudo salt-key) and accept the key (sudo salt-key -a testprod), only then the connection gets completed.
+
+[If multiple masters are specified in the 'master' setting, the default behavior is to always try to connect to them in the order they are listed]
+
+[***FYI, by default, once the connection is not happening with the primary server it will wait for 30secs to get the connection back, this can also be re-configured according to the need; this will be called {# master_alive_interval: 30}]
+
+We are using this concept for High-Availability mode.
+
+Reference Link: https://docs.saltproject.io/en/latest/topics/tutorials/multimaster.html
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                         
